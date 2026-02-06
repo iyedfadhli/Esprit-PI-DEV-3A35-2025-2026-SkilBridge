@@ -1,0 +1,209 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f7f8fc;
+    color: #333;
+}
+
+/* Layout */
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: #fff;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.05);
+    padding: 30px 20px;
+}
+
+.sidebar-logo {
+    display: flex;
+    flex-direction: column;   /* stack logo above text */
+    align-items: center;      /* center horizontally */
+    justify-content: center;  /* center vertically inside the sidebar padding */
+    padding: 30px 10px;       /* enough space */
+}
+
+.sidebar-logo-img {
+    width: 200px;   /* bigger logo */
+    height: auto;
+    margin-bottom: 10px; /* space between logo & text */
+}
+
+.sidebar-logo-text {
+    font-size: 22px;       /* bigger text */
+    font-weight: 800;
+    color: #fff;          
+    text-align: center;
+}
+
+
+.sidebar-menu a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.sidebar-menu a:hover,
+.sidebar-menu a.active {
+    background: #4a7fd7;
+    color: #fff;
+}
+
+/* Main Content */
+.admin-content {
+    flex: 1;
+    padding: 30px 40px;
+}
+
+/* Header */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.admin-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.admin-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+/* Stats */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+    margin-bottom: 50px;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(74,127,215,0.12);
+}
+
+.stat-card h3 {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 32px;
+    font-weight: 900;
+    color: #4a7fd7;
+}
+
+/* Sections */
+.admin-section {
+    margin-bottom: 40px;
+}
+
+.admin-section h2 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 15px;
+}
+
+.admin-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.primary-btn {
+    margin-top: 15px;
+    background: #4a7fd7;
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.primary-btn:hover {
+    background: #3a6bb8;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .sidebar {
+        display: none;
+    }
+
+    .admin-content {
+        padding: 20px;
+    }
+}
+.statistics-placeholder {
+    margin-bottom: 60px;
+}
+
+.stats-placeholder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 35px;
+}
+
+/* Card */
+.placeholder-card {
+    background: linear-gradient(145deg, #ffffff, #f3f6fb);
+    border-radius: 22px;
+    padding: 45px 25px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(74, 127, 215, 0.15);
+    color: #444;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    cursor: pointer;
+}
+
+/* Hover life */
+.placeholder-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(74, 127, 215, 0.25);
+}
+
+/* Images (replaces icons) */
+.placeholder-card img {
+    width: 140px;
+    margin-bottom: 20px;
+    transition: transform 0.35s ease;
+}
+
+.placeholder-card:hover img {
+    transform: scale(1.08);
+}
+
+/* Text */
+.placeholder-card p {
+    font-size: 15px;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: 0.3px;
+}
