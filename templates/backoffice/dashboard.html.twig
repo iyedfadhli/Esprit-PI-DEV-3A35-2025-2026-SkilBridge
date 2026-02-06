@@ -1,0 +1,110 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+
+{% block body %}
+	<main
+		class="admin-content">
+
+		<!-- Top Bar -->
+		<header class="admin-header">
+			<h1>Dashboard</h1>
+			<div class="admin-user">
+				<i class="fa fa-user-circle"></i>
+				<span>Admin</span>
+			</div>
+		</header>
+
+		<section class="stats-grid">
+			<div class="stat-card">
+				<h3>users</h3>
+				<p class="stat-number">395</p>
+			</div>
+			<div class="stat-card">
+				<h3>Courses</h3>
+				<p class="stat-number">24</p>
+			</div>
+			<div class="stat-card">
+				<h3>Groups</h3>
+				<p class="stat-number">40</p>
+			</div>
+			<div class="stat-card">
+				<h3>Challenges</h3>
+				<p class="stat-number">18</p>
+			</div>
+			<div class="stat-card">
+				<h3>Hackathons</h3>
+				<p class="stat-number">7</p>
+			</div>
+			<div class="stat-card">
+				<h3>Internship</h3>
+				<p class="stat-number">32</p>
+			</div>
+		</section>
+
+		<!-- Management Sections -->
+		<section class="admin-section" id="courses">
+			<h2>Courses Management</h2>
+			<div class="admin-card">
+				<p>Manage courses (Add / Edit / Delete / Publish)</p>
+				<button class="primary-btn">Add Course</button>
+			</div>
+		</section>
+
+		<section class="admin-section" id="groups">
+			<h2>Groups Management</h2>
+			<div class="admin-card">
+				<p>Create and manage student groups</p>
+				<button class="primary-btn">Create Group</button>
+			</div>
+		</section>
+
+		<section class="admin-section" id="challenges">
+			<h2>Challenges Management</h2>
+			<div class="admin-card">
+				<p>Manage challenges and submissions</p>
+				<button class="primary-btn">Add Challenge</button>
+			</div>
+		</section>
+
+		<section class="admin-section" id="cv">
+			<h2>CV & Internship</h2>
+			<div class="admin-card">
+				<p>Review CVs and internship offers</p>
+				<button class="primary-btn">View Applications</button>
+			</div>
+		</section>
+
+		<section class="admin-section" id="hackathon">
+			<h2>Hackathon</h2>
+			<div class="admin-card">
+				<p>Manage hackathons and teams</p>
+				<button class="primary-btn">Create Hackathon</button>
+			</div>
+		</section>
+
+		<section class="admin-section statistics-placeholder">
+			<h2>Statistics</h2>
+
+			<div class="stats-placeholder-grid">
+
+				<div class="placeholder-card">
+					<img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Users stats">
+					<p>User growth statistics</p>
+				</div>
+
+				<div class="placeholder-card">
+					<img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Courses stats">
+					<p>Courses & challenges comparison</p>
+				</div>
+
+				<div class="placeholder-card">
+					<img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Internship stats">
+					<p>Internship applications statistics</p>
+				</div>
+
+			</div>
+		</section>
+
+
+	</main>
+{% endblock %}

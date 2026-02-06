@@ -1,0 +1,194 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+
+{% block body %}
+
+	<section class="hero">
+		<div class="hero-left">
+			<h1 class="hero-title">Skill Bridge</h1>
+			<p class="hero-subtitle">
+				Plateforme éducative intelligente pour développer vos compétences et booster votre carrière.
+			</p>
+            
+		</div>
+        
+		<div class="hero-right">
+			<img src="{{ asset('assets/images/frontoffice/home_pic.jpg') }}" alt="Skill Bridge illustration">
+		</div>
+	</section>
+	
+
+	<section class="modules">
+		<div class="module-card" id="profile">
+			<div class="module-icon">👤</div>
+			<h3>Profile</h3>
+			<p>Gérez vos informations et suivez votre progression.</p>
+		</div>
+
+		<div class="module-card" id="courses">
+			<div class="module-icon">📚</div>
+			<h3>Courses</h3>
+			<p>Accédez à des cours interactifs pour développer vos compétences.</p>
+		</div>
+
+		<div class="module-card" id="groups">
+			<div class="module-icon">👥</div>
+			<h3>Groups</h3>
+			<p>Rejoignez des groupes d’étude et collaborez avec d’autres étudiants.</p>
+		</div>
+
+		<div class="module-card" id="challenges">
+			<div class="module-icon">🏆</div>
+			<h3>Challenges</h3>
+			<p>Testez vos compétences grâce à des défis interactifs.</p>
+		</div>
+
+		<div class="module-card" id="cv-internship">
+			<div class="module-icon">📄</div>
+			<h3>CV & Internship</h3>
+			<p>Créez votre CV et postulez pour des stages adaptés.</p>
+		</div>
+
+		<div class="module-card" id="hackathon">
+			<div class="module-icon">💡</div>
+			<h3>Hackathon</h3>
+			<p>Participez à des hackathons et mettez vos compétences en pratique.</p>
+		</div>
+	</section>
+
+	<section class="about-section">
+		<div class="section-header">
+			<span class="section-subtitle">Notre Histoire</span>
+			<h2 class="section-title">
+				Découvrez comment Skill Bridge est né et pourquoi nous sommes passionnés
+			</h2>
+		</div>
+
+		<div class="about-grid">
+			<div class="about-img">
+				<img src="{{ asset('assets/images/frontoffice/softskills.jpg') }}" alt="About Skill Bridge">
+			</div>
+
+			<div class="about-content">
+				<h3>Pourquoi avons-nous créé Skill Bridge ?</h3>
+				<p>
+					Skill Bridge est né d'une vision : créer un espace où les étudiants peuvent s'épanouir
+					                et développer leurs compétences.
+				</p>
+				<p>
+					Nous voulons connecter les étudiants avec des défis, des stages et des hackathons
+					                pour maximiser leur apprentissage.
+				</p>
+
+				<ul class="about-features">
+					<li>✔ Plateforme sécurisée et fiable</li>
+					<li>✔ Opportunités de stages et hackathons</li>
+					<li>✔ Support et suivi personnalisé</li>
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<section class="team-section">
+		<div class="section-header">
+			<span class="section-subtitle">Notre Équipe</span>
+			<h2 class="section-title">Des professionnels passionnés</h2>
+		</div>
+
+		<div class="team-grid">
+
+			<div class="team-card">
+				<img src="{{ asset('assets/images/frontoffice/members/salim.png') }}" alt="Salim">
+				<div class="team-social">
+					<a href="https://www.facebook.com/profile.php?id=61561583608782" target="_blank">
+						<i class="fa fa-facebook"></i>
+					</a>
+					<a href="https://www.instagram.com/salim_benhamouda/" target="_blank">
+						<i class="fa fa-instagram"></i>
+					</a>
+				</div>
+				<div class="team-info">
+					<h4 class="team-name">Mohamed Salim Ben Hamouda</h4>
+					<p class="team-position">Rôle</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<img src="assets/images/frontoffice/members/tasnim.png" alt="Member 2">
+				<div class="team-social">
+					<a href="https://www.facebook.com/tas.nyme.2025" target="_blank">
+						<i class="fa fa-facebook"></i>
+					</a>
+					<a href="https://www.instagram.com/tas_nyme_/" target="_blank">
+						<i class="fa fa-instagram"></i>
+					</a>
+				</div>
+				<div class="team-info">
+					<h4 class="team-name">Tasnim Sammoud</h4>
+					<p class="team-position">Rôle</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<img src="assets/images/frontoffice/members/nouh.png" alt="Member 3">
+				<div class="team-social">
+					<a href="https://www.facebook.com/nouhmznd" target="_blank">
+						<i class="fa fa-facebook"></i>
+					</a>
+					<a href="https://www.instagram.com/nouhmznd/" target="_blank">
+						<i class="fa fa-instagram"></i>
+					</a>
+				</div>
+				<div class="team-info">
+					<h4 class="team-name">Nouh Mezned</h4>
+					<p class="team-position">Rôle</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<img src="assets/images/frontoffice/members/takoua.png" alt="Member 4">
+				<div class="team-social">
+					<a href="https://www.facebook.com/takouabettaieb27" target="_blank">
+						<i class="fa fa-facebook"></i>
+					</a>
+					<a href="https://www.instagram.com/bettaiebtakoua/" target="_blank">
+						<i class="fa fa-instagram"></i>
+					</a>
+				</div>
+				<div class="team-info">
+					<h4 class="team-name">Takoua Bettaieb</h4>
+					<p class="team-position">Rôle</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<img src="assets/images/frontoffice/members/iyed.png" alt="Member 5">
+				<div class="team-social">
+					<a href="https://www.facebook.com/mohamed.iyed.fadhli" target="_blank">
+						<i class="fa fa-facebook"></i>
+					</a>
+					<a href="https://www.instagram.com/iyed_fd/" target="_blank">
+						<i class="fa fa-instagram"></i>
+					</a>
+				</div>
+				<div class="team-info">
+					<h4 class="team-name">Mohamed Iyed Fadhli</h4>
+					<p class="team-position">Rôle</p>
+				</div>
+			</div>
+			<div class="team-card">
+				<img src="assets/images/frontoffice/members/oumaima.png" alt="Member 6">
+				<div class="team-social">
+					<a href="https://www.facebook.com/omaima.barhoumi.58" target="_blank">
+						<i class="fa fa-facebook"></i>
+					</a>
+					<a href="https://www.instagram.com/barhoumiomaima/" target="_blank">
+						<i class="fa fa-instagram"></i>
+					</a>
+				</div>
+				<div class="team-info">
+					<h4 class="team-name">Oumaima Barhoumi</h4>
+					<p class="team-position">Rôle</p>
+				</div>
+			</div>
+
+		</div>
+	</section>
+
+{% endblock %}

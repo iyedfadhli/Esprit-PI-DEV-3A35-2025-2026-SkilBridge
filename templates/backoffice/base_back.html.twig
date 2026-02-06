@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Skill Bridge Back Office{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/dashboard/backoffice.css') }}">
+
+    <link rel="shortcut icon" href="{{ asset('assets/images/frontoffice/logo.png') }}" type="image/x-icon">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body>
+
+    <div class="admin-layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ asset('assets/images/frontoffice/logo.png') }}" alt="Skill Bridge Logo" class="sidebar-logo-img">
+            </div>
+
+            <nav class="sidebar-menu">
+                <a class="active" href="{{ path('dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a>
+                <a href="#"><i class="fa fa-user"></i> Users</a>
+                <a href="#"><i class="fa fa-book"></i> Courses</a>
+                <a href="#"><i class="fa fa-users"></i> Groups</a>
+                <a href="#"><i class="fa fa-trophy"></i> Challenges</a>
+                <a href="#"><i class="fa fa-file-text"></i> CV & Internship</a>
+                <a href="#"><i class="fa fa-lightbulb-o"></i> Hackathon</a>
+                <a href="{{path('home')}}"><i class="fa fa-home"></i> FrontOffice</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            {% block body %}{% endblock %}
+        </main>
+
+    </div>
+
+    {% block javascripts %}{% endblock %}
+
+</body>
+</html>

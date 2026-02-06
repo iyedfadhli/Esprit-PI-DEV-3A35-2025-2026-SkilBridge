@@ -1,0 +1,9 @@
+twig:
+    file_name_pattern: '*.twig'
+    globals:
+        mercure_public_url: '%mercure.public_url%'
+        mercure_jwt_secret: '%mercure.jwt_secret%'
+
+when@test:
+    twig:
+        strict_variables: true
