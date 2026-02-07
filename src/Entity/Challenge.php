@@ -46,6 +46,9 @@ class Challenge
     #[ORM\JoinColumn(nullable: false)]
     private ?Course $course = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $content = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -167,6 +170,18 @@ class Challenge
     public function setCourse(?Course $course): static
     {
         $this->course = $course;
+
+        return $this;
+    }
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(?string $content): static
+    {
+        $this->content = $content;
 
         return $this;
     }

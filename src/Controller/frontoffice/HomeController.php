@@ -13,4 +13,5 @@ class HomeController extends AbstractController
     {
         return $this->render('frontoffice/home.html.twig');
     }
+
 }
