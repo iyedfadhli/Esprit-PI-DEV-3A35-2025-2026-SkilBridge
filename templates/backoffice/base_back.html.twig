@@ -17,6 +17,8 @@
 </head>
 
 <body>
+    
+    {% if user.getMainRoleLabel() == 'Admin'%}
 
     <div class="admin-layout">
 
@@ -28,7 +30,7 @@
 
             <nav class="sidebar-menu">
                 <a class="active" href="{{ path('dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a>
-                <a href="#"><i class="fa fa-user"></i> Users</a>
+                <a href="{{path('dashboard_user')}}"><i class="fa fa-user"></i> Users</a>
                 <a href="#"><i class="fa fa-book"></i> Courses</a>
                 <a href="#"><i class="fa fa-users"></i> Groups</a>
                 <a href="#"><i class="fa fa-trophy"></i> Challenges</a>
@@ -37,9 +39,14 @@
                 <a href="{{path('home')}}"><i class="fa fa-home"></i> FrontOffice</a>
             </nav>
         </aside>
-
+{% else %}
+<script>
+                window.location.href = "{{ path('home') }}";
+            </script>
+{% endif %}
         <!-- Main Content -->
         <main class="admin-content">
+
             {% block body %}{% endblock %}
         </main>
 

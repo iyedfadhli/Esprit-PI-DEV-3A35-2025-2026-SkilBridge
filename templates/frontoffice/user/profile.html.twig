@@ -1,0 +1,174 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+{% block stylesheets %}
+	{{parent()}}
+	<link rel="stylesheet" href="{{asset('assets/css/frontoffice/user/profile.css')}}">
+
+{% endblock %}
+{% block body %}
+
+	<section class="profile-layout">
+
+		<aside class="profile-sidebar">
+			<div class="sidebar-user">
+				<div class="profile-pic-wrapper">
+					<img src="{{ asset(user.photo ?: 'assets/images/frontoffice/user_pic/profile_pic.png') }}" alt="Profile Picture" class="profile-img">
+
+					<label for="profile-upload" class="camera-overlay">
+						<i class="fa fa-camera"></i>
+					</label>
+
+					<form method="POST" action="{{ path('profile_change_photo', {'id': user.id}) }}" enctype="multipart/form-data">
+						<input type="file" id="profile-upload" name="profile" accept="image/*" style="display: none;" onchange="this.form.submit()">
+					</form>
+				</div>
+
+				<h3>{{ user.prenom ~ ' ' ~ user.nom }}</h3>
+				<span>{{ user.getMainRoleLabel() }}</span>
+			</div>
+
+
+			<ul class="sidebar-menu">
+				<li class="active">Overview</li>
+				<li>Personal Info</li>
+				<li>Account</li>
+				<li>Security</li>
+			</ul>
+			<li style="text-align: center">
+				<a href="{{ path('logout') }}" style="
+																																																			              background-color: #e74c3c;
+																																																			              color: white;
+																																																			              border: none;
+																																																			              padding: 10px 25px;
+																																																			              border-radius: 25px;
+																																																			              font-size: 14px;
+																																																			              cursor: pointer;
+																																																			              font-weight: 600;
+																																																			              text-decoration: none;
+																																																			              display: inline-block;
+																																																			              transition: background-color 0.3s;
+																																																			           " onmouseover="this.style.backgroundColor='#c0392b'" onmouseout="this.style.backgroundColor='#e74c3c'">
+					Logout</a>
+			</li>
+		</aside>
+
+		<main class="profile-content">
+			<section class="profile-section">
+				<h2>Profile Overview</h2>
+
+				<div class="overview-grid">
+					<div class="overview-card">
+						<h4>Email</h4>
+						<p>{{ user.email }}</p>
+					</div>
+
+					<div class="overview-card">
+						<h4>name</h4>
+						<p>{{ user.nom ?: user.email }}</p>
+					</div>
+
+					<div class="overview-card">
+						<h4>Member Since</h4>
+						<p>{{ user.dateInscrit|date('M Y') }}</p>
+					</div>
+				</div>
+			</section>
+			<form method="POST" action="{{ path('profile_edit', {'id': user.id}) }}">
+				<section class="profile-section">
+					<h2>Personal Information</h2>
+
+					<div class="info-grid">
+						<div>
+							<label>Last Name</label>
+							<input type="text" name="nom" value="{{ user.nom }}">
+						</div>
+
+						{% if user.getMainRoleLabel() == 'Student' %}
+							<div>
+								<label>First Name</label>
+								<input type="text" name="prenom" value="{{ user.prenom }}">
+							</div>
+							<div>
+								<label>Education</label>
+								<input type="text" name="education" value="{{ user.education ?: '' }}">
+							</div>
+							<div>
+								<label>Score</label>
+								<input type="text" name="scoreGenerale" value="{{ user.scoreGenerale ?: 0 }}" disabled>
+							</div>
+							<div>
+								<label>Skills</label>
+								<input type="text" name="skills" value="{{ user.skills ?: '' }}">
+							</div>
+						{% elseif user.getMainRoleLabel() == 'Supervisor' %}
+							<div>
+								<label>First Name</label>
+								<input type="text" name="prenom" value="{{ user.prenom }}">
+							</div>
+							<div>
+								<label>Experience</label>
+								<input type="text" name="experience" value="{{ user.experience ?: '' }}">
+							</div>
+						{% elseif user.getMainRoleLabel() == 'Entreprise' %}
+							<div>
+								<label>Domain</label>
+								<input type="text" name="domaine" value="{{ user.domaine ?: '' }}">
+							</div>
+						{% elseif user.getMainRoleLabel() == 'Admin' %}
+							<div>
+								<label>First Name</label>
+								<input type="text" name="prenom" value="{{ user.prenom }}">
+							</div>
+						{% endif %}
+
+						<div>
+							<label>Email</label>
+							<input type="email" name="email" value="{{ user.email }}">
+						</div>
+
+						<div>
+							<label>Role</label>
+							<input type="text" value="{{ user.getMainRoleLabel() }}" disabled>
+						</div>
+
+						<div>
+							<label>Member Since</label>
+							<input type="text" value="{{ user.dateInscrit|date('M Y') }}" disabled>
+						</div>
+					</div>
+
+					<button type="submit" class="signin-btn">Save Changes</button>
+				</section>
+			</form>
+
+
+			<section class="profile-section">
+				<h2>Security</h2>
+
+				<form method="POST" action="{{ path('profile_change_password', {'id': user.id})}}">
+					<div class="info-grid">
+						<div>
+							<label for="current_password">Current Password</label>
+							<input type="password" id="current_password" name="current_password" required>
+						</div>
+
+						<div>
+							<label for="new_password">New Password</label>
+							<input type="password" id="new_password" name="new_password" required>
+						</div>
+
+						<div>
+							<label for="confirm_password">Confirm New Password</label>
+							<input type="password" id="confirm_password" name="confirm_password" required>
+						</div>
+					</div>
+
+					<button type="submit" class="signin-btn">Change Password</button>
+				</form>
+			</section>
+
+
+		</main>
+	</section>
+
+
+{% endblock %}

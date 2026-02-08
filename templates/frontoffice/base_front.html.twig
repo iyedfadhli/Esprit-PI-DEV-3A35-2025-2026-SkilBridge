@@ -20,12 +20,12 @@
 		<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/home/chat.css') }}"> {% block stylesheets %}{% endblock %}
 		{% block javascripts %} <script src="{{ asset('assets/js/frontoffice/chat.js') }}" defer></script>
 			 <script>
-															    const url = new URL('http://localhost:3001/.well-known/mercure');
-															    url.searchParams.append('topic', 'https://example.com/chat');
-															
-															    const es = new EventSource(url);
-															    es.onmessage = e => console.log('Mercure update:', e.data);
-															</script>
+																								    const url = new URL('http://localhost:3001/.well-known/mercure');
+																								    url.searchParams.append('topic', 'https://example.com/chat');
+																								
+																								    const es = new EventSource(url);
+																								    es.onmessage = e => console.log('Mercure update:', e.data);
+																								</script>
 		{% endblock %}
 
 	</head>
@@ -37,18 +37,33 @@
 			</div>
 
 			<nav>
+							{% if user %}
+
+				{% if user.getMainRoleLabel() == "Admin" %}
+					<a href="{{path('dashboard')}}">Dashboard</a>
+				{% endif %}
+				{% endif %}
+
+
 				<a href="{{path('home')}}">Home</a>
 				<a href="#">Courses</a>
 				<a href="#">Groups</a>
 				<a href="#">Challenges</a>
 				<a href="#">CV & Internship</a>
 				<a href="#">Hackathon</a>
+				{% if user %}
+					<div class="header-profile">
+						<a href="{{path('profile')}}">
+							<img src="{{ asset(user.photo ?: 'assets/images/frontoffice/user_pic/profile_pic.png') }}" alt="Profile" class="profile-img"></a>
+					</div>
+					<a href="{{ path('logout') }}" class="logout-btn">Logout</a>
 
-				<div class="header-profile">
-					<a href="#">
-						<img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" alt="Profile" class="profile-img">
+				{% else %}
+					<a href="{{ path('sign') }}">
+						<button class="signin-btn">Sign in</button>
 					</a>
-				</div>
+				{% endif %}
+
 			</nav>
 		</header>
 
@@ -64,7 +79,7 @@
 						<h2>Skill Bridge</h2>
 						<p>
 							Plateforme éducative intelligente pour améliorer les compétences
-																																			                    des étudiants et connecter les talents avec les opportunités.
+																																																								                    des étudiants et connecter les talents avec les opportunités.
 						</p>
 					</div>
 
@@ -117,8 +132,7 @@
 					<input type="text" id="chat-search" placeholder="Search groups..." class="chat-search">
 				</div>
 
-				<div
-					id="chat-windows">
+				<div id="chat-windows">
 					<div class="chat-window" data-group="Group 1" style="display:none;">
 						<div class="chat-header">
 							<span>Group 1</span>
