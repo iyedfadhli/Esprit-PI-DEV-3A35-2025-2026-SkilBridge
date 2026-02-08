@@ -41,7 +41,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank]
     #[Assert\Email(message: 'Please enter a valid email address')]
     private $email;
-
+//raz
     #[ORM\Column(options: ['default' => false])]
     private bool $ban = false;
 
