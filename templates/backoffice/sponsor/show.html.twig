@@ -1,0 +1,66 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Sponsor Details{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .detail-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+    .detail-header {
+        display: flex;
+        align-items: center;
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+    .detail-logo {
+        width: 150px;
+        height: 150px;
+        object-fit: contain;
+        background: #fff;
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+    .detail-info h2 { font-size: 32px; color: #4a7fd7; margin-bottom: 10px; }
+    .info-item { margin-bottom: 30px; }
+    .info-item label { display: block; font-size: 13px; color: #888; text-transform: uppercase; font-weight: 700; margin-bottom: 5px; }
+    .info-item p { font-size: 16px; color: #333; line-height: 1.6; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-header">
+    <h1>Sponsor Profile</h1>
+    <div class="admin-user">
+        <a href="{{ path('app_back_sponsor_index') }}" class="primary-btn" style="background: #6c757d;">
+            <i class="fa fa-arrow-left"></i> Back
+        </a>
+        <a href="{{ path('app_back_sponsor_edit', {'id': sponsor.id}) }}" class="primary-btn">
+            <i class="fa fa-edit"></i> Edit
+        </a>
+    </div>
+</div>
+
+<div class="detail-card">
+    <div class="detail-header">
+        <img src="{{ sponsor.logoUrl }}" alt="Logo" class="detail-logo">
+        <div class="detail-info">
+            <h2>{{ sponsor.name }}</h2>
+            <a href="{{ sponsor.websiteUrl }}" target="_blank" style="color: #4a7fd7; font-weight: 600; text-decoration: none;">
+                <i class="fa fa-external-link"></i> {{ sponsor.websiteUrl }}
+            </a>
+            <p style="margin-top: 10px; color: #888;">Partner since {{ sponsor.createdAt|date('M Y') }}</p>
+        </div>
+    </div>
+
+    <div class="info-item">
+        <label>About the Sponsor</label>
+        <p>{{ sponsor.description }}</p>
+    </div>
+</div>
+{% endblock %}

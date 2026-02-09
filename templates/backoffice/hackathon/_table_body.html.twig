@@ -1,0 +1,40 @@
+{% for hackathon in hackathons %}
+    <tr>
+        <td>
+            <div style="width: 50px; height: 50px; border-radius: 8px; overflow: hidden; background: #f0f0f0;">
+                {% if hackathon.coverUrl %}
+                    <img src="{{ hackathon.coverUrl }}" alt="Cover" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <i class="fa fa-image" style="display: flex; align-items: center; justify-content: center; height: 100%; color: #ccc;"></i>
+                {% endif %}
+            </div>
+        </td>
+        <td><strong>{{ hackathon.title }}</strong></td>
+        <td>{{ hackathon.theme }}</td>
+        <td>
+            <span class="badge badge-{{ hackathon.status }}">
+                {{ hackathon.status }}
+            </span>
+        </td>
+        <td>
+            <small>Start: {{ hackathon.startAt ? hackathon.startAt|date('Y-m-d') : '' }}</small><br>
+            <small>End: {{ hackathon.endAt ? hackathon.endAt|date('Y-m-d') : '' }}</small>
+        </td>
+        <td>{{ hackathon.location }}</td>
+        <td>{{ hackathon.maxTeams }} (max)</td>
+        <td>
+            <div style="display: flex;">
+                <a href="{{ path('app_back_hackathon_show', {'id': hackathon.id}) }}" class="btn-action btn-show" title="View"><i class="fa fa-eye"></i></a>
+                <a href="{{ path('app_back_hackathon_edit', {'id': hackathon.id}) }}" class="btn-action btn-edit" title="Edit"><i class="fa fa-edit"></i></a>
+                <form method="post" action="{{ path('app_back_hackathon_delete', {'id': hackathon.id}) }}" onsubmit="return confirm('Are you sure you want to delete this hackathon?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ hackathon.id) }}">
+                    <button class="btn-action btn-delete" title="Delete"><i class="fa fa-trash"></i></button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="8" style="text-align: center; padding: 30px;">No records found</td>
+    </tr>
+{% endfor %}

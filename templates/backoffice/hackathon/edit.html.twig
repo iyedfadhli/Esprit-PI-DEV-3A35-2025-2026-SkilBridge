@@ -1,0 +1,18 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Edit Hackathon{% endblock %}
+
+{% block body %}
+<div class="admin-header">
+    <h1>Edit Hackathon: {{ hackathon.title }}</h1>
+    <div class="admin-user">
+        <a href="{{ path('app_back_hackathon_index') }}" class="primary-btn" style="background: #6c757d;">
+            <i class="fa fa-arrow-left"></i> Back to list
+        </a>
+    </div>
+</div>
+
+<div class="admin-card" style="max-width: 900px; margin: 0 auto; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px);">
+    {{ include('backoffice/hackathon/_form.html.twig', {'button_label': 'Update Hackathon'}) }}
+</div>
+{% endblock %}

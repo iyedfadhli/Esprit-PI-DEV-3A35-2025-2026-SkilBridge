@@ -1,0 +1,154 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Manage Sponsors{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    }
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+    .custom-table th {
+        padding: 15px;
+        text-align: left;
+        color: #666;
+        font-weight: 600;
+        border-bottom: 2px solid #eee;
+    }
+    .custom-table td {
+        padding: 15px;
+        background: #fff;
+        transition: 0.3s;
+    }
+    .custom-table tr:hover td {
+        background: rgba(240, 244, 255, 0.5);
+    }
+    .custom-table tr td:first-child { border-radius: 10px 0 0 10px; }
+    .custom-table tr td:last-child { border-radius: 0 10px 10px 0; }
+    
+    .logo-img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #f8f9fa;
+        padding: 5px;
+    }
+
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        text-decoration: none;
+        margin-right: 5px;
+        transition: 0.3s;
+    }
+    .btn-show { background: #e3f2fd; color: #1976d2; }
+    .btn-edit { background: #fff3e0; color: #f57c00; }
+    .btn-delete { background: #ffebee; color: #d32f2f; border: none; cursor: pointer; }
+    .btn-action:hover { transform: translateY(-3px); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-header">
+    <h1>Sponsors Management</h1>
+    <div class="admin-user">
+        <a href="{{ path('app_back_sponsor_new') }}" class="primary-btn">
+            <i class="fa fa-plus"></i> Add Sponsor
+        </a>
+    </div>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}" style="padding: 15px; margin-bottom: 20px; border-radius: 10px; background: {{ label == 'success' ? '#d4edda' : '#f8d7da' }}; color: {{ label == 'success' ? '#155724' : '#721c24' }};">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="premium-filters-wrapper" style="margin-bottom: 35px; background: rgba(255, 255, 255, 0.4); padding: 25px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); display: flex; gap: 20px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+    <div class="search-input-group" style="flex-grow: 1; position: relative;">
+        <i class="fa fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #4a7fd7; font-size: 18px;"></i>
+        <input type="text" id="ajax-search" class="form-control" placeholder="Search by sponsor name..." 
+               style="padding: 18px 20px 18px 55px; border-radius: 15px; border: none; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; transition: 0.3s; font-size: 15px;">
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Logo</th>
+                    <th>Name</th>
+                    <th>Website</th>
+                    <th>Added On</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                {% include 'backoffice/sponsor/_table_body.html.twig' %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('ajax-search');
+    const tableBody = document.getElementById('table-body');
+
+    function updateTable() {
+        if (!tableBody) return;
+        
+        const query = searchInput ? searchInput.value : '';
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', query);
+        url.searchParams.set('ajax', '1');
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                tableBody.innerHTML = html;
+            })
+            .catch(err => console.error('Error fetching search results:', err));
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(updateTable, 300));
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}
