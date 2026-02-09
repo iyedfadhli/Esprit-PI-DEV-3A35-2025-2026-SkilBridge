@@ -1,0 +1,123 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Manage Assignments{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    }
+    .table-container {
+        overflow-x: auto;
+        margin-top: 20px;
+    }
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+    .custom-table th { padding: 15px; text-align: left; color: #666; font-weight: 600; }
+    .custom-table td { padding: 15px; background: #fff; transition: 0.3s; }
+    .custom-table tr td:first-child { border-radius: 10px 0 0 10px; }
+    .custom-table tr td:last-child { border-radius: 0 10px 10px 0; }
+    .btn-action {
+        width: 35px; height: 35px; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 50%; text-decoration: none; margin-right: 5px; transition: 0.3s;
+    }
+    .btn-edit { background: #fff3e0; color: #f57c00; }
+    .btn-delete { background: #ffebee; color: #d32f2f; border: none; cursor: pointer; }
+    .btn-action:hover { transform: translateY(-3px); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-header">
+    <h1>Sponsor Assignments</h1>
+    <div class="admin-user">
+        <a href="{{ path('app_back_sponsor_hackathon_new') }}" class="primary-btn">
+            <i class="fa fa-link"></i> Assign Sponsor
+        </a>
+    </div>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}" style="padding: 15px; margin-bottom: 20px; border-radius: 10px; background: {{ label == 'success' ? '#d4edda' : '#f8d7da' }}; color: {{ label == 'success' ? '#155724' : '#721c24' }};">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="premium-filters-wrapper" style="margin-bottom: 35px; background: rgba(255, 255, 255, 0.4); padding: 25px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); display: flex; gap: 20px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+    <div class="search-input-group" style="flex-grow: 1; position: relative;">
+        <i class="fa fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #4a7fd7; font-size: 18px;"></i>
+        <input type="text" id="ajax-search" class="form-control" placeholder="Search by sponsor name or hackathon title..." 
+               style="padding: 18px 20px 18px 55px; border-radius: 15px; border: none; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; transition: 0.3s; font-size: 15px;">
+    </div>
+</div>
+
+<div class="glass-card">
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Sponsor</th>
+                    <th>Hackathon</th>
+                    <th>Contribution Type</th>
+                    <th>Value</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                {% include 'backoffice/sponsor_hackathon/_table_body.html.twig' %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('ajax-search');
+    const tableBody = document.getElementById('table-body');
+
+    function updateTable() {
+        if (!tableBody) return;
+        
+        const query = searchInput ? searchInput.value : '';
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', query);
+        url.searchParams.set('ajax', '1');
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                tableBody.innerHTML = html;
+            })
+            .catch(err => console.error('Error fetching search results:', err));
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(updateTable, 300));
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}
