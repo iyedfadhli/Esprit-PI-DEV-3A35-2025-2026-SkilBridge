@@ -3,14 +3,10 @@
 namespace App\Entity;
 
 use App\Repository\HackathonRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: HackathonRepository::class)]
-#[ORM\HasLifecycleCallbacks]
 class Hackathon
 {
     #[ORM\Id]
@@ -23,83 +19,49 @@ class Hackathon
     private ?User $creator_id = null;
 
     #[ORM\Column(length: 30)]
-    #[Assert\NotBlank(message: 'Title is required')]
-    #[Assert\Length(max: 30, maxMessage: 'Title cannot exceed 30 characters')]
     private ?string $title = null;
 
     #[ORM\Column(length: 30)]
-    #[Assert\NotBlank(message: 'Theme is required')]
-    #[Assert\Length(max: 30, maxMessage: 'Theme cannot exceed 30 characters')]
     private ?string $theme = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: 'Description is required')]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: 'Rules are required')]
     private ?string $rules = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Start date is required')]
-    #[Assert\Type('\DateTimeImmutable')]
     private ?\DateTimeImmutable $start_at = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'End date is required')]
-    #[Assert\Type('\DateTimeImmutable')]
-    #[Assert\GreaterThan(propertyPath: 'start_at', message: 'End date must be after start date')]
     private ?\DateTimeImmutable $end_at = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Registration open date is required')]
     private ?\DateTime $registration_open_at = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Registration close date is required')]
-    #[Assert\Type('\DateTimeImmutable')]
-    #[Assert\LessThan(propertyPath: 'start_at', message: 'Registration must close before the event starts')]
     private ?\DateTimeImmutable $registration_close_at = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Fee is required')]
-    #[Assert\PositiveOrZero(message: 'Fee cannot be negative')]
     private ?float $fee = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Max teams is required')]
-    #[Assert\Positive(message: 'Max teams must be at least 1')]
     private ?int $max_teams = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Max team size is required')]
-    #[Assert\Positive(message: 'Max team size must be at least 1')]
     private ?int $team_size_max = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Location is required')]
     private ?string $location = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Cover URL is required')]
-    #[Assert\Url(message: 'The URL is not a valid URL')]
     private ?string $cover_url = null;
 
     #[ORM\Column(length: 30)]
-    #[Assert\NotBlank(message: 'Status is required')]
     private ?string $status = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $created_at = null;
-
-    #[ORM\OneToMany(mappedBy: 'hackathon', targetEntity: SponsorHackathon::class, orphanRemoval: true)]
-    private Collection $sponsorHackathons;
-
-    public function __construct()
-    {
-        $this->created_at = new \DateTimeImmutable();
-        $this->sponsorHackathons = new ArrayCollection();
-    }
 
     public function getId(): ?int
     {
@@ -296,43 +258,5 @@ class Hackathon
         $this->created_at = $created_at;
 
         return $this;
-    }
-
-    /**
-     * @return Collection<int, SponsorHackathon>
-     */
-    public function getSponsorHackathons(): Collection
-    {
-        return $this->sponsorHackathons;
-    }
-
-    public function addSponsorHackathon(SponsorHackathon $sponsorHackathon): static
-    {
-        if (!$this->sponsorHackathons->contains($sponsorHackathon)) {
-            $this->sponsorHackathons->add($sponsorHackathon);
-            $sponsorHackathon->setHackathon($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSponsorHackathon(SponsorHackathon $sponsorHackathon): static
-    {
-        if ($this->sponsorHackathons->removeElement($sponsorHackathon)) {
-            // set the owning side to null (unless already changed)
-            if ($sponsorHackathon->getHackathon() === $this) {
-                $sponsorHackathon->setHackathon(null);
-            }
-        }
-
-        return $this;
-    }
-
-    #[ORM\PrePersist]
-    public function setCreatedAtValue(): void
-    {
-        if ($this->created_at === null) {
-            $this->created_at = new \DateTimeImmutable();
-        }
     }
 }

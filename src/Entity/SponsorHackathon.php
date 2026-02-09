@@ -13,13 +13,13 @@ class SponsorHackathon
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: Sponsor::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Sponsor $sponsor = null;
+    private ?sponsor $sponsor = null;
 
-    #[ORM\ManyToOne(targetEntity: Hackathon::class)]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Hackathon $hackathon = null;
+    private ?hackathon $hackathon = null;
 
     #[ORM\Column(length: 30)]
     private ?string $contribution_type = null;
@@ -32,24 +32,24 @@ class SponsorHackathon
         return $this->id;
     }
 
-    public function getSponsor(): ?Sponsor
+    public function getSponsor(): ?sponsor
     {
         return $this->sponsor;
     }
 
-    public function setSponsor(?Sponsor $sponsor): static
+    public function setSponsor(?sponsor $sponsor): static
     {
         $this->sponsor = $sponsor;
 
         return $this;
     }
 
-    public function getHackathon(): ?Hackathon
+    public function getHackathon(): ?hackathon
     {
         return $this->hackathon;
     }
 
-    public function setHackathon(?Hackathon $hackathon): static
+    public function setHackathon(?hackathon $hackathon): static
     {
         $this->hackathon = $hackathon;
 

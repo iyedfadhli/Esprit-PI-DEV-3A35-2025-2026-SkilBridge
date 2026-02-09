@@ -16,19 +16,28 @@ class SponsorHackathonRepository extends ServiceEntityRepository
         parent::__construct($registry, SponsorHackathon::class);
     }
 
-    public function searchSponsors(?string $query = null): array
-    {
-        $qb = $this->createQueryBuilder('s')
-            ->leftJoin('s.sponsor', 'sp')
-            ->leftJoin('s.hackathon', 'h');
+    //    /**
+    //     * @return SponsorHackathon[] Returns an array of SponsorHackathon objects
+    //     */
+    //    public function findByExampleField($value): array
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->orderBy('s.id', 'ASC')
+    //            ->setMaxResults(10)
+    //            ->getQuery()
+    //            ->getResult()
+    //        ;
+    //    }
 
-        if ($query) {
-            $qb->andWhere('sp.name LIKE :query OR h.title LIKE :query')
-                ->setParameter('query', '%' . $query . '%');
-        }
-
-        return $qb->orderBy('s.id', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
+    //    public function findOneBySomeField($value): ?SponsorHackathon
+    //    {
+    //        return $this->createQueryBuilder('s')
+    //            ->andWhere('s.exampleField = :val')
+    //            ->setParameter('val', $value)
+    //            ->getQuery()
+    //            ->getOneOrNullResult()
+    //        ;
+    //    }
 }
