@@ -1,0 +1,22 @@
+{% for assignment in sponsor_hackathons %}
+    <tr>
+        <td><strong>{{ assignment.sponsor.name }}</strong></td>
+        <td>{{ assignment.hackathon.title }}</td>
+        <td><span class="badge" style="background: #e9ecef; color: #495057; padding: 5px 10px; border-radius: 5px;">{{ assignment.contributionType }}</span></td>
+        <td>{{ assignment.contributionValue ? assignment.contributionValue ~ ' TND' : '-' }}</td>
+        <td>
+            <div style="display: flex;">
+                <a href="{{ path('app_back_sponsor_hackathon_pdf', {'id': assignment.id}) }}" class="btn-action btn-pdf" title="Download Contract" style="background: #e3f2fd; color: #1976d2; margin-right: 5px;"><i class="fa fa-file-pdf-o"></i></a>
+                <a href="{{ path('app_back_sponsor_hackathon_edit', {'id': assignment.id}) }}" class="btn-action btn-edit" title="Edit"><i class="fa fa-edit"></i></a>
+                <form method="post" action="{{ path('app_back_sponsor_hackathon_delete', {'id': assignment.id}) }}" onsubmit="return confirm('Are you sure you want to remove this assignment?');" style="margin: 0;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assignment.id) }}">
+                    <button class="btn-action btn-delete" title="Delete"><i class="fa fa-trash"></i></button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="5" style="text-align: center; padding: 30px;">No assignments found</td>
+    </tr>
+{% endfor %}

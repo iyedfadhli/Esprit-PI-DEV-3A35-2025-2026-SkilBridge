@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\SponsorRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SponsorRepository::class)]
 class Sponsor
@@ -16,22 +17,42 @@ class Sponsor
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Creator is required')]
     private ?User $creator_id = null;
 
     #[ORM\Column(length: 30)]
+    #[Assert\NotBlank(message: 'Sponsor name is required')]
+    #[Assert\Length(
+        max: 30,
+        maxMessage: 'Name cannot exceed 30 characters'
+    )]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: 'Description is required')]
     private ?string $description = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: 'Logo URL is required')]
+    #[Assert\Url(message: 'Please enter a valid URL')]
     private ?string $logo_url = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(
+        message: 'Please enter a valid URL',
+        protocols: ['http', 'https']
+    )]
     private ?string $website_url = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'Created at is required')]
     private ?\DateTime $created_at = null;
+
+    public function __construct()
+    {
+        // Set creation date by default so validation passes and DB constraint is satisfied
+        $this->created_at = new \DateTime();
+    }
 
     public function getId(): ?int
     {
