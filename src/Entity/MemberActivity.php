@@ -25,7 +25,7 @@ class MemberActivity
     #[ORM\Column(type: Types::TEXT)]
     private ?string $activityDescription = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $indivScore = null;
 
     public function getId(): ?int

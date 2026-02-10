@@ -1,0 +1,100 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/activity_challenge.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start work → toggle group selection
+            document.querySelectorAll('.start-work-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const card = btn.closest('.challenge-card');
+                    card.querySelector('.group-selection').classList.toggle('hidden');
+                });
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+<section class="activity-page">
+    <div class="container">
+        <div class="challenge-list">
+
+            {% for challenge in challenges %}
+                <div class="challenge-card" data-challenge-id="{{ challenge.id }}">
+
+                    <div class="challenge-header">
+                        <h3>{{ challenge.title }}</h3>
+                        <button class="outline-btn start-work-btn">
+                            Commencer le travail
+                        </button>
+                    </div>
+
+                    <p class="challenge-desc">{{ challenge.description }}</p>
+
+                    {% if challenge.content %}
+                        {% set extension = challenge.content|split('.')|last|lower %}
+                        {% if extension in ['pdf', 'doc', 'docx'] %}
+                            <p class="challenge-desc">
+                                <a href="{{ asset(challenge.content) }}" target="_blank">
+                                    📎 {{ challenge.content|split('/')|last }}
+                                </a>
+                            </p>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="challenge-info">
+                        <div class="challenge-info-row">
+                            <span>📌 Difficulty:
+                                <strong>{{ challenge.difficulty }}</strong>
+                            </span>
+                            <span>👥 Min / Max Group:
+                                <strong>{{ challenge.minGroupNbr }} / {{ challenge.maxGroupNbr }}</strong>
+                            </span>
+                            <span>⏱ Deadline:
+                                <strong>{{ challenge.deadline|date('d-m-Y H:i') }}</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- GROUP SELECTION -->
+                    <div class="group-selection hidden">
+                        <div class="challenge-header">
+                            <h4>Choisissez un groupe (Admin)</h4>
+                        </div>
+
+                        <div class="group-list">
+                            {% for group in groups %}
+                                <div class="group-card available" data-members="{{ group.memberCount }}">
+                                    <div class="group-info">
+                                        <span class="group-name">
+                                            👥 {{ group.group.getName() }}
+                                        </span>
+                                        <span class="group-members">
+                                            {{ group.memberCount }} membres
+                                        </span>
+                                    </div>
+                                    <form method="post" action="{{ path('activity_start') }}">
+                                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                                        <input type="hidden" name="group_id" value="{{ group.group.getId() }}">
+                                        <button type="submit" class="outline-btn select-group-btn">
+                                            Choisir
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+{% endblock %}
