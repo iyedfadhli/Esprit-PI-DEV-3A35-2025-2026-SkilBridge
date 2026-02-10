@@ -81,8 +81,6 @@ class Hackathon
     private ?string $location = null;
 
     #[ORM\Column(length: 255)]
-    #[Assert\NotBlank(message: 'Cover URL is required')]
-    #[Assert\Url(message: 'The URL is not a valid URL')]
     private ?string $cover_url = null;
 
     #[ORM\Column(length: 30)]

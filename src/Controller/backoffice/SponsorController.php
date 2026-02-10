@@ -3,6 +3,7 @@
 namespace App\Controller\backoffice;
 
 use App\Entity\Sponsor;
+use App\Entity\User;
 use App\Form\SponsorType;
 use App\Repository\SponsorRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,14 +37,19 @@ class SponsorController extends AbstractController
     {
         $sponsor = new Sponsor();
 
+        // Attach currently "connected" user based on session (custom auth)
+        $userId = $request->getSession()->get('user_id');
+        if ($userId) {
+            $user = $entityManager->getRepository(User::class)->find($userId);
+            if ($user && method_exists($sponsor, 'setCreatorId')) {
+                $sponsor->setCreatorId($user);
+            }
+        }
+
         $form = $this->createForm(SponsorType::class, $sponsor);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            if (method_exists($sponsor, 'setCreatorId') && $this->getUser()) {
-                $sponsor->setCreatorId($this->getUser());
-            }
-
             $entityManager->persist($sponsor);
             $entityManager->flush();
 

@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\SponsorHackathonRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SponsorHackathonRepository::class)]
 class SponsorHackathon
@@ -15,16 +16,25 @@ class SponsorHackathon
 
     #[ORM\ManyToOne(targetEntity: Sponsor::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Sponsor is required')]
     private ?Sponsor $sponsor = null;
 
     #[ORM\ManyToOne(targetEntity: Hackathon::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: 'Hackathon is required')]
     private ?Hackathon $hackathon = null;
 
     #[ORM\Column(length: 30)]
+    #[Assert\NotBlank(message: 'Please enter the contribution type')]
+    #[Assert\Length(
+        max: 30,
+        maxMessage: 'Contribution type cannot exceed 30 characters'
+    )]
     private ?string $contribution_type = null;
 
     #[ORM\Column(nullable: true)]
+    #[Assert\NotNull(message: 'Please enter the contribution value')]
+    #[Assert\PositiveOrZero(message: 'The value must be zero or greater')]
     private ?float $contribution_value = null;
 
     public function getId(): ?int
