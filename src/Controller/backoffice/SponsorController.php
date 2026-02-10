@@ -95,4 +95,62 @@ class SponsorController extends AbstractController
 
         return $this->redirectToRoute('app_back_sponsor_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/export/csv', name: 'app_back_sponsor_export_csv', methods: ['GET'])]
+    public function exportCsv(SponsorRepository $sponsorRepository): Response
+    {
+        // Get all sponsors
+        $sponsors = $sponsorRepository->findAll();
+
+        // Create CSV content
+        $csvData = [];
+        
+        // Add header row
+        $csvData[] = [
+            'ID',
+            'Name',
+            'Description',
+            'Logo URL',
+            'Website URL',
+            'Created At',
+            'Creator Email'
+        ];
+
+        // Add data rows
+        foreach ($sponsors as $sponsor) {
+            // Clean description - replace newlines with spaces for CSV
+            $description = $sponsor->getDescription() ?? '';
+            $description = str_replace(["\r\n", "\r", "\n"], ' ', $description);
+            $description = trim($description);
+
+            $csvData[] = [
+                $sponsor->getId(),
+                $sponsor->getName() ?? '',
+                $description,
+                $sponsor->getLogoUrl() ?? '',
+                $sponsor->getWebsiteUrl() ?? '',
+                $sponsor->getCreatedAt() ? $sponsor->getCreatedAt()->format('Y-m-d H:i:s') : '',
+                $sponsor->getCreatorId() && method_exists($sponsor->getCreatorId(), 'getEmail') ? $sponsor->getCreatorId()->getEmail() : ''
+            ];
+        }
+
+        // Convert to CSV string
+        $output = fopen('php://temp', 'r+');
+        foreach ($csvData as $row) {
+            fputcsv($output, $row);
+        }
+        rewind($output);
+        $csvContent = stream_get_contents($output);
+        fclose($output);
+
+        // Create response
+        $response = new Response();
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="sponsors_' . date('Y-m-d_His') . '.csv"');
+        
+        // Add BOM for Excel compatibility and set content
+        $response->setContent("\xEF\xBB\xBF" . $csvContent);
+
+        return $response;
+    }
 }

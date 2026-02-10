@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\frontoffice;
+namespace App\Controller\frontoffice\User;
 
 use App\Repository\HackathonRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

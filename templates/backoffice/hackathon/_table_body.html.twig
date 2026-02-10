@@ -24,6 +24,7 @@
         <td>{{ hackathon.maxTeams }} (max)</td>
         <td>
             <div style="display: flex;">
+                <a href="{{ path('app_back_hackathon_pdf', {'id': hackathon.id}) }}" class="btn-action btn-pdf" title="Download PDF" style="background: #e3f2fd; color: #1976d2; margin-right: 5px;"><i class="fa fa-file-pdf-o"></i></a>
                 <a href="{{ path('app_back_hackathon_show', {'id': hackathon.id}) }}" class="btn-action btn-show" title="View"><i class="fa fa-eye"></i></a>
                 <a href="{{ path('app_back_hackathon_edit', {'id': hackathon.id}) }}" class="btn-action btn-edit" title="Edit"><i class="fa fa-edit"></i></a>
                 <form method="post" action="{{ path('app_back_hackathon_delete', {'id': hackathon.id}) }}" onsubmit="return confirm('Are you sure you want to delete this hackathon?');">

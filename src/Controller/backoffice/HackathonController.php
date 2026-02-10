@@ -14,6 +14,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Routing\Annotation\Route;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Route('/backoffice/hackathon')]
 class HackathonController extends AbstractController
@@ -147,5 +149,31 @@ class HackathonController extends AbstractController
         }
 
         return $this->redirectToRoute('app_back_hackathon_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{id}/pdf', name: 'app_back_hackathon_pdf', methods: ['GET'])]
+    public function downloadPdf(Hackathon $hackathon): Response
+    {
+        // 1. Configure DomPDF
+        $pdfOptions = new Options();
+        $pdfOptions->set('defaultFont', 'Arial');
+        $pdfOptions->setIsRemoteEnabled(true);
+
+        $dompdf = new Dompdf($pdfOptions);
+
+        // 2. Render HTML
+        $html = $this->renderView('backoffice/hackathon/pdf_details.html.twig', [
+            'hackathon' => $hackathon,
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // 3. Return PDF Response
+        return new Response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="hackathon_' . $hackathon->getId() . '_' . str_replace(' ', '_', $hackathon->getTitle()) . '.pdf"',
+        ]);
     }
 }

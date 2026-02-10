@@ -17,45 +17,45 @@
 </head>
 
 <body>
-    
-    {% if user.getMainRoleLabel() == 'Admin'%}
 
-    <div class="admin-layout">
+{% if user.getMainRoleLabel() == 'Admin'%}
 
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-logo">
-                <img src="{{ asset('assets/images/frontoffice/logo.png') }}" alt="Skill Bridge Logo" class="sidebar-logo-img">
-            </div>
+<div class="admin-layout">
 
-            <nav class="sidebar-menu">
-                <a class="{{ app.request.attributes.get('_route') == 'dashboard' ? 'active' : '' }}" href="{{ path('dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a>
-                <a class="{{ app.request.attributes.get('_route') starts with 'dashboard_user' ? 'active' : '' }}" href="{{path('dashboard_user')}}"><i class="fa fa-user"></i> Users</a>
-                <a href="#"><i class="fa fa-book"></i> Courses</a>
-                <a href="#"><i class="fa fa-users"></i> Groups</a>
-                <a href="#"><i class="fa fa-trophy"></i> Challenges</a>
-                <a href="#"><i class="fa fa-file-text"></i> CV & Internship</a>
-                <a class="{{ app.request.attributes.get('_route') starts with 'app_back_hackathon_index' ? 'active' : '' }}" href="{{ path('app_back_hackathon_index') }}"><i class="fa fa-lightbulb-o"></i> Hackathons</a>
-                <a class="{{ app.request.attributes.get('_route') starts with 'app_back_sponsor' and not (app.request.attributes.get('_route') starts with 'app_back_sponsor_hackathon') ? 'active' : '' }}" href="{{ path('app_back_sponsor_index') }}"><i class="fa fa-handshake-o"></i> Sponsors</a>
-                <a class="{{ app.request.attributes.get('_route') starts with 'app_back_sponsor_hackathon' ? 'active' : '' }}" href="{{ path('app_back_sponsor_hackathon_index') }}"><i class="fa fa-link"></i> Assignments</a>
-                <a class="{{ app.request.attributes.get('_route') == 'app_back_stats' ? 'active' : '' }}" href="{{ path('app_back_stats') }}"><i class="fa fa-bar-chart"></i> Analytics</a>
-                <a href="{{path('home')}}"><i class="fa fa-home"></i> FrontOffice</a>
-            </nav>
-        </aside>
-{% else %}
-<script>
-                window.location.href = "{{ path('home') }}";
-            </script>
-{% endif %}
-        <!-- Main Content -->
-        <main class="admin-content">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="{{ asset('assets/images/frontoffice/logo.png') }}" alt="Skill Bridge Logo" class="sidebar-logo-img">
+        </div>
 
-            {% block body %}{% endblock %}
-        </main>
+        <nav class="sidebar-menu">
+            <a class="{{ app.request.attributes.get('_route') == 'dashboard' ? 'active' : '' }}" href="{{ path('dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a>
+            <a class="{{ app.request.attributes.get('_route') starts with 'dashboard_user' ? 'active' : '' }}" href="{{path('dashboard_user')}}"><i class="fa fa-user"></i> Users</a>
+            <a href="#"><i class="fa fa-book"></i> Courses</a>
+            <a href="#"><i class="fa fa-users"></i> Groups</a>
+            <a href="#"><i class="fa fa-trophy"></i> Challenges</a>
+            <a href="#"><i class="fa fa-file-text"></i> CV & Internship</a>
+            <a class="{{ app.request.attributes.get('_route') starts with 'app_back_hackathon_index' ? 'active' : '' }}" href="{{ path('app_back_hackathon_index') }}"><i class="fa fa-lightbulb-o"></i> Hackathons</a>
+            <a class="{{ app.request.attributes.get('_route') starts with 'app_back_sponsor' and not (app.request.attributes.get('_route') starts with 'app_back_sponsor_hackathon') ? 'active' : '' }}" href="{{ path('app_back_sponsor_index') }}"><i class="fa fa-handshake-o"></i> Sponsors</a>
+            <a class="{{ app.request.attributes.get('_route') starts with 'app_back_sponsor_hackathon' ? 'active' : '' }}" href="{{ path('app_back_sponsor_hackathon_index') }}"><i class="fa fa-link"></i> Assignments</a>
+            <a class="{{ app.request.attributes.get('_route') == 'app_back_stats' ? 'active' : '' }}" href="{{ path('app_back_stats') }}"><i class="fa fa-bar-chart"></i> Analytics</a>
+            <a href="{{path('home')}}"><i class="fa fa-home"></i> FrontOffice</a>
+        </nav>
+    </aside>
+    {% else %}
+        <script>
+            window.location.href = "{{ path('home') }}";
+        </script>
+    {% endif %}
+    <!-- Main Content -->
+    <main class="admin-content">
 
-    </div>
+        {% block body %}{% endblock %}
+    </main>
 
-    {% block javascripts %}{% endblock %}
+</div>
+
+{% block javascripts %}{% endblock %}
 
 </body>
 </html>
