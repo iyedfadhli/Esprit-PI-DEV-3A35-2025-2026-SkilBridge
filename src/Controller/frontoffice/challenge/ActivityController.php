@@ -19,21 +19,16 @@ use Doctrine\ORM\EntityManagerInterface;
 
 final class ActivityController extends AbstractController
 {
-    // -------------------------
-    // 2️⃣ Show all challenges + group selection (admin)
-    // -------------------------
+
     #[Route('/activity_challenge', name: 'activity_challenge')]
     public function selectChallenges(Request $request, EntityManagerInterface $em): Response
     {
-        $userId = 2; // TODO: replace with actual logged-in user ID
+        $userId = 1; 
 
-        // Get all challenges
         $challenges = $em->getRepository(Challenge::class)->findBy([], ['createdAt' => 'DESC']);
 
-        // Get all memberships for current user
         $memberships = $em->getRepository(Membership::class)->findBy(['user_id' => $userId]);
 
-        // Prepare admin groups
         $groups = [];
         $userAdminGroups = [];
         foreach ($memberships as $membership) {
@@ -55,9 +50,7 @@ final class ActivityController extends AbstractController
         ]);
     }
 
-    // -------------------------
-    // 2️⃣ Start activity for selected challenge + group
-    // -------------------------
+
     #[Route('/activity/start', name: 'activity_start', methods: ['POST'])]
     public function startActivity(Request $request, EntityManagerInterface $em): Response
     {
@@ -81,7 +74,7 @@ final class ActivityController extends AbstractController
         if ($existingActivity) {
             return $this->redirectToRoute('activity_resume', [
                 'activity_id' => $existingActivity->getId(),
-                'role' => 'ADMIN', // hardcoded since admin is starting
+                'role' => 'ADMIN', 
             ]);
         }
 
@@ -106,7 +99,7 @@ final class ActivityController extends AbstractController
     #[Route('/activity/check', name: 'activity_check')]
     public function checkActivity(EntityManagerInterface $em): Response
     {
-        $userId = 2; // TODO: replace with actual logged-in user ID
+        $userId = 1; // TODO: replace with actual logged-in user ID
 
         $result = $em->createQueryBuilder()
             ->select('a', 'm.role AS memberRole')
@@ -117,13 +110,13 @@ final class ActivityController extends AbstractController
             ->andWhere('a.status = :status')
             ->setParameter('user', $userId)
             ->setParameter('status', 'in_progress')
-            ->setMaxResults(2)
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
 
         if ($result) {
-            $activity = $result[0];        // Activity entity
-            $role = $result['memberRole']; // Role from Membership
+            $activity = $result[0];        
+            $role = $result['memberRole']; 
 
             return $this->redirectToRoute('activity_resume', [
                 'activity_id' => $activity->getId(),
@@ -134,9 +127,7 @@ final class ActivityController extends AbstractController
         return $this->redirectToRoute('activity_challenge');
     }
 
-    // -------------------------
-    // 4️⃣ Resume activity (show selected activity + challenge + form)
-    // -------------------------
+
     #[Route('/activity/resume', name: 'activity_resume')]
     public function resumeActivity(Request $request, EntityManagerInterface $em): Response
     {
@@ -155,7 +146,7 @@ final class ActivityController extends AbstractController
         $challenge = $activity->getIdChallenge();
         $problems = $em->getRepository(ProblemSolution::class)
             ->findBy(['activityId' => $activity]);
-        $userId = 2;
+        $userId = 1;
         $user = $em->getRepository(User::class)->find($userId);
         $memberActivityList = $em->getRepository(MemberActivity::class)
         ->findBy(['user_id' => $em->getRepository(User::class)->find($userId), 'id_activity' => $activity]);
@@ -183,13 +174,10 @@ final class ActivityController extends AbstractController
             throw $this->createNotFoundException('Activity not found');
         }
 
-        // Example: admin ID (replace with actual logged-in admin)
-        $userId = 2;
+        $userId = 1;
 
-        // 2️⃣ Handle Activity Description Form
         $activityDescription = $request->request->get('activity_description');
         if ($activityDescription !== null) {
-            // Find or create MemberActivity for admin
             $memberActivity = $em->getRepository(MemberActivity::class)
                 ->findOneBy(['id_activity' => $activity, 'user_id' => $userId]);
 
@@ -210,7 +198,7 @@ final class ActivityController extends AbstractController
             ]);
         }
 
-        // 2️⃣ Handle Problem Form
+        // 1️⃣ Handle Problem Form
         $problemDescription = $request->request->get('problem_description');
         if ($problemDescription !== null && trim($problemDescription) !== '') {
             $solutionDescription = $request->request->get('solution_description');
@@ -262,17 +250,15 @@ final class ActivityController extends AbstractController
     }
 
 
-    // ✅ Handle Member submission
     #[Route('/activity/submit/member/{activity_id}', name: 'activity_submit_member', methods: ['POST'])]
     public function submitMember(Request $request, EntityManagerInterface $em, int $activity_id): Response
     {
-        $userId = 2; // TODO: replace with actual logged-in user
+        $userId = 1; // bech nbadl l user id
         $activity = $em->getRepository(Activity::class)->find($activity_id);
         if (!$activity) {
             throw $this->createNotFoundException('Activity not found');
         }
 
-        // Fetch User entity instead of using the ID directly
         $user = $em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw $this->createNotFoundException('User not found');
@@ -285,12 +271,12 @@ final class ActivityController extends AbstractController
 
         // Save member activity
         $memberActivity = $em->getRepository(MemberActivity::class)
-            ->findOneBy(['user_id' => $user, 'id_activity' => $activity]); // use entities
+            ->findOneBy(['user_id' => $user, 'id_activity' => $activity]);
 
         if (!$memberActivity) {
             $memberActivity = new MemberActivity();
-            $memberActivity->setUserId($user);    // ✅ pass User entity
-            $memberActivity->setIdActivity($activity); // ✅ pass Activity entity
+            $memberActivity->setUserId($user);  
+            $memberActivity->setIdActivity($activity); 
         }
 
         if ($activityDescription) {
@@ -300,7 +286,6 @@ final class ActivityController extends AbstractController
         $em->persist($memberActivity);
         $em->flush();
 
-        // Save problem/solution if provided
         if ($problemDescription) {
             $problem = new ProblemSolution();
             $problem->setActivityId($activity);
@@ -309,7 +294,6 @@ final class ActivityController extends AbstractController
             $em->flush();
         }
 
-        // 3️⃣ Save a solution for an existing problem (if problem_id is set)
         if ($problemId && $solutionDescription !== null && trim($solutionDescription) !== '') {
             $problem = $em->getRepository(ProblemSolution::class)->find($problemId);
 
@@ -352,7 +336,7 @@ final class ActivityController extends AbstractController
 
             return $this->redirectToRoute('activity_check', [
                 'activity_id' => $problem->getActivityId()->getId(),
-                'role' => 'admin' // or member
+                'role' => 'admin' 
             ]);
         }
 
@@ -431,7 +415,11 @@ public function editMemberActivity(Request $request, EntityManagerInterface $em,
         'role' => 'member'
     ]);
 }
+#[Route('/activity_evaluation', name: 'activity_evaluation')]
+public function index():Response{
+     return $this->render('frontoffice/challenge/evaluation.html.twig');
 
+}
 
 
 

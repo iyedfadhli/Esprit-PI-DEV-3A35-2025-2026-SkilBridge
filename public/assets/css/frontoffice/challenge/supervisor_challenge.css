@@ -1,0 +1,251 @@
+.supervisor-dashboard {
+    display: grid;
+    grid-template-columns: 2.5fr 1fr;
+    gap: 30px;
+    padding: 30px;
+    background: #f7f8fc;
+}
+
+/* Sections */
+.challenges-section h2,
+.create-section h2 {
+    margin-bottom: 20px;
+    color: #2b2e4a;
+}
+
+/* Challenge Card */
+.challenge-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.challenge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.challenge-header h3 {
+    color: #1f3c88;
+}
+
+.description {
+    margin: 15px 0;
+    color: #555;
+}
+
+.challenge-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #777;
+}
+
+/* Buttons */
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-outline {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid #1f3c88;
+    background: transparent;
+    color: #1f3c88;
+    cursor: pointer;
+}
+
+.btn-outline.danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline:hover {
+    background: #1f3c88;
+    color: #fff;
+}
+
+.btn-outline.danger:hover {
+    background: #dc3545;
+}
+
+/* Create Section */
+.create-section {
+    background: #fff;
+    border-radius: 14px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.challenge-form label {
+    font-weight: 600;
+    margin-top: 10px;
+    display: block;
+}
+
+.challenge-form input,
+.challenge-form textarea,
+.challenge-form select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+}
+
+.btn-primary {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    background: #1f3c88;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+.edit-form {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 12px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+/* Rows to align two fields */
+.edit-form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+/* Individual field styling */
+.edit-form-group {
+    flex: 1;
+}
+
+.edit-form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.edit-form-group input,
+.edit-form-group textarea,
+.edit-form-group select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: all 0.3s ease;
+}
+
+.edit-form-group input:focus,
+.edit-form-group textarea:focus,
+.edit-form-group select:focus {
+    border-color: #1f3c88;
+    box-shadow: 0 0 0 0.2rem rgba(31,60,136,0.25);
+    outline: none;
+}
+
+.edit-form .btn-primary {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    background: #1f3c88;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.edit-form .btn-primary:hover {
+    background: #16326c;
+}
+/* Edit Form Card */
+.edit-form-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+/* Two fields per row */
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+}
+
+.btn-primary {
+    margin-top: 15px;
+    width: 100%;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    background: #1f3c88;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+.file-upload-input {
+    display: none; /* hide the default input */
+}
+
+.file-upload-btn {
+    padding: 8px 15px;
+    background-color: #1f3c88;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.file-upload-btn:hover {
+    background-color: #162a5b;
+}
+
+.file-upload-name {
+    font-size: 0.85rem;
+    color: #555;
+}
+.file-preview-bar button {
+    background: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.file-preview-bar button:hover {
+    background: #e0e0e0;
+}
+
+.file-preview-content {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fafafa;
+}

@@ -9,7 +9,6 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Start work → toggle group selection
             document.querySelectorAll('.start-work-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const card = btn.closest('.challenge-card');
@@ -62,7 +61,6 @@
                         </div>
                     </div>
 
-                    <!-- GROUP SELECTION -->
                     <div class="group-selection hidden">
                         <div class="challenge-header">
                             <h4>Choisissez un groupe (Admin)</h4>
