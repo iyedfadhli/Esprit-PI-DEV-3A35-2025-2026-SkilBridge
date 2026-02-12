@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use App\Repository\QuizRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Course;
+use App\Entity\Chapter;
+use App\Entity\Question;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
 class Quiz
@@ -13,13 +16,13 @@ class Quiz
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne(inversedBy: 'quizzes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?course $course = null;
+    private ?Course $course = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?chapter $chapter = null;
+    #[ORM\OneToOne(inversedBy: 'quiz')]
+    #[ORM\JoinColumn(nullable: true, unique: true)]
+    private ?Chapter $chapter = null;
 
     #[ORM\Column(length: 30)]
     private ?string $title = null;
@@ -30,6 +33,9 @@ class Quiz
     #[ORM\Column]
     private ?int $max_attempts = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $questions_per_attempt = null;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $supervisor = null;
@@ -39,24 +45,24 @@ class Quiz
         return $this->id;
     }
 
-    public function getCourse(): ?course
+    public function getCourse(): ?Course
     {
         return $this->course;
     }
 
-    public function setCourse(course $course): static
+    public function setCourse(Course $course): static
     {
         $this->course = $course;
 
         return $this;
     }
 
-    public function getChapter(): ?chapter
+    public function getChapter(): ?Chapter
     {
         return $this->chapter;
     }
 
-    public function setChapter(chapter $chapter): static
+    public function setChapter(?Chapter $chapter): static
     {
         $this->chapter = $chapter;
 
@@ -99,6 +105,18 @@ class Quiz
         return $this;
     }
 
+    public function getQuestionsPerAttempt(): ?int
+    {
+        return $this->questions_per_attempt;
+    }
+
+    public function setQuestionsPerAttempt(?int $questions_per_attempt): static
+    {
+        $this->questions_per_attempt = $questions_per_attempt;
+
+        return $this;
+    }
+
     public function getSupervisor(): ?User
     {
         return $this->supervisor;
@@ -109,5 +127,16 @@ class Quiz
         $this->supervisor = $supervisor;
 
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        $chapterTitle = $this->chapter?->getTitle() ?? '';
+        $title = $this->title ?? '';
+        if ($chapterTitle !== '') {
+            return $chapterTitle.' - '.($title !== '' ? $title : 'Quiz #'.$this->id);
+        }
+
+        return $title !== '' ? $title : 'Quiz #'.$this->id;
     }
 }

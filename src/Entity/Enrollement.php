@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\EnrollementRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Course;
 
 #[ORM\Entity(repositoryClass: EnrollementRepository::class)]
 class Enrollement
@@ -32,7 +33,7 @@ class Enrollement
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?course $course = null;
+    private ?Course $course = null;
 
     public function getId(): ?int
     {
@@ -99,12 +100,12 @@ class Enrollement
         return $this;
     }
 
-    public function getCourse(): ?course
+    public function getCourse(): ?Course
     {
         return $this->course;
     }
 
-    public function setCourse(?course $course): static
+    public function setCourse(?Course $course): static
     {
         $this->course = $course;
 

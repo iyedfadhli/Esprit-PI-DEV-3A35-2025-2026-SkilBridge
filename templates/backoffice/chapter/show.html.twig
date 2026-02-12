@@ -1,0 +1,140 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}{{ chapter.title }} - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-bookmark"></i> {{ chapter.title }}</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_chapter_edit', {'id': chapter.id}) }}" class="btn btn-warning">
+                <i class="fa-solid fa-pen"></i> Edit
+            </a>
+            <form method="post" action="{{ path('admin_chapter_delete', {'id': chapter.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ chapter.id) }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_chapter_index') }}">Chapters</a>
+        <span>/</span>
+        <span>{{ chapter.title }}</span>
+    </nav>
+
+    <div class="detail-grid">
+        <!-- Chapter Information Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-info-circle"></i> Chapter Information</h2>
+                <span class="badge badge-secondary">#{{ chapter.id }}</span>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <div class="detail-label">Title</div>
+                    <div class="detail-value">{{ chapter.title }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Course</div>
+                    <div class="detail-value">
+                        <a href="{{ path('admin_course_show', {'id': chapter.course.id}) }}">
+                            {{ chapter.course.title }} <i class="fa-solid fa-external-link"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Order</div>
+                    <div class="detail-value">
+                        <span class="badge badge-primary">Chapter {{ chapter.chapterOrder }}</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="badge badge-{{ chapter.status == 'published' ? 'success' : (chapter.status == 'draft' ? 'warning' : 'secondary') }}">
+                            {{ chapter.status }}
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Minimum Score</div>
+                    <div class="detail-value">
+                        <span class="badge badge-success">{{ chapter.minScore }}%</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Content URL</div>
+                    <div class="detail-value">
+                        <a href="{{ chapter.content }}" target="_blank" class="text-primary">
+                            {{ chapter.content }} <i class="fa-solid fa-external-link"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-clipboard-question"></i> Chapter Quiz</h2>
+                {% if not chapter.quiz %}
+                <a href="{{ path('admin_quiz_new') }}" class="btn btn-sm btn-primary">
+                    <i class="fa-solid fa-plus"></i> Create Quiz
+                </a>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if chapter.quiz %}
+                    <div class="detail-item">
+                        <div class="detail-label">Quiz Title</div>
+                        <div class="detail-value">{{ chapter.quiz.title }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Passing Score</div>
+                        <div class="detail-value">
+                            <span class="badge badge-success">{{ chapter.quiz.passingScore }}%</span>
+                        </div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Max Attempts</div>
+                        <div class="detail-value">{{ chapter.quiz.maxAttempts }}</div>
+                    </div>
+                    <div class="mt-2">
+                        <a href="{{ path('admin_quiz_show', {'id': chapter.quiz.id}) }}" class="btn btn-sm btn-primary">
+                            <i class="fa-solid fa-eye"></i> View Quiz
+                        </a>
+                        <a href="{{ path('admin_quiz_edit', {'id': chapter.quiz.id}) }}" class="btn btn-sm btn-warning">
+                            <i class="fa-solid fa-pen"></i> Edit Quiz
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fa-solid fa-clipboard-question"></i>
+                        <p>No quiz assigned to this chapter</p>
+                        <a href="{{ path('admin_quiz_new') }}" class="btn btn-sm btn-primary">
+                            <i class="fa-solid fa-plus"></i> Create Quiz
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-3">
+        <a href="{{ path('admin_chapter_index') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Chapters
+        </a>
+        <a href="{{ path('admin_course_show', {'id': chapter.course.id}) }}" class="btn btn-outline">
+            <i class="fa-solid fa-book"></i> View Course
+        </a>
+    </div>
+</div>
+{% endblock %}

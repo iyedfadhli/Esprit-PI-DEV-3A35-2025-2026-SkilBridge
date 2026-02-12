@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\AnswerRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Question;
 
 #[ORM\Entity(repositoryClass: AnswerRepository::class)]
 class Answer
@@ -16,7 +17,7 @@ class Answer
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?question $question = null;
+    private ?Question $question = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
@@ -29,12 +30,12 @@ class Answer
         return $this->id;
     }
 
-    public function getQuestion(): ?question
+    public function getQuestion(): ?Question
     {
         return $this->question;
     }
 
-    public function setQuestion(?question $question): static
+    public function setQuestion(?Question $question): static
     {
         $this->question = $question;
 

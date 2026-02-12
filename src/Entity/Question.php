@@ -5,6 +5,10 @@ namespace App\Entity;
 use App\Repository\QuestionRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Quiz;
+use App\Entity\Answer;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: QuestionRepository::class)]
 class Question
@@ -16,7 +20,7 @@ class Question
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?quiz $quiz = null;
+    private ?Quiz $quiz = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $content = null;
@@ -27,17 +31,25 @@ class Question
     #[ORM\Column]
     private ?float $point = null;
 
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Answer::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $answers;
+
+    public function __construct()
+    {
+        $this->answers = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getQuiz(): ?quiz
+    public function getQuiz(): ?Quiz
     {
         return $this->quiz;
     }
 
-    public function setQuiz(?quiz $quiz): static
+    public function setQuiz(?Quiz $quiz): static
     {
         $this->quiz = $quiz;
 
@@ -78,5 +90,43 @@ class Question
         $this->point = $point;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Answer>
+     */
+    public function getAnswers(): Collection
+    {
+        return $this->answers;
+    }
+
+    public function addAnswer(Answer $answer): static
+    {
+        if (!$this->answers->contains($answer)) {
+            $this->answers->add($answer);
+            $answer->setQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAnswer(Answer $answer): static
+    {
+        if ($this->answers->removeElement($answer)) {
+            if ($answer->getQuestion() === $this) {
+                $answer->setQuestion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        $content = $this->content ?? '';
+        if (strlen($content) > 40) {
+            return substr($content, 0, 37).'...';
+        }
+        return $content !== '' ? $content : 'Question #'.$this->id;
     }
 }

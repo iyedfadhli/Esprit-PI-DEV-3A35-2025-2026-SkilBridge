@@ -1,0 +1,130 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Answers - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-check-double"></i> Answers Management</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_answer_new') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Add New Answer
+            </a>
+        </div>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <span>Answers</span>
+    </nav>
+
+    <!-- Quick Nav Tabs -->
+    <div class="nav-tabs">
+        <a href="{{ path('admin_course_index') }}">Courses</a>
+        <a href="{{ path('admin_chapter_index') }}">Chapters</a>
+        <a href="{{ path('admin_quiz_index') }}">Quizzes</a>
+        <a href="{{ path('admin_question_index') }}">Questions</a>
+        <a href="{{ path('admin_answer_index') }}" class="active">Answers</a>
+    </div>
+
+    <div class="section-title">
+        <h2>All Answers</h2>
+        <span class="count">{{ total }}</span>
+    </div>
+
+    <div class="toolbar">
+        <form class="search-box" method="get">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="search" value="{{ search }}" placeholder="Search answers...">
+        </form>
+    </div>
+
+    <div class="card">
+        {% if answers|length > 0 %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Answer</th>
+                        <th>Question</th>
+                        <th>Quiz</th>
+                        <th>Correct</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for answer in answers %}
+                    <tr>
+                        <td><span class="badge badge-secondary">#{{ answer.id }}</span></td>
+                        <td>
+                            <div class="cell-title">{{ answer.content|length > 50 ? answer.content|slice(0, 50) ~ '...' : answer.content }}</div>
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_question_show', {'id': answer.question.id}) }}">
+                                {{ answer.question.content|length > 40 ? answer.question.content|slice(0, 40) ~ '...' : answer.question.content }}
+                            </a>
+                        </td>
+                        <td>{{ answer.question.quiz.title }}</td>
+                        <td>
+                            {% if answer.isCorrect %}
+                                <span class="badge badge-success"><i class="fa-solid fa-check"></i> Yes</span>
+                            {% else %}
+                                <span class="badge badge-danger"><i class="fa-solid fa-xmark"></i> No</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ path('admin_answer_show', {'id': answer.id}) }}" class="btn btn-icon btn-sm btn-secondary" data-tooltip="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_answer_edit', {'id': answer.id}) }}" class="btn btn-icon btn-sm btn-warning" data-tooltip="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form method="post" action="{{ path('admin_answer_delete', {'id': answer.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ answer.id) }}">
+                                    <button type="submit" class="btn btn-icon btn-sm btn-danger" data-tooltip="Delete">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if totalPages > 1 %}
+        <div class="card-footer">
+            <div class="pagination">
+                <span class="pagination-info">Showing page {{ currentPage }} of {{ totalPages }}</span>
+                {% if currentPage > 1 %}
+                    <a href="{{ path('admin_answer_index', {'page': 1, 'search': search}) }}"><i class="fa-solid fa-angles-left"></i></a>
+                    <a href="{{ path('admin_answer_index', {'page': currentPage - 1, 'search': search}) }}"><i class="fa-solid fa-angle-left"></i></a>
+                {% endif %}
+                {% for p in max(1, currentPage - 2)..min(totalPages, currentPage + 2) %}
+                    <a href="{{ path('admin_answer_index', {'page': p, 'search': search}) }}" class="{{ p == currentPage ? 'active' : '' }}">{{ p }}</a>
+                {% endfor %}
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('admin_answer_index', {'page': currentPage + 1, 'search': search}) }}"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="{{ path('admin_answer_index', {'page': totalPages, 'search': search}) }}"><i class="fa-solid fa-angles-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-check-double"></i>
+            <h3>No answers found</h3>
+            <p>Get started by creating your first answer</p>
+            <a href="{{ path('admin_answer_new') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Create Answer
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

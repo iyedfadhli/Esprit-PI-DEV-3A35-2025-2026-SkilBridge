@@ -5,6 +5,10 @@ namespace App\Entity;
 use App\Repository\CourseRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Quiz;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+use App\Entity\Chapter;
 
 #[ORM\Entity(repositoryClass: CourseRepository::class)]
 class Course
@@ -33,6 +37,20 @@ class Course
 
     #[ORM\Column(length: 255)]
     private ?string $content = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $material = null;
+
+    #[ORM\ManyToOne]
+    private ?Quiz $prerequisite_quiz = null;
+
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Quiz::class, cascade: ['persist', 'remove'])]
+    private Collection $quizzes;
+
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Chapter::class, cascade: ['persist', 'remove'])]
+    private Collection $chapters;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $sections_to_review = null;
 
     public function getId(): ?int
     {
@@ -109,5 +127,110 @@ class Course
         $this->content = $content;
 
         return $this;
+    }
+
+    public function getMaterial(): ?string
+    {
+        return $this->material;
+    }
+
+    public function setMaterial(?string $material): static
+    {
+        $this->material = $material;
+
+        return $this;
+    }
+
+    public function getPrerequisiteQuiz(): ?Quiz
+    {
+        return $this->prerequisite_quiz;
+    }
+
+    public function setPrerequisiteQuiz(?Quiz $prerequisite_quiz): static
+    {
+        $this->prerequisite_quiz = $prerequisite_quiz;
+
+        return $this;
+    }
+
+    public function getSectionsToReview(): ?array
+    {
+        return $this->sections_to_review;
+    }
+
+    public function setSectionsToReview(?array $sections_to_review): static
+    {
+        $this->sections_to_review = $sections_to_review;
+
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->quizzes = new ArrayCollection();
+        $this->chapters = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, Quiz>
+     */
+    public function getQuizzes(): Collection
+    {
+        return $this->quizzes;
+    }
+
+    public function addQuiz(Quiz $quiz): static
+    {
+        if (!$this->quizzes->contains($quiz)) {
+            $this->quizzes->add($quiz);
+            $quiz->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeQuiz(Quiz $quiz): static
+    {
+        if ($this->quizzes->removeElement($quiz)) {
+            if ($quiz->getCourse() === $this) {
+                $quiz->setCourse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Chapter>
+     */
+    public function getChapters(): Collection
+    {
+        return $this->chapters;
+    }
+
+    public function addChapter(Chapter $chapter): static
+    {
+        if (!$this->chapters->contains($chapter)) {
+            $this->chapters->add($chapter);
+            $chapter->setCourse($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChapter(Chapter $chapter): static
+    {
+        if ($this->chapters->removeElement($chapter)) {
+            if ($chapter->getCourse() === $this) {
+                $chapter->setCourse(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->title ?? 'Course #'.$this->id;
     }
 }

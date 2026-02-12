@@ -1,0 +1,141 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Questions - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-circle-question"></i> Questions Management</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_question_new') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Add New Question
+            </a>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <span>Questions</span>
+    </nav>
+
+    <!-- Quick Nav Tabs -->
+    <div class="nav-tabs">
+        <a href="{{ path('admin_course_index') }}">Courses</a>
+        <a href="{{ path('admin_chapter_index') }}">Chapters</a>
+        <a href="{{ path('admin_quiz_index') }}">Quizzes</a>
+        <a href="{{ path('admin_question_index') }}" class="active">Questions</a>
+        <a href="{{ path('admin_answer_index') }}">Answers</a>
+    </div>
+
+    <!-- Section Title with Count -->
+    <div class="section-title">
+        <h2>All Questions</h2>
+        <span class="count">{{ total }}</span>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <form class="search-box" method="get">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="search" value="{{ search }}" placeholder="Search questions...">
+        </form>
+    </div>
+
+    <!-- Data Card -->
+    <div class="card">
+        {% if questions|length > 0 %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Question</th>
+                        <th>Quiz</th>
+                        <th>Type</th>
+                        <th>Points</th>
+                        <th>Answers</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in questions %}
+                    <tr>
+                        <td><span class="badge badge-secondary">#{{ question.id }}</span></td>
+                        <td>
+                            <div class="cell-title">{{ question.content|length > 60 ? question.content|slice(0, 60) ~ '...' : question.content }}</div>
+                        </td>
+                        <td>
+                            <a href="{{ path('admin_quiz_show', {'id': question.quiz.id}) }}">
+                                {{ question.quiz.title }}
+                            </a>
+                            <div class="cell-subtitle">{{ question.quiz.course.title }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ question.type == 'multiple_choice' ? 'primary' : (question.type == 'single_choice' ? 'success' : 'warning') }}">
+                                {{ question.type|replace({'_': ' '})|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">{{ question.point }} pts</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-secondary">{{ question.answers|length }}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ path('admin_question_show', {'id': question.id}) }}" class="btn btn-icon btn-sm btn-secondary" data-tooltip="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_question_edit', {'id': question.id}) }}" class="btn btn-icon btn-sm btn-warning" data-tooltip="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form method="post" action="{{ path('admin_question_delete', {'id': question.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ question.id) }}">
+                                    <button type="submit" class="btn btn-icon btn-sm btn-danger" data-tooltip="Delete">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if totalPages > 1 %}
+        <div class="card-footer">
+            <div class="pagination">
+                <span class="pagination-info">Showing page {{ currentPage }} of {{ totalPages }}</span>
+                {% if currentPage > 1 %}
+                    <a href="{{ path('admin_question_index', {'page': 1, 'search': search}) }}"><i class="fa-solid fa-angles-left"></i></a>
+                    <a href="{{ path('admin_question_index', {'page': currentPage - 1, 'search': search}) }}"><i class="fa-solid fa-angle-left"></i></a>
+                {% endif %}
+                {% for p in max(1, currentPage - 2)..min(totalPages, currentPage + 2) %}
+                    <a href="{{ path('admin_question_index', {'page': p, 'search': search}) }}" class="{{ p == currentPage ? 'active' : '' }}">{{ p }}</a>
+                {% endfor %}
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('admin_question_index', {'page': currentPage + 1, 'search': search}) }}"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="{{ path('admin_question_index', {'page': totalPages, 'search': search}) }}"><i class="fa-solid fa-angles-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-circle-question"></i>
+            <h3>No questions found</h3>
+            <p>Get started by creating your first question</p>
+            <a href="{{ path('admin_question_new') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Create Question
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
