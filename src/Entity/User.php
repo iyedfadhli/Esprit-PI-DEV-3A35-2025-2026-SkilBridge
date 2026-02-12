@@ -175,6 +175,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->report_nbr = $report_nbr;
         return $this;
     }
+    public function getDisplayName(): string
+    {
+        if ($this->prenom && $this->nom) {
+            return $this->prenom . ' ' . $this->nom;
+        }
+        if ($this->email) {
+            return $this->email;
+        }
+        return 'Unknown';
+    }
 
     public function getUserIdentifier(): string
     {

@@ -199,7 +199,12 @@ final class UserController extends AbstractController
         if ($file) {
             $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/assets/images/frontoffice/user_pic';
             $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '', strtolower($user->getNom()));
-            $filename = $safeName . '.' . $file->guessExtension();
+            $ext = strtolower($file->getClientOriginalExtension() ?? '');
+            $allowed = ['jpg','jpeg','png','gif','webp'];
+            if (!in_array($ext, $allowed, true)) {
+                $ext = 'dat';
+            }
+            $filename = $safeName . '.' . $ext;
 
             $file->move($uploadsDir, $filename);
 

@@ -10,25 +10,27 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
-class QuestionCrudController extends AbstractCrudController
-{
-    public static function getEntityFqcn(): string
+if (class_exists(AbstractCrudController::class)) {
+    class QuestionCrudController extends AbstractCrudController
     {
-        return Question::class;
-    }
+        public static function getEntityFqcn(): string
+        {
+            return Question::class;
+        }
 
-    public function configureFields(string $pageName): iterable
-    {
-        return [
-            AssociationField::new('quiz'),
-            TextareaField::new('content'),
-            TextField::new('type')->setLabel('Type'),
-            NumberField::new('point')->setLabel('Points'),
-        ];
-    }
+        public function configureFields(string $pageName): iterable
+        {
+            return [
+                AssociationField::new('quiz'),
+                TextareaField::new('content'),
+                TextField::new('type')->setLabel('Type'),
+                NumberField::new('point')->setLabel('Points'),
+            ];
+        }
 
-    public function configureCrud(Crud $crud): Crud
-    {
-        return $crud->setSearchFields(['content', 'type', 'quiz.title']);
+        public function configureCrud(Crud $crud): Crud
+        {
+            return $crud->setSearchFields(['content', 'type', 'quiz.title']);
+        }
     }
 }
