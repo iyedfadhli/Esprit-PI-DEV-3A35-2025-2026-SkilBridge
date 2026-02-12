@@ -1,0 +1,187 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Manage Hackathons{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 35px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    }
+    .custom-table th {
+        padding: 20px 15px;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 1px;
+        color: #888;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    .custom-table td {
+        padding: 20px 15px;
+        vertical-align: middle;
+    }
+    .badge {
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    .badge-pending { background: #fff8e1; color: #ff8f00; }
+    .badge-ongoing { background: #e8f5e9; color: #2e7d32; }
+    .badge-completed { background: #e3f2fd; color: #1565c0; }
+    .badge-cancelled { background: #ffebee; color: #c62828; }
+    
+    .table-container {
+        overflow-x: auto;
+        margin-top: 10px;
+    }
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 12px;
+    }
+    .custom-table tr td {
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+    .custom-table tr:hover td {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        background: #fafafa;
+    }
+    .custom-table tr td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid #f0f0f0; }
+    .custom-table tr td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid #f0f0f0; }
+    .custom-table tr td { border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
+    
+    .btn-action {
+        width: 35px;
+        height: 35px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        text-decoration: none;
+        margin-right: 5px;
+        transition: 0.3s;
+    }
+    .btn-show { background: #e3f2fd; color: #1976d2; }
+    .btn-edit { background: #fff3e0; color: #f57c00; }
+    .btn-delete { background: #ffebee; color: #d32f2f; border: none; cursor: pointer; }
+    
+    .btn-action:hover { transform: translateY(-3px); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-header">
+    <h1>Hackathons Management</h1>
+    <div class="admin-user">
+        <a href="{{ path('app_back_hackathon_new') }}" class="primary-btn">
+            <i class="fa fa-plus"></i> Create New
+        </a>
+    </div>
+</div>
+
+<div class="premium-filters-wrapper" style="margin-bottom: 35px; background: rgba(255, 255, 255, 0.4); padding: 25px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); display: flex; gap: 20px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+    <div class="search-input-group" style="flex-grow: 1; position: relative;">
+        <i class="fa fa-search" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #4a7fd7; font-size: 18px;"></i>
+        <input type="text" id="ajax-search" class="form-control" placeholder="Search by title, theme, or location..." 
+               style="padding: 18px 20px 18px 55px; border-radius: 15px; border: none; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; transition: 0.3s; font-size: 15px;">
+    </div>
+    <div class="filter-select-group" style="min-width: 220px; position: relative;">
+        <i class="fa fa-filter" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #4a7fd7; font-size: 16px;"></i>
+        <select id="status-filter" class="form-control" 
+                style="padding: 18px 45px 18px 45px; border-radius: 15px; border: none; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; cursor: pointer; -webkit-appearance: none; font-size: 15px; font-weight: 500;">
+            <option value="">Filter Status</option>
+            <option value="pending">⏳ Pending</option>
+            <option value="ongoing">🚀 Ongoing</option>
+            <option value="completed">✅ Completed</option>
+            <option value="cancelled">❌ Cancelled</option>
+        </select>
+        <i class="fa fa-chevron-down" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); color: #4a7fd7; pointer-events: none; font-size: 12px;"></i>
+    </div>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}" style="padding: 15px; margin-bottom: 20px; border-radius: 10px; background: {{ label == 'success' ? '#d4edda' : '#f8d7da' }}; color: {{ label == 'success' ? '#155724' : '#721c24' }};">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="glass-card">
+    <div class="table-container">
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Theme</th>
+                    <th>Status</th>
+                    <th>Dates</th>
+                    <th>Location</th>
+                    <th>Teams</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% include 'backoffice/hackathon/_table_body.html.twig' %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('ajax-search');
+    const statusFilter = document.getElementById('status-filter');
+    const tableBody = document.querySelector('.custom-table tbody');
+
+    function updateTable() {
+        if (!tableBody) return;
+        
+        const query = searchInput ? searchInput.value : '';
+        const status = statusFilter ? statusFilter.value : '';
+        
+        const url = new URL(window.location.href);
+        url.searchParams.set('q', query);
+        url.searchParams.set('status', status);
+        url.searchParams.set('ajax', '1');
+
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                tableBody.innerHTML = html;
+            })
+            .catch(err => console.error('Error fetching search results:', err));
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', debounce(updateTable, 300));
+    }
+    if (statusFilter) {
+        statusFilter.addEventListener('change', updateTable);
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+});
+</script>
+{% endblock %}

@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Quiz;
 use App\Entity\Answer;
+use App\Entity\StudentResponse;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -19,7 +20,7 @@ class Question
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Quiz $quiz = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -34,9 +35,13 @@ class Question
     #[ORM\OneToMany(mappedBy: 'question', targetEntity: Answer::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $answers;
 
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: StudentResponse::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $studentResponses;
+
     public function __construct()
     {
         $this->answers = new ArrayCollection();
+        $this->studentResponses = new ArrayCollection();
     }
 
     public function getId(): ?int

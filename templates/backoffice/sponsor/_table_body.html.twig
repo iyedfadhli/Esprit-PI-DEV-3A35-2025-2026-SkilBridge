@@ -1,0 +1,24 @@
+{% for sponsor in sponsors %}
+    <tr>
+        <td>
+            <img src="{{ sponsor.logoUrl }}" alt="{{ sponsor.name }}" class="logo-img">
+        </td>
+        <td><strong>{{ sponsor.name }}</strong></td>
+        <td><a href="{{ sponsor.websiteUrl }}" target="_blank" style="color: #4a7fd7;">{{ sponsor.websiteUrl }}</a></td>
+        <td>{{ sponsor.createdAt ? sponsor.createdAt|date('Y-m-d') : '' }}</td>
+        <td>
+            <div style="display: flex;">
+                <a href="{{ path('app_back_sponsor_show', {'id': sponsor.id}) }}" class="btn-action btn-show" title="View"><i class="fa fa-eye"></i></a>
+                <a href="{{ path('app_back_sponsor_edit', {'id': sponsor.id}) }}" class="btn-action btn-edit" title="Edit"><i class="fa fa-edit"></i></a>
+                <form method="post" action="{{ path('app_back_sponsor_delete', {'id': sponsor.id}) }}" onsubmit="return confirm('Are you sure you want to delete this sponsor?');" style="margin: 0;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ sponsor.id) }}">
+                    <button class="btn-action btn-delete" title="Delete"><i class="fa fa-trash"></i></button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="5" style="text-align: center; padding: 30px;">No sponsors found</td>
+    </tr>
+{% endfor %}

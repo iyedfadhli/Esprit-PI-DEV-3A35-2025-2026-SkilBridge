@@ -17,14 +17,14 @@ class Reactions
     private ?string $type = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $user_id = null;
 
     #[ORM\Column(length: 255)]
     private ?string $url = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?posts $post_id = null;
 
     #[ORM\Column]

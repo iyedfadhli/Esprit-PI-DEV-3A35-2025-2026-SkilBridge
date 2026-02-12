@@ -11,7 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class CourseController extends AbstractController
 {
-    #[Route('/student/course/{id}', name: 'student_course')]
+    #[Route('/student/course/{id}', name: 'student_course', requirements: ['id' => '\d+'])]
     public function show(int $id, EntityManagerInterface $em): Response
     {
         $student = $this->getUser();

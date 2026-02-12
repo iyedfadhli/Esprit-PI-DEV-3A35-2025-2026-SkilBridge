@@ -16,7 +16,7 @@ class Enrollement
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $student = null;
 
     #[ORM\Column(length: 30)]
@@ -32,7 +32,7 @@ class Enrollement
     private ?\DateTime $completed_at = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Course $course = null;
 
     public function getId(): ?int

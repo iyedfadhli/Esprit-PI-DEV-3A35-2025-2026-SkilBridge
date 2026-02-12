@@ -27,7 +27,7 @@ class Challenge
     private ?string $difficulty = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $creator = null;
 
     #[ORM\Column]
@@ -43,7 +43,7 @@ class Challenge
     private ?\DateTime $createdAt = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Course $course = null;
 
     public function getId(): ?int

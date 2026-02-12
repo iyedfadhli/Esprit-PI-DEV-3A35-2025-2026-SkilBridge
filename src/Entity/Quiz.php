@@ -7,6 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Course;
 use App\Entity\Chapter;
 use App\Entity\Question;
+use App\Entity\QuizAttempts;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
 class Quiz
@@ -17,11 +20,11 @@ class Quiz
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'quizzes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Course $course = null;
 
     #[ORM\OneToOne(inversedBy: 'quiz')]
-    #[ORM\JoinColumn(nullable: true, unique: true)]
+    #[ORM\JoinColumn(nullable: true, unique: true, onDelete: 'SET NULL')]
     private ?Chapter $chapter = null;
 
     #[ORM\Column(length: 30)]
@@ -37,8 +40,20 @@ class Quiz
     private ?int $questions_per_attempt = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $supervisor = null;
+
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $questions;
+
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: QuizAttempts::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $quizAttempts;
+
+    public function __construct()
+    {
+        $this->questions = new ArrayCollection();
+        $this->quizAttempts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -127,6 +142,22 @@ class Quiz
         $this->supervisor = $supervisor;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Question>
+     */
+    public function getQuestions(): Collection
+    {
+        return $this->questions;
+    }
+
+    /**
+     * @return Collection<int, QuizAttempts>
+     */
+    public function getQuizAttempts(): Collection
+    {
+        return $this->quizAttempts;
     }
 
     public function __toString(): string

@@ -16,28 +16,22 @@ class HackathonRepository extends ServiceEntityRepository
         parent::__construct($registry, Hackathon::class);
     }
 
-    //    /**
-    //     * @return Hackathon[] Returns an array of Hackathon objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('h')
-    //            ->andWhere('h.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('h.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function searchHackathons(?string $query = null, ?string $status = null): array
+    {
+        $qb = $this->createQueryBuilder('h');
 
-    //    public function findOneBySomeField($value): ?Hackathon
-    //    {
-    //        return $this->createQueryBuilder('h')
-    //            ->andWhere('h.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        if ($query) {
+            $qb->andWhere('h.title LIKE :query OR h.theme LIKE :query')
+                ->setParameter('query', '%' . $query . '%');
+        }
+
+        if ($status) {
+            $qb->andWhere('h.status = :status')
+                ->setParameter('status', $status);
+        }
+
+        return $qb->orderBy('h.created_at', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

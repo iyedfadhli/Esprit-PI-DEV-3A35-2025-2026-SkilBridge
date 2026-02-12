@@ -9,6 +9,8 @@ use App\Entity\Quiz;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use App\Entity\Chapter;
+use App\Entity\Enrollement;
+use App\Entity\Challenge;
 
 #[ORM\Entity(repositoryClass: CourseRepository::class)]
 class Course
@@ -32,7 +34,7 @@ class Course
 
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $creator = null;
 
     #[ORM\Column(length: 255)]
@@ -41,6 +43,7 @@ class Course
     private ?string $material = null;
 
     #[ORM\ManyToOne]
+    #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Quiz $prerequisite_quiz = null;
 
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Quiz::class, cascade: ['persist', 'remove'])]
@@ -48,6 +51,12 @@ class Course
 
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Chapter::class, cascade: ['persist', 'remove'])]
     private Collection $chapters;
+
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Enrollement::class, cascade: ['remove'])]
+    private Collection $enrollements;
+
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Challenge::class, cascade: ['remove'])]
+    private Collection $challenges;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $sections_to_review = null;
@@ -169,6 +178,8 @@ class Course
     {
         $this->quizzes = new ArrayCollection();
         $this->chapters = new ArrayCollection();
+        $this->enrollements = new ArrayCollection();
+        $this->challenges = new ArrayCollection();
     }
 
     /**

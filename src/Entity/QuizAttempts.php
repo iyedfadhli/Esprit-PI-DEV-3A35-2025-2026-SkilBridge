@@ -4,10 +4,13 @@ namespace App\Entity;
 
 use App\Repository\QuizAttemptsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 use App\Entity\Course;
 use App\Entity\Quiz;
 use App\Entity\User;
+use App\Entity\StudentResponse;
 
 #[ORM\Entity(repositoryClass: QuizAttemptsRepository::class)]
 class QuizAttempts
@@ -27,12 +30,20 @@ class QuizAttempts
     private ?\DateTimeImmutable $submitted_at = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $student = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Quiz $quiz = null;
+
+    #[ORM\OneToMany(mappedBy: 'attempt', targetEntity: StudentResponse::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $studentResponses;
+
+    public function __construct()
+    {
+        $this->studentResponses = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {

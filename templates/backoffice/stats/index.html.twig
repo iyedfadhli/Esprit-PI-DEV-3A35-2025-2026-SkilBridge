@@ -1,0 +1,206 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Statistics Dashboard{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .stats-container {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    .stats-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 25px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        margin-bottom: 30px;
+        transition: transform 0.3s ease;
+    }
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+    .chart-wrapper {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    .stats-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .stats-header h1 {
+        font-weight: 700;
+        color: #2c3e50;
+        position: relative;
+        display: inline-block;
+    }
+    .stats-header h1::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #4a7fd7, #6c5ce7);
+        border-radius: 2px;
+    }
+    .total-value-card {
+        background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+        color: white;
+        text-align: center;
+        padding: 40px;
+    }
+    .total-value-card h2 {
+        font-size: 3em;
+        margin: 0;
+        font-weight: 800;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    .total-value-card p {
+        font-size: 1.2em;
+        opacity: 0.9;
+        margin-top: 10px;
+    }
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="stats-container">
+    <div class="stats-header">
+        <h1>Hackathon & Sponsor Analytics</h1>
+    </div>
+
+    <!-- Total Value KPI -->
+    <div class="stats-card total-value-card">
+        <h2>{{ totalContributionValue|number_format(2, '.', ',') }} TND</h2>
+        <p>Total Sponsorship Value</p>
+    </div>
+
+    <div class="grid-2">
+        <!-- Hackathon Status (Pie) -->
+        <div class="stats-card">
+            <h3 style="color: #444; margin-bottom: 20px;">Hackathon Status</h3>
+            <div class="chart-wrapper">
+                <canvas id="hackathonStatusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Sponsor Types (Doughnut) -->
+        <div class="stats-card">
+            <h3 style="color: #444; margin-bottom: 20px;">Sponsorship Types</h3>
+            <div class="chart-wrapper">
+                <canvas id="sponsorTypeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Hackathons per Month (Bar) -->
+        <div class="stats-card">
+            <h3 style="color: #444; margin-bottom: 20px;">Hackathon Timeline</h3>
+            <div class="chart-wrapper">
+                <canvas id="hackathonTimelineChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Sponsorship Trends (Line) -->
+        <div class="stats-card">
+            <h3 style="color: #444; margin-bottom: 20px;">Sponsorship Value Trend</h3>
+            <div class="chart-wrapper">
+                <canvas id="sponsorshipTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Shared Options
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        };
+
+        // 1. Hackathon Status (Pie)
+        new Chart(document.getElementById('hackathonStatusChart'), {
+            type: 'pie',
+            data: {
+                labels: {{ hackathonStatusLabels|json_encode|raw }},
+                datasets: [{
+                    data: {{ hackathonStatusData|json_encode|raw }},
+                    backgroundColor: ['#4a7fd7', '#e17055', '#00b894', '#fdcb6e'],
+                    borderWidth: 0
+                }]
+            },
+            options: commonOptions
+        });
+
+        // 2. Sponsor Types (Doughnut)
+        new Chart(document.getElementById('sponsorTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ sponsorTypeLabels|json_encode|raw }},
+                datasets: [{
+                    data: {{ sponsorTypeData|json_encode|raw }},
+                    backgroundColor: ['#6c5ce7', '#a29bfe', '#fd79a8', '#fab1a0', '#74b9ff'],
+                    borderWidth: 0
+                }]
+            },
+            options: commonOptions
+        });
+
+        // 3. Hackathon Timeline (Bar)
+        new Chart(document.getElementById('hackathonTimelineChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ hackathonsPerMonthLabels|json_encode|raw }},
+                datasets: [{
+                    label: 'Hackathons',
+                    data: {{ hackathonsPerMonthData|json_encode|raw }},
+                    backgroundColor: '#4a7fd7',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 4. Sponsorship Trend (Line)
+        new Chart(document.getElementById('sponsorshipTrendChart'), {
+            type: 'line',
+            data: {
+                labels: {{ sponsorshipTrendLabels|json_encode|raw }},
+                datasets: [{
+                    label: 'Value (TND)',
+                    data: {{ sponsorshipTrendData|json_encode|raw }},
+                    borderColor: '#00b894',
+                    backgroundColor: 'rgba(0, 184, 148, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
