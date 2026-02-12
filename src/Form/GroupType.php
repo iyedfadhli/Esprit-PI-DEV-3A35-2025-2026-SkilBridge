@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 
 class GroupType extends AbstractType
 {
@@ -18,8 +19,13 @@ class GroupType extends AbstractType
             ->add('type')
             ->add('level')
             ->add('max_members')
-            ->add('icon', TextType::class, [
-                'required' => false, // optional
+            ->add('icon_file', FileType::class, [
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('icon_url', TextType::class, [
+                'mapped' => false,
+                'required' => false,
             ]);
     }
 

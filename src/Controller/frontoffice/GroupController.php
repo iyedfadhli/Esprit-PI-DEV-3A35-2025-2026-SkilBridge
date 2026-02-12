@@ -11,9 +11,11 @@ use App\Form\PostType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use App\Entity\Commentaires;
 
 class GroupController extends AbstractController
 {
@@ -52,6 +54,23 @@ public function index(EntityManagerInterface $em, Request $request): Response
             $sort = 'newest';
     }
     $publicPosts = $qb->getQuery()->getResult();
+    $publicCommentsByPost = [];
+    if (!empty($publicPosts)) {
+        $postIds = array_map(fn($p) => $p->getId(), $publicPosts);
+        $comments = $em->getRepository(Commentaires::class)->createQueryBuilder('c')
+            ->where('c.post IN (:postIds)')
+            ->setParameter('postIds', $postIds)
+            ->orderBy('c.created_at', 'ASC')
+            ->getQuery()
+            ->getResult();
+        foreach ($comments as $c) {
+            $pid = $c->getPost()->getId();
+            if (!isset($publicCommentsByPost[$pid])) {
+                $publicCommentsByPost[$pid] = [];
+            }
+            $publicCommentsByPost[$pid][] = $c;
+        }
+    }
 
     // Also fetch all groups for the "Discover Groups" or "All Groups" section if needed
     $allGroups = $em->getRepository(Group::class)->findAll();
@@ -68,6 +87,26 @@ public function index(EntityManagerInterface $em, Request $request): Response
         $quickPost->setStatus('published');
         $quickPost->setVisibility('public'); // Main feed posts are public by default
         $quickPost->setGroupId(null); // Explicitly no group
+        $uploadedFile = $quickPostForm->get('attached_file')->getData();
+        if ($uploadedFile) {
+            $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/posts';
+            if (!is_dir($uploadsDir)) {
+                @mkdir($uploadsDir, 0775, true);
+            }
+            $safeName = bin2hex(random_bytes(8));
+            $ext = strtolower($uploadedFile->getClientOriginalExtension() ?? '');
+            $allowed = ['jpg','jpeg','png','gif','webp'];
+            if (!in_array($ext, $allowed, true)) {
+                $ext = 'dat';
+            }
+            $newFilename = $safeName . '.' . $ext;
+            try {
+                $uploadedFile->move($uploadsDir, $newFilename);
+                $quickPost->setAttachedFile('uploads/posts/' . $newFilename);
+            } catch (FileException $e) {
+                // ignore upload error
+            }
+        }
 
         $em->persist($quickPost);
         $em->flush();
@@ -83,6 +122,7 @@ public function index(EntityManagerInterface $em, Request $request): Response
         'allGroups' => $allGroups,
         'quickPostForm' => $quickPostForm->createView(),
         'currentSort' => $sort,
+        'commentsByPost' => $publicCommentsByPost,
     ]);
 }
 
@@ -100,6 +140,36 @@ public function index(EntityManagerInterface $em, Request $request): Response
 $dummyUser = $em->getRepository(User::class)->find(1); // ID of a test user in your DB
 $group->setLeaderId($dummyUser);
             $group->setRatingScore(0); // initial score
+            $uploadedIcon = $form->get('icon_file')->getData();
+            $iconUrl = trim((string) $form->get('icon_url')->getData());
+            if ($uploadedIcon) {
+                $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/groups';
+                if (!is_dir($uploadsDir)) {
+                    @mkdir($uploadsDir, 0775, true);
+                }
+                $safeName = bin2hex(random_bytes(8));
+                $ext = strtolower($uploadedIcon->getClientOriginalExtension() ?? '');
+                $allowed = ['jpg','jpeg','png','gif','webp'];
+                if (!in_array($ext, $allowed, true)) {
+                    $ext = 'dat';
+                }
+                $newFilename = $safeName . '.' . $ext;
+                try {
+                    $uploadedIcon->move($uploadsDir, $newFilename);
+                    $group->setIcon('uploads/groups/' . $newFilename);
+                } catch (FileException $e) {
+                    // ignore upload error
+                }
+            } elseif ($iconUrl !== '') {
+                $iconUrl = trim($iconUrl);
+                if (!preg_match('#^(https?:)?//#i', $iconUrl) && !preg_match('#^data:image/#i', $iconUrl)) {
+                    $iconUrl = 'https://' . ltrim($iconUrl, '/');
+                }
+                $group->setIcon($iconUrl);
+            }
+            if (!$group->getIcon()) {
+                $group->setIcon('assets/images/frontoffice/profile_pic.png');
+            }
 
             $em->persist($group);
             $em->flush();
@@ -132,6 +202,33 @@ $group->setLeaderId($dummyUser);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $uploadedIcon = $form->get('icon_file')->getData();
+            $iconUrl = trim((string) $form->get('icon_url')->getData());
+            if ($uploadedIcon) {
+                $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/groups';
+                if (!is_dir($uploadsDir)) {
+                    @mkdir($uploadsDir, 0775, true);
+                }
+                $safeName = bin2hex(random_bytes(8));
+                $ext = strtolower($uploadedIcon->getClientOriginalExtension() ?? '');
+                $allowed = ['jpg','jpeg','png','gif','webp'];
+                if (!in_array($ext, $allowed, true)) {
+                    $ext = 'dat';
+                }
+                $newFilename = $safeName . '.' . $ext;
+                try {
+                    $uploadedIcon->move($uploadsDir, $newFilename);
+                    $group->setIcon('uploads/groups/' . $newFilename);
+                } catch (FileException $e) {
+                    // ignore upload error
+                }
+            } elseif ($iconUrl !== '') {
+                $iconUrl = trim($iconUrl);
+                if (!preg_match('#^(https?:)?//#i', $iconUrl) && !preg_match('#^data:image/#i', $iconUrl)) {
+                    $iconUrl = 'https://' . ltrim($iconUrl, '/');
+                }
+                $group->setIcon($iconUrl);
+            }
             $em->flush();
             return $this->redirectToRoute('groups_index');
         }
@@ -160,6 +257,24 @@ public function show(Group $group, Request $request, EntityManagerInterface $em)
     
     // Fetch posts for this group
     $posts = $em->getRepository(Posts::class)->findBy(['group_id' => $group], ['created_at' => 'DESC']);
+    // Fetch comments for these posts
+    $commentsByPost = [];
+    if (!empty($posts)) {
+        $postIds = array_map(fn($p) => $p->getId(), $posts);
+        $comments = $em->getRepository(Commentaires::class)->createQueryBuilder('c')
+            ->where('c.post IN (:postIds)')
+            ->setParameter('postIds', $postIds)
+            ->orderBy('c.created_at', 'ASC')
+            ->getQuery()
+            ->getResult();
+        foreach ($comments as $c) {
+            $pid = $c->getPost()->getId();
+            if (!isset($commentsByPost[$pid])) {
+                $commentsByPost[$pid] = [];
+            }
+            $commentsByPost[$pid][] = $c;
+        }
+    }
 
     // Check current user's membership
     $currentUserMembership = $em->getRepository(Membership::class)->findOneBy([
@@ -224,6 +339,7 @@ public function show(Group $group, Request $request, EntityManagerInterface $em)
         'group' => $group,
         'memberships' => $groupMemberships,
         'posts' => $posts,
+        'commentsByPost' => $commentsByPost,
         'myGroups' => $myGroups, // Pass sidebar data
         'currentUserMembership' => $currentUserMembership,
         'users' => $users,

@@ -93,8 +93,12 @@
                     <div class="invalid-feedback">{{ form_errors(form.max_members) }}</div>
                 </div>
                 <div class="col-md-6 mb-4">
-                    {{ form_label(form.icon, 'Icon (Optional URL)', {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.icon, {'attr': {'class': 'form-control', 'placeholder': 'https://...'}}) }}
+                    {{ form_label(form.icon_file, 'Icon Upload (Optional)', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.icon_file, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="col-md-6 mb-4">
+                    {{ form_label(form.icon_url, 'Icon URL (Optional)', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.icon_url, {'attr': {'class': 'form-control', 'placeholder': 'https://...'}}) }}
                 </div>
             </div>
 

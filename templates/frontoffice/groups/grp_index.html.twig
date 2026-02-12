@@ -54,6 +54,14 @@
             font-weight: 500;
             margin-bottom: 5px;
         }
+        .group-link .group-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 8px;
+            border: 1px solid #eee;
+        }
         .group-link:hover {
             background: #f0f4fd;
             color: #4a7fd7;
@@ -229,8 +237,20 @@
                 
                 <div class="mt-3">
                     {% for group in myGroups %}
-                        <a href="{{ path('group_show', {id: group.id}) }}" class="group-link">
-                            <i class="fa fa-users me-2 text-primary small"></i> {{ group.name }}
+                        <a href="{{ path('group_show', {id: group.id}) }}" class="group-link d-flex align-items-center">
+                            {% set iconPath = group.icon %}
+                            {% if iconPath is empty %}
+                                {% set src = asset('assets/images/frontoffice/profile_pic.png') %}
+                            {% elseif iconPath starts with 'http' or iconPath starts with 'https' or iconPath starts with '//' or iconPath starts with 'data:image' %}
+                                {% set src = iconPath %}
+                            {% elseif iconPath starts with '/uploads/' or iconPath starts with 'uploads/' or iconPath starts with '/assets/' or iconPath starts with 'assets/' %}
+                                {% set localPath = iconPath starts with '/' ? iconPath|slice(1) : iconPath %}
+                                {% set src = asset(localPath) %}
+                            {% else %}
+                                {% set src = asset('assets/images/frontoffice/profile_pic.png') %}
+                            {% endif %}
+                            <img src="{{ src }}" alt="Icon" class="group-icon">
+                            <span>{{ group.name }}</span>
                         </a>
                     {% else %}
                         <div class="text-center py-3">
@@ -343,11 +363,37 @@
                     <div class="post-content">
                         <h5 class="post-title">{{ post.titre }}</h5>
                         <p class="post-text">{{ post.description }}</p>
+                        {% if post.attachedFile %}
+                            <div class="mt-2">
+                                <img src="{{ asset(post.attachedFile) }}" alt="Post photo" class="img-fluid rounded">
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="post-footer">
-                        <button class="action-btn"><i class="fa fa-thumbs-o-up"></i> Like ({{ post.likesCounter }})</button>
+                        <a href="{{ path('post_like', {id: post.id}) }}" class="action-btn"><i class="fa fa-thumbs-o-up"></i> Like ({{ post.likesCounter }})</a>
                         <button class="action-btn"><i class="fa fa-comment-o"></i> Comment</button>
                         <button class="action-btn"><i class="fa fa-share"></i> Share</button>
+                    </div>
+                    <div class="px-3 pb-3">
+                        {% set comments = commentsByPost[post.id] ?? [] %}
+                        {% if comments %}
+                            <div class="mb-2">
+                                {% for c in comments %}
+                                    <div class="d-flex gap-2 mb-2">
+                                        <img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" class="author-img" alt="User" style="width:32px;height:32px;">
+                                        <div class="bg-light rounded-3 px-3 py-2 flex-grow-1">
+                                            <div class="small fw-bold">{{ c.authorId.prenom }} {{ c.authorId.nom }}</div>
+                                            <div class="small text-muted">{{ c.createdAt|date('M d, Y H:i') }}</div>
+                                            <div>{{ c.content }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <form action="{{ path('post_comment', {id: post.id}) }}" method="post" class="d-flex gap-2">
+                            <input type="text" name="content" class="form-control" placeholder="Write a comment..." required>
+                            <button class="btn btn-primary btn-sm">Comment</button>
+                        </form>
                     </div>
                 </div>
             {% else %}

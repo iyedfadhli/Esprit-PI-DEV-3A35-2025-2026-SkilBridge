@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\Posts;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -22,6 +23,12 @@ class PostType extends AbstractType
             ->add('description', TextareaType::class, [
                 'label' => 'Content',
                 'attr' => ['class' => 'form-control', 'rows' => 5]
+            ])
+            ->add('attached_file', FileType::class, [
+                'label' => 'Photo (optional)',
+                'mapped' => false,
+                'required' => false,
+                'attr' => ['class' => 'form-control']
             ])
             ->add('visibility', ChoiceType::class, [
                 'choices' => [

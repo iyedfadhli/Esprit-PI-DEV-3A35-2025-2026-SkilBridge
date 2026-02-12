@@ -6,6 +6,8 @@ use App\Repository\ReactionsRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ReactionsRepository::class)]
+#[ORM\Table(name: 'reactions')]
+#[ORM\UniqueConstraint(name: 'uniq_user_post_type', columns: ['user_id_id', 'post_id_id', 'type'])]
 class Reactions
 {
     #[ORM\Id]
@@ -16,7 +18,7 @@ class Reactions
     #[ORM\Column(length: 25)]
     private ?string $type = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user_id = null;
 
