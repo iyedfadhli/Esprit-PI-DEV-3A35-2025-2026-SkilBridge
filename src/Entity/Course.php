@@ -9,6 +9,7 @@ use App\Entity\Quiz;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 use App\Entity\Chapter;
+use App\Entity\Enrollement;
 
 #[ORM\Entity(repositoryClass: CourseRepository::class)]
 class Course
@@ -48,6 +49,9 @@ class Course
 
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Chapter::class, cascade: ['persist', 'remove'])]
     private Collection $chapters;
+
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Enrollement::class, cascade: ['remove'])]
+    private Collection $enrollements;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private ?array $sections_to_review = null;
@@ -169,6 +173,7 @@ class Course
     {
         $this->quizzes = new ArrayCollection();
         $this->chapters = new ArrayCollection();
+        $this->enrollements = new ArrayCollection();
     }
 
     /**

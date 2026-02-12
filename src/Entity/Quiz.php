@@ -7,6 +7,9 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Course;
 use App\Entity\Chapter;
 use App\Entity\Question;
+use App\Entity\QuizAttempts;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
 class Quiz
@@ -39,6 +42,18 @@ class Quiz
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $supervisor = null;
+
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: QuizAttempts::class, cascade: ['remove'])]
+    private Collection $quizAttempts;
+
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['remove'])]
+    private Collection $questions;
+
+    public function __construct()
+    {
+        $this->quizAttempts = new ArrayCollection();
+        $this->questions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
