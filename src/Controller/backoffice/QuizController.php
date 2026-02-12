@@ -21,6 +21,17 @@ class QuizController extends AbstractController
         $courseFilter = $request->query->get('course', '');
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
+
+        // Sorting
+        $allowedSortFields = ['id', 'title', 'passingScore', 'maxAttempts'];
+        $sort = $request->query->get('sort', 'id');
+        $direction = strtoupper($request->query->get('direction', 'DESC'));
+        if (!in_array($sort, $allowedSortFields)) {
+            $sort = 'id';
+        }
+        if (!in_array($direction, ['ASC', 'DESC'])) {
+            $direction = 'DESC';
+        }
         
         $queryBuilder = $quizRepository->createQueryBuilder('q')
             ->leftJoin('q.course', 'c')
@@ -37,8 +48,14 @@ class QuizController extends AbstractController
             $queryBuilder->andWhere('c.id = :courseId')
                 ->setParameter('courseId', $courseFilter);
         }
-        
-        $queryBuilder->orderBy('q.id', 'DESC');
+
+        $sortMapping = [
+            'id' => 'q.id',
+            'title' => 'q.title',
+            'passingScore' => 'q.passing_score',
+            'maxAttempts' => 'q.max_attempts',
+        ];
+        $queryBuilder->orderBy($sortMapping[$sort], $direction);
         
         $total = count($queryBuilder->getQuery()->getResult());
         $quizzes = $queryBuilder
@@ -56,6 +73,8 @@ class QuizController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'total' => $total,
+            'sort' => $sort,
+            'direction' => $direction,
         ]);
     }
 

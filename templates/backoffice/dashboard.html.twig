@@ -71,13 +71,18 @@
     </section>
 
     <section class="admin-section" id="groups">
-        <h2>Groups Management</h2>
+        <h2>Community Management</h2>
         <div class="card">
             <div class="card-body">
-                <p class="mb-2">Create and manage student groups</p>
-                <button class="btn btn-primary">
-                    <i class="fa-solid fa-users"></i> Manage Groups
-                </button>
+                <p class="mb-2">Manage student groups and posts</p>
+                <div class="d-flex gap-2" style="flex-wrap: wrap;">
+                    <a href="{{ path('admin_groups_index') }}" class="btn btn-primary">
+                        <i class="fa-solid fa-users"></i> Manage Groups
+                    </a>
+                    <a href="{{ path('admin_posts_index') }}" class="btn btn-outline">
+                        <i class="fa-solid fa-comments"></i> Manage Posts
+                    </a>
+                </div>
             </div>
         </div>
     </section>

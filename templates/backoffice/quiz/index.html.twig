@@ -41,6 +41,22 @@
         <form class="search-box" method="get">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" name="search" value="{{ search }}" placeholder="Search quizzes...">
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <input type="hidden" name="direction" value="{{ direction }}">
+        </form>
+        <form class="sort-box" method="get" style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <input type="hidden" name="search" value="{{ search }}">
+            <label for="sort" style="white-space:nowrap;font-weight:600;font-size:0.9rem;"><i class="fa-solid fa-arrow-down-short-wide"></i> Trier par :</label>
+            <select name="sort" id="sort" onchange="this.form.submit()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border-color,#d1d5db);font-size:0.9rem;background:#fff;cursor:pointer;">
+                <option value="id" {{ sort == 'id' ? 'selected' }}>ID</option>
+                <option value="title" {{ sort == 'title' ? 'selected' }}>Titre</option>
+                <option value="passingScore" {{ sort == 'passingScore' ? 'selected' }}>Score de passage</option>
+                <option value="maxAttempts" {{ sort == 'maxAttempts' ? 'selected' }}>Max tentatives</option>
+            </select>
+            <select name="direction" onchange="this.form.submit()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border-color,#d1d5db);font-size:0.9rem;background:#fff;cursor:pointer;">
+                <option value="ASC" {{ direction == 'ASC' ? 'selected' }}>Croissant</option>
+                <option value="DESC" {{ direction == 'DESC' ? 'selected' }}>Décroissant</option>
+            </select>
         </form>
     </div>
 
@@ -51,12 +67,28 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Quiz</th>
+                        <th>
+                            <a href="{{ path('admin_quiz_index', {search: search, sort: 'id', direction: sort == 'id' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                ID {% if sort == 'id' %}<i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa-solid fa-sort" style="opacity:0.3;"></i>{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_quiz_index', {search: search, sort: 'title', direction: sort == 'title' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                Quiz {% if sort == 'title' %}<i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa-solid fa-sort" style="opacity:0.3;"></i>{% endif %}
+                            </a>
+                        </th>
                         <th>Course</th>
                         <th>Chapter</th>
-                        <th>Passing Score</th>
-                        <th>Max Attempts</th>
+                        <th>
+                            <a href="{{ path('admin_quiz_index', {search: search, sort: 'passingScore', direction: sort == 'passingScore' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                Passing Score {% if sort == 'passingScore' %}<i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa-solid fa-sort" style="opacity:0.3;"></i>{% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_quiz_index', {search: search, sort: 'maxAttempts', direction: sort == 'maxAttempts' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                Max Attempts {% if sort == 'maxAttempts' %}<i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa-solid fa-sort" style="opacity:0.3;"></i>{% endif %}
+                            </a>
+                        </th>
                         <th>Supervisor</th>
                         <th>Actions</th>
                     </tr>
@@ -116,15 +148,15 @@
             <div class="pagination">
                 <span class="pagination-info">Showing page {{ currentPage }} of {{ totalPages }}</span>
                 {% if currentPage > 1 %}
-                    <a href="{{ path('admin_quiz_index', {'page': 1, 'search': search}) }}"><i class="fa-solid fa-angles-left"></i></a>
-                    <a href="{{ path('admin_quiz_index', {'page': currentPage - 1, 'search': search}) }}"><i class="fa-solid fa-angle-left"></i></a>
+                    <a href="{{ path('admin_quiz_index', {'page': 1, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angles-left"></i></a>
+                    <a href="{{ path('admin_quiz_index', {'page': currentPage - 1, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angle-left"></i></a>
                 {% endif %}
                 {% for p in max(1, currentPage - 2)..min(totalPages, currentPage + 2) %}
-                    <a href="{{ path('admin_quiz_index', {'page': p, 'search': search}) }}" class="{{ p == currentPage ? 'active' : '' }}">{{ p }}</a>
+                    <a href="{{ path('admin_quiz_index', {'page': p, 'search': search, 'sort': sort, 'direction': direction}) }}" class="{{ p == currentPage ? 'active' : '' }}">{{ p }}</a>
                 {% endfor %}
                 {% if currentPage < totalPages %}
-                    <a href="{{ path('admin_quiz_index', {'page': currentPage + 1, 'search': search}) }}"><i class="fa-solid fa-angle-right"></i></a>
-                    <a href="{{ path('admin_quiz_index', {'page': totalPages, 'search': search}) }}"><i class="fa-solid fa-angles-right"></i></a>
+                    <a href="{{ path('admin_quiz_index', {'page': currentPage + 1, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="{{ path('admin_quiz_index', {'page': totalPages, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angles-right"></i></a>
                 {% endif %}
             </div>
         </div>

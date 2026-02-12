@@ -21,6 +21,17 @@ class ChapterController extends AbstractController
         $courseFilter = $request->query->get('course', '');
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
+
+        // Sorting
+        $allowedSortFields = ['id', 'title', 'chapterOrder', 'status', 'minScore'];
+        $sort = $request->query->get('sort', 'chapterOrder');
+        $direction = strtoupper($request->query->get('direction', 'ASC'));
+        if (!in_array($sort, $allowedSortFields)) {
+            $sort = 'chapterOrder';
+        }
+        if (!in_array($direction, ['ASC', 'DESC'])) {
+            $direction = 'ASC';
+        }
         
         $queryBuilder = $chapterRepository->createQueryBuilder('ch')
             ->leftJoin('ch.course', 'c')
@@ -35,9 +46,15 @@ class ChapterController extends AbstractController
             $queryBuilder->andWhere('c.id = :courseId')
                 ->setParameter('courseId', $courseFilter);
         }
-        
-        $queryBuilder->orderBy('c.title', 'ASC')
-            ->addOrderBy('ch.chapter_order', 'ASC');
+
+        $sortMapping = [
+            'id' => 'ch.id',
+            'title' => 'ch.title',
+            'chapterOrder' => 'ch.chapter_order',
+            'status' => 'ch.status',
+            'minScore' => 'ch.min_score',
+        ];
+        $queryBuilder->orderBy($sortMapping[$sort], $direction);
         
         $total = count($queryBuilder->getQuery()->getResult());
         $chapters = $queryBuilder
@@ -55,6 +72,8 @@ class ChapterController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'total' => $total,
+            'sort' => $sort,
+            'direction' => $direction,
         ]);
     }
 

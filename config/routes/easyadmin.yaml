@@ -1,7 +1,0 @@
-# EasyAdmin routes removed - using custom CRUD controllers
-# All pedagogical management routes are now in:
-# - admin_course_* (Course CRUD)
-# - admin_chapter_* (Chapter CRUD)
-# - admin_quiz_* (Quiz CRUD)
-# - admin_question_* (Question CRUD)
-# - admin_answer_* (Answer CRUD)

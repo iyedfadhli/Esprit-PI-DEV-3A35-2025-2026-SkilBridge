@@ -52,18 +52,50 @@
 
         <section class="admin-section" id="posts">
             <div class="search-row">
-                <h2 style="margin:0;">Posts Management</h2>
-                <input type="text" placeholder="Search posts...">
+                <h2 style="margin:0;">Posts Management <span class="badge" style="font-size:13px;">{{ total }}</span></h2>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <form method="get" style="display:flex;gap:8px;align-items:center;">
+                        <input type="text" name="search" value="{{ search }}" placeholder="Search posts...">
+                        <input type="hidden" name="sort" value="{{ sort }}">
+                        <input type="hidden" name="direction" value="{{ direction }}">
+                    </form>
+                    <form method="get" style="display:flex;gap:6px;align-items:center;">
+                        <input type="hidden" name="search" value="{{ search }}">
+                        <label style="white-space:nowrap;font-weight:600;font-size:0.85rem;"><i class="fa fa-arrow-down-short-wide"></i> Trier :</label>
+                        <select name="sort" onchange="this.form.submit()" style="padding:6px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:0.85rem;cursor:pointer;">
+                            <option value="id" {{ sort == 'id' ? 'selected' }}>ID</option>
+                            <option value="titre" {{ sort == 'titre' ? 'selected' }}>Titre</option>
+                            <option value="likesCounter" {{ sort == 'likesCounter' ? 'selected' }}>Likes</option>
+                            <option value="createdAt" {{ sort == 'createdAt' ? 'selected' }}>Date</option>
+                        </select>
+                        <select name="direction" onchange="this.form.submit()" style="padding:6px 10px;border-radius:8px;border:1px solid #d1d5db;font-size:0.85rem;cursor:pointer;">
+                            <option value="ASC" {{ direction == 'ASC' ? 'selected' }}>Croissant</option>
+                            <option value="DESC" {{ direction == 'DESC' ? 'selected' }}>Décroissant</option>
+                        </select>
+                    </form>
+                </div>
             </div>
             <div class="admin-card">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Post</th>
+                            <th>
+                                <a href="{{ path('admin_posts_index', {search: search, sort: 'titre', direction: sort == 'titre' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                    Post {% if sort == 'titre' %}<i class="fa fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa fa-sort" style="opacity:0.3;"></i>{% endif %}
+                                </a>
+                            </th>
                             <th>Author</th>
                             <th>Group</th>
-                            <th>Likes</th>
-                            <th>Created</th>
+                            <th>
+                                <a href="{{ path('admin_posts_index', {search: search, sort: 'likesCounter', direction: sort == 'likesCounter' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                    Likes {% if sort == 'likesCounter' %}<i class="fa fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa fa-sort" style="opacity:0.3;"></i>{% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a href="{{ path('admin_posts_index', {search: search, sort: 'createdAt', direction: sort == 'createdAt' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                    Created {% if sort == 'createdAt' %}<i class="fa fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa fa-sort" style="opacity:0.3;"></i>{% endif %}
+                                </a>
+                            </th>
                             <th></th>
                         </tr>
                     </thead>
@@ -91,6 +123,23 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                {% if totalPages > 1 %}
+                <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:16px 0;">
+                    <span style="font-size:0.85rem;color:#6c7a89;">Page {{ currentPage }}/{{ totalPages }}</span>
+                    {% if currentPage > 1 %}
+                        <a href="{{ path('admin_posts_index', {page: 1, search: search, sort: sort, direction: direction}) }}" class="badge">&laquo;</a>
+                        <a href="{{ path('admin_posts_index', {page: currentPage - 1, search: search, sort: sort, direction: direction}) }}" class="badge">&lsaquo;</a>
+                    {% endif %}
+                    {% for p in max(1, currentPage - 2)..min(totalPages, currentPage + 2) %}
+                        <a href="{{ path('admin_posts_index', {page: p, search: search, sort: sort, direction: direction}) }}" class="badge" style="{{ p == currentPage ? 'background:#667eea;color:#fff;border-color:#667eea;' : '' }}">{{ p }}</a>
+                    {% endfor %}
+                    {% if currentPage < totalPages %}
+                        <a href="{{ path('admin_posts_index', {page: currentPage + 1, search: search, sort: sort, direction: direction}) }}" class="badge">&rsaquo;</a>
+                        <a href="{{ path('admin_posts_index', {page: totalPages, search: search, sort: sort, direction: direction}) }}" class="badge">&raquo;</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </div>
         </section>
     </main>

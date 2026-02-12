@@ -20,6 +20,17 @@ class CourseController extends AbstractController
         $search = $request->query->get('search', '');
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
+
+        // Sorting
+        $allowedSortFields = ['id', 'title', 'duration', 'validationScore'];
+        $sort = $request->query->get('sort', 'id');
+        $direction = strtoupper($request->query->get('direction', 'DESC'));
+        if (!in_array($sort, $allowedSortFields)) {
+            $sort = 'id';
+        }
+        if (!in_array($direction, ['ASC', 'DESC'])) {
+            $direction = 'DESC';
+        }
         
         $queryBuilder = $courseRepository->createQueryBuilder('c')
             ->leftJoin('c.creator', 'u')
@@ -29,8 +40,15 @@ class CourseController extends AbstractController
             $queryBuilder->where('c.title LIKE :search OR c.description LIKE :search')
                 ->setParameter('search', '%' . $search . '%');
         }
-        
-        $queryBuilder->orderBy('c.id', 'DESC');
+
+        // Map sort field to query alias
+        $sortMapping = [
+            'id' => 'c.id',
+            'title' => 'c.title',
+            'duration' => 'c.duration',
+            'validationScore' => 'c.validation_score',
+        ];
+        $queryBuilder->orderBy($sortMapping[$sort], $direction);
         
         $total = count($queryBuilder->getQuery()->getResult());
         $courses = $queryBuilder
@@ -47,6 +65,8 @@ class CourseController extends AbstractController
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'total' => $total,
+            'sort' => $sort,
+            'direction' => $direction,
         ]);
     }
 
