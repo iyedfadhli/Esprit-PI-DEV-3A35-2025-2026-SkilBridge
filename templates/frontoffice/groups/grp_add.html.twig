@@ -1,0 +1,110 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}{{ app.request.attributes.get('_route') == 'group_add' ? 'Create Group' : 'Edit Group' }} - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+        .form-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: none;
+        }
+        .form-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .btn-skill {
+            background: #4a7fd7;
+            color: #fff;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-skill:hover {
+            background: #3a6bb8;
+            color: #fff;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 1px solid #e1e1e1;
+            background: #fcfcfc;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #4a7fd7;
+            box-shadow: 0 0 0 4px rgba(74, 127, 215, 0.1);
+            background: #fff;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <div class="form-card">
+        <h2 class="form-title">{{ app.request.attributes.get('_route') == 'group_add' ? 'Create a New Group' : 'Edit Group Settings' }}</h2>
+        
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="mb-4">
+                {{ form_label(form.name, 'Group Name', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.name, {'attr': {'class': 'form-control' ~ (form.name.vars.valid ? '' : ' is-invalid'), 'placeholder': 'e.g. Symfony Developers Tunisia'}}) }}
+                <div class="invalid-feedback">{{ form_errors(form.name) }}</div>
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.valid ? '' : ' is-invalid'), 'placeholder': 'What is this group about?', 'rows': 4}}) }}
+                <div class="invalid-feedback">{{ form_errors(form.description) }}</div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    {{ form_label(form.type, 'Group Type', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.type, {'attr': {'class': 'form-select' ~ (form.type.vars.valid ? '' : ' is-invalid')}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.type) }}</div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    {{ form_label(form.level, 'Level', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.level, {'attr': {'class': 'form-select' ~ (form.level.vars.valid ? '' : ' is-invalid')}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.level) }}</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    {{ form_label(form.max_members, 'Max Members', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.max_members, {'attr': {'class': 'form-control' ~ (form.max_members.vars.valid ? '' : ' is-invalid'), 'placeholder': 'e.g. 50'}}) }}
+                    <div class="invalid-feedback">{{ form_errors(form.max_members) }}</div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    {{ form_label(form.icon, 'Icon (Optional URL)', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.icon, {'attr': {'class': 'form-control', 'placeholder': 'https://...'}}) }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <a href="{{ path('groups_index') }}" class="text-decoration-none text-muted fw-bold"><i class="fa fa-arrow-left me-1"></i> Cancel</a>
+                <button class="btn btn-skill shadow-sm px-5">
+                    {{ app.request.attributes.get('_route') == 'group_add' ? 'Create Group' : 'Save Changes' }}
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

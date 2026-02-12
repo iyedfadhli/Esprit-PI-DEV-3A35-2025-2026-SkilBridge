@@ -1,0 +1,374 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Groups Feed - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .groups-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .sidebar-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f4fd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-create-group {
+            background: #4a7fd7;
+            color: #fff;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.3s;
+            border: none;
+            box-shadow: 0 2px 5px rgba(74, 127, 215, 0.2);
+        }
+        .btn-create-group:hover {
+            background: #3a6bb8;
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .group-link {
+            display: block;
+            padding: 10px 15px;
+            color: #555;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: 0.3s;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        .group-link:hover {
+            background: #f0f4fd;
+            color: #4a7fd7;
+        }
+        .group-link.active {
+            background: #4a7fd7;
+            color: #fff;
+        }
+        .post-card {
+            background: #fff;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: none;
+            overflow: hidden;
+        }
+        .post-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .author-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .post-content {
+            padding: 0 20px 20px;
+        }
+        .post-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .post-text {
+            color: #666;
+            line-height: 1.6;
+        }
+        .post-footer {
+            padding: 15px 20px;
+            background: #fafbfc;
+            border-top: 1px solid #f1f1f1;
+            display: flex;
+            gap: 20px;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .action-btn:hover {
+            color: #4a7fd7;
+        }
+        .quick-post-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0f0f0;
+        }
+        .quick-post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .quick-post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .quick-post-input-trigger {
+            background: #f0f2f5;
+            border-radius: 25px;
+            padding: 10px 20px;
+            flex-grow: 1;
+            color: #65676b;
+            cursor: pointer;
+            transition: 0.2s;
+            border: none;
+            text-align: left;
+        }
+        .quick-post-input-trigger:hover {
+            background: #e4e6e9;
+        }
+        .quick-post-actions {
+            display: flex;
+            border-top: 1px solid #f0f2f5;
+            padding-top: 10px;
+            margin-top: 10px;
+            justify-content: space-around;
+        }
+        .quick-action-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #65676b;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .quick-action-item:hover {
+            background: #f0f2f5;
+        }
+        .quick-action-item.photo i { color: #45bd62; }
+        .quick-action-item.group i { color: #1877f2; }
+        .quick-action-item.event i { color: #f7b928; }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+        .modal-header {
+            border-bottom: 1px solid #f0f2f5;
+            padding: 15px 20px;
+        }
+        .modal-title {
+            font-weight: 700;
+            color: #050505;
+        }
+        .btn-skill {
+            background: #4a7fd7;
+            color: #fff;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-skill:hover {
+            background: #3a6bb8;
+            color: #fff;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="groups-container">
+    {# Display Flash Messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mb-4 rounded-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="row">
+        <!-- SIDEBAR: My Groups -->
+        <div class="col-md-3">
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <span>My Groups</span>
+                    <a href="{{ path('group_add') }}" class="btn-create-group">
+                        <i class="fa fa-plus me-1"></i> Create Group
+                    </a>
+                </div>
+                
+                <div class="mt-3">
+                    {% for group in myGroups %}
+                        <a href="{{ path('group_show', {id: group.id}) }}" class="group-link">
+                            <i class="fa fa-users me-2 text-primary small"></i> {{ group.name }}
+                        </a>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="text-muted small mb-2">No groups yet.</p>
+                            <a href="{{ path('group_add') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Start one</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="sidebar-card">
+                <div class="sidebar-title">Explore</div>
+                <div class="mt-2">
+                    <a href="#" class="group-link"><i class="fa fa-compass me-2 text-success"></i> Suggestions</a>
+                    <a href="#" class="group-link"><i class="fa fa-line-chart me-2 text-danger"></i> Trending</a>
+                    <a href="#" class="group-link"><i class="fa fa-bookmark me-2 text-warning"></i> Saved Posts</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN FEED -->
+        <div class="col-md-6">
+            <!-- QUICK POST (SOCIAL STYLE) -->
+            <div class="quick-post-card">
+                <div class="quick-post-header">
+                    <img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" class="quick-post-avatar" alt="User">
+                    <button class="quick-post-input-trigger" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                        What's on your mind, {{ app.user ? app.user.prenom : 'User' }}?
+                    </button>
+                </div>
+                <div class="quick-post-actions">
+                    <div class="quick-action-item photo" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                        <i class="fa fa-image"></i> <span>Photo</span>
+                    </div>
+                    <div class="quick-action-item group" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                        <i class="fa fa-users"></i> <span>Tag Group</span>
+                    </div>
+                    <div class="quick-action-item event" data-bs-toggle="modal" data-bs-target="#createPostModal">
+                        <i class="fa fa-calendar"></i> <span>Event</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Post Modal -->
+            <div class="modal fade" id="createPostModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Create Post</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" class="quick-post-avatar" alt="User">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : 'Dummy User' }}</h6>
+                                    <span class="badge bg-light text-dark border"><i class="fa fa-globe me-1"></i> Public</span>
+                                </div>
+                            </div>
+                            {{ form_start(quickPostForm, {'attr': {'id': 'quickPostForm'}}) }}
+                                <div class="mb-3">
+                                    {{ form_widget(quickPostForm.titre, {'attr': {'class': 'form-control border-0 fs-5 fw-bold px-0 shadow-none', 'placeholder': 'Post Title...'}}) }}
+                                </div>
+                                <div class="mb-3">
+                                    {{ form_widget(quickPostForm.description, {'attr': {'class': 'form-control border-0 px-0 shadow-none', 'placeholder': "What's on your mind?", 'rows': 4, 'style': 'resize:none; font-size: 1.1rem;'}}) }}
+                                </div>
+                                {# Hide the default visibility field if you want it to be always public from here, or style it #}
+                                <div class="d-none">
+                                    {{ form_row(quickPostForm.visibility, {'value': 'public'}) }}
+                                </div>
+                                <div class="d-grid mt-3">
+                                    <button type="submit" class="btn btn-skill py-2">Post Now</button>
+                                </div>
+                            {{ form_end(quickPostForm) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="fw-bold mb-0">Public Feed</h4>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Sort by: {{ currentSort == 'popular' ? 'Popular' : (currentSort == 'oldest' ? 'Oldest' : 'Newest') }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ path('groups_index', {'sort': 'newest'}) }}">Newest</a></li>
+                        <li><a class="dropdown-item" href="{{ path('groups_index', {'sort': 'oldest'}) }}">Oldest</a></li>
+                        <li><a class="dropdown-item" href="{{ path('groups_index', {'sort': 'popular'}) }}">Popular</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            {% for post in publicPosts %}
+                <div class="post-card">
+                    <div class="post-header">
+                        <img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" alt="User" class="author-img">
+                        <div>
+                            <h6 class="mb-0 fw-bold">{{ post.AuthorId.prenom }} {{ post.AuthorId.nom }}</h6>
+                            <small class="text-muted">
+                                {% if post.groupId %}
+                                    in <a href="{{ path('group_show', {id: post.groupId.id}) }}" class="text-decoration-none fw-bold text-primary">{{ post.groupId.name }}</a>
+                                {% else %}
+                                    <span class="badge bg-light text-secondary border">Public</span>
+                                {% endif %}
+                                • {{ post.createdAt|date('M d, Y') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <h5 class="post-title">{{ post.titre }}</h5>
+                        <p class="post-text">{{ post.description }}</p>
+                    </div>
+                    <div class="post-footer">
+                        <button class="action-btn"><i class="fa fa-thumbs-o-up"></i> Like ({{ post.likesCounter }})</button>
+                        <button class="action-btn"><i class="fa fa-comment-o"></i> Comment</button>
+                        <button class="action-btn"><i class="fa fa-share"></i> Share</button>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm">
+                    <i class="fa fa-newspaper-o fa-3x text-light mb-3"></i>
+                    <p class="text-muted">No public posts yet. Be the first to share something!</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="col-md-3">
+            <div class="sidebar-card">
+                <div class="sidebar-title">Skill Bridge Community</div>
+                <p class="small text-muted">Join the most active educational community in Tunisia.</p>
+                <hr>
+                <div class="d-grid">
+                    <button class="btn btn-outline-primary btn-sm rounded-pill">View Guidelines</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

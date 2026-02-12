@@ -1,0 +1,91 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Create Post - {{ group.name }}{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+        .form-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: none;
+        }
+        .form-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .btn-skill {
+            background: #4a7fd7;
+            color: #fff;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-skill:hover {
+            background: #3a6bb8;
+            color: #fff;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .form-control, .form-select {
+            border-radius: 12px;
+            padding: 12px 15px;
+            border: 1px solid #e1e1e1;
+            background: #fcfcfc;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #4a7fd7;
+            box-shadow: 0 0 0 4px rgba(74, 127, 215, 0.1);
+            background: #fff;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <div class="form-card">
+        <h2 class="form-title">Create New Post in <span class="text-primary">{{ group.name }}</span></h2>
+        
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="mb-4">
+                {{ form_label(form.titre, 'Post Title', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.titre, {'attr': {'class': 'form-control' ~ (form.titre.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Enter a catchy title'}}) }}
+                <div class="invalid-feedback">{{ form_errors(form.titre) }}</div>
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.description, 'Content', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.valid ? '' : ' is-invalid'), 'placeholder': "What's on your mind?", 'rows': 6}}) }}
+                <div class="invalid-feedback">{{ form_errors(form.description) }}</div>
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.visibility, 'Visibility', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.visibility, {'attr': {'class': 'form-select'}}) }}
+                <div class="invalid-feedback">{{ form_errors(form.visibility) }}</div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <a href="{{ path('group_show', {id: group.id}) }}" class="text-decoration-none text-muted fw-bold"><i class="fa fa-arrow-left me-1"></i> Cancel</a>
+                <button class="btn btn-skill shadow-sm px-5">
+                    Post Now
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

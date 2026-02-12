@@ -177,6 +177,18 @@ class User
         return $this;
     }
 
+public function getDisplayName(): string
+{
+    if ($this->prenom && $this->nom) {
+        return $this->prenom . ' ' . $this->nom;
+    }
+
+    if ($this->email) {
+        return $this->email;
+    }
+
+    return 'Unknown';
+}
   
 
 }
