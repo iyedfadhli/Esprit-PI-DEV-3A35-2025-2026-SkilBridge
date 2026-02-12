@@ -18,9 +18,14 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Constraints\Range;
 use Doctrine\ORM\EntityRepository;
+use App\Repository\QuizRepository;
 
 class QuizType extends AbstractType
 {
+    public function __construct(private QuizRepository $quizRepository)
+    {
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
@@ -54,6 +59,30 @@ class QuizType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control form-select'],
                 'placeholder' => 'Course-level quiz (no chapter)',
+                'query_builder' => function (EntityRepository $er) use ($options) {
+                    $qb = $er->createQueryBuilder('ch');
+                    $takenChapterIds = array_map(
+                        fn($row) => $row['chapterId'],
+                        $this->quizRepository->createQueryBuilder('q')
+                            ->select('IDENTITY(q.chapter) AS chapterId')
+                            ->where('q.chapter IS NOT NULL')
+                            ->getQuery()
+                            ->getScalarResult()
+                    );
+
+                    // When editing, keep the current quiz's chapter available
+                    $currentQuiz = $options['data'] ?? null;
+                    if ($currentQuiz instanceof Quiz && $currentQuiz->getChapter()) {
+                        $takenChapterIds = array_filter($takenChapterIds, fn($id) => $id != $currentQuiz->getChapter()->getId());
+                    }
+
+                    if (!empty($takenChapterIds)) {
+                        $qb->where('ch.id NOT IN (:taken)')
+                           ->setParameter('taken', $takenChapterIds);
+                    }
+
+                    return $qb->orderBy('ch.chapter_order', 'ASC');
+                },
             ])
             ->add('passing_score', NumberType::class, [
                 'label' => 'Passing Score (%)',
