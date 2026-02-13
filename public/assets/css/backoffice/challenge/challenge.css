@@ -1,0 +1,118 @@
+.admin-wrapper {
+    padding: 40px;
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+}
+
+/* ==================== */
+/* TABS */
+/* ==================== */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    background-color: #e5e7eb;
+    color: #1e293b;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.tab:hover {
+    background-color: #d1d5db;
+}
+
+.tab.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* ==================== */
+/* TABLE STYLING */
+/* ==================== */
+.table-container {
+    overflow-x: auto;
+}
+
+.evaluation-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+.evaluation-table th,
+.evaluation-table td {
+    padding: 12px 18px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.evaluation-table th {
+    background-color: #1e293b;
+    color: white;
+    font-weight: 600;
+}
+
+.evaluation-table tr:hover {
+    background-color: #f1f5f9;
+}
+
+/* ==================== */
+/* BUTTONS */
+/* ==================== */
+.btn {
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.2s;
+    margin-right: 5px;
+}
+
+.view-btn {
+    background-color: #2563eb;
+    color: white;
+}
+
+.view-btn:hover {
+    background-color: #1d4ed8;
+}
+
+.edit-btn {
+    background-color: #10b981;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #059669;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .evaluation-table th, .evaluation-table td {
+        padding: 10px 8px;
+    }
+
+    .tabs {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

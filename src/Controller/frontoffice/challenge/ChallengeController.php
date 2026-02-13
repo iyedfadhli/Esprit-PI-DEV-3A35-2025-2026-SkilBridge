@@ -82,10 +82,27 @@ final class ChallengeController extends AbstractController
             $editForms[$challenge->getId()] = $form->createView();
         }
 
+        $groupsWorked = [];
+        $groupsByChallenge = [];
+        foreach ($userChallenges as $ch) {
+            $activities = $em->getRepository(\App\Entity\Activity::class)->findByChallenge($ch);
+            $uniqueGroupIds = [];
+            foreach ($activities as $a) {
+                $g = $a->getGroupId();
+                if ($g) {
+                    $uniqueGroupIds[$g->getId()] = true;
+                    $groupsByChallenge[$ch->getId()][$g->getId()] = $g;
+                }
+            }
+            $groupsWorked[$ch->getId()] = count($uniqueGroupIds);
+        }
+
         return $this->render('frontoffice/challenge/challenge.html.twig', [
             'challenges' => $userChallenges,
             'formA' => $formA->createView(),
             'editForms' => $editForms,
+            'groupsWorked' => $groupsWorked,
+            'groupsByChallenge' => array_map(function($arr){ return array_values($arr); }, $groupsByChallenge),
         ]);
     }
     #[Route('/supervisor_challenge/{id}/edit', name: 'supervisor_challenge_edit', methods: ['POST'])]
@@ -132,8 +149,6 @@ final class ChallengeController extends AbstractController
 
 
 }
-
-
 
 
 

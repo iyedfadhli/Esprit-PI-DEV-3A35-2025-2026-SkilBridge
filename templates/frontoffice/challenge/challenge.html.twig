@@ -6,27 +6,51 @@
 {% endblock %}
 
 {% block javascripts %}
-	 {{parent()}}
+	{{parent()}}
 
 	 <script>
-									
-									const pdfInput = document.getElementById('pdfFile');
-									const pdfName = document.getElementById('pdfFileName');
-									
-									pdfInput.addEventListener('change', () => {
-									    pdfName.textContent = pdfInput.files.length > 0 ? pdfInput.files[0].name : 'No file chosen';
-									});
-									
-														function toggleForm_proposition(id) {
-														    var form = document.getElementById('proposition-form-' + id);
-														    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-														}
-														
-														function toggleForm(id) {
-														    var form = document.getElementById('edit-form-' + id);
-														    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-														}
-														</script>
+										
+										const pdfInput = document.getElementById('pdfFile');
+										const pdfName = document.getElementById('pdfFileName');
+										if (pdfInput && pdfName) {
+											pdfInput.addEventListener('change', () => {
+												pdfName.textContent = pdfInput.files.length > 0 ? pdfInput.files[0].name : 'No file chosen';
+											});
+										}
+										
+															function toggleForm_proposition(id) {
+															    var form = document.getElementById('proposition-form-' + id);
+															    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+															}
+															
+															function toggleForm(id) {
+															    var form = document.getElementById('edit-form-' + id);
+															    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+															}
+                                                            // inline PDF viewer modal
+                                                            document.addEventListener('DOMContentLoaded', () => {
+                                                                const pdfModal = document.createElement('div');
+                                                                pdfModal.id = 'pdf-modal';
+                                                                pdfModal.className = 'modal';
+                                                                pdfModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;';
+                                                                pdfModal.innerHTML = '<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);"><span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span><iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe></div>';
+                                                                document.body.appendChild(pdfModal);
+                                                                const pdfClose = pdfModal.querySelector('.close');
+                                                                const pdfFrame = document.getElementById('pdf-frame');
+                                                                document.addEventListener('click', function(e) {
+                                                                    const btn = e.target.closest('.open-pdf');
+                                                                    if (btn) {
+                                                                        const src = btn.dataset.src;
+                                                                        pdfFrame.src = src;
+                                                                        pdfModal.style.display = 'block';
+                                                                    }
+                                                                });
+                                                                pdfClose.addEventListener('click', function() {
+                                                                    pdfFrame.src = '';
+                                                                    pdfModal.style.display = 'none';
+                                                                });
+                                                            });
+															</script>
 {% endblock %}
 
 {% block body %}
@@ -42,17 +66,14 @@
 					<div class="challenge-header">
 						<h3>{{challenge.title}}</h3>
 						<div class="actions">
-							<button class="btn-outline" onclick="toggleForm_proposition(1)">Groups</button>
-<form method="post"
-      action="{{ path('challenge_delete', {id: challenge.id}) }}"
-      onsubmit="return confirm('Are you sure you want to delete this challenge title: {{challenge.title}}?');"
-      style="display:inline;">
-      
-    <input type="hidden" name="_token"
-           value="{{ csrf_token('delete' ~ challenge.id) }}">
+							<button class="btn-outline" onclick="toggleForm_proposition({{challenge.id}})">Groups</button>
+							<form method="post" action="{{ path('challenge_delete', {id: challenge.id}) }}" onsubmit="return confirm('Are you sure you want to delete this challenge title: {{challenge.title}}?');" style="display:inline;">
 
-    <button class="btn-outline danger">Delete</button>
-</form>							<button class="btn-outline" onclick="toggleForm({{challenge.id}})">Edit</button>
+								<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ challenge.id) }}">
+
+								<button class="btn-outline danger">Delete</button>
+							</form>
+							<button class="btn-outline" onclick="toggleForm({{challenge.id}})">Edit</button>
 						</div>
 					</div>
 
@@ -64,10 +85,15 @@
 
 							{% if extension in ['pdf', 'doc', 'docx'] %}
 								<br>
-								<a href="{{ asset(challenge.content) }}" target="_blank">
-									View File:
-									{{ challenge.content|split('/')|last }}
-								</a>
+								{% if extension == 'pdf' %}
+									<button class="btn-outline open-pdf" data-src="{{ asset(challenge.content) }}">
+										View File: {{ challenge.content|split('/')|last }}
+									</button>
+								{% else %}
+									<a href="{{ asset(challenge.content) }}" target="_blank">
+										View File: {{ challenge.content|split('/')|last }}
+									</a>
+								{% endif %}
 							{% endif %}
 						{% endif %}
 					</p>
@@ -85,7 +111,7 @@
 						</div>
 
 						<div style="display: flex; justify-content: space-between; width: 100%;">
-							<span style="flex:1; text-align: left;">👥 Groups: 4</span>
+							<span style="flex:1; text-align: left;">👥 participations: {{ groupsWorked[challenge.id]|default(0) }}</span>
 							<span style="flex:1; text-align: center;">🔢 Min / Max Group Nbr:
 								{{challenge.minGroupNbr}}
 								/
@@ -105,10 +131,12 @@
 							<div class="edit-form-group">
 								<label>Title</label>
 								{{ form_widget(form.title, {'attr': {'class':'form-control'}}) }}
+								<div class="input-error">{{ form_errors(form.title) }}</div>
 							</div>
 							<div class="edit-form-group">
 								<label>Difficulty</label>
 								{{ form_widget(form.difficulty, {'attr': {'class':'form-control'}}) }}
+								<div class="input-error">{{ form_errors(form.difficulty) }}</div>
 							</div>
 						</div>
 
@@ -116,13 +144,16 @@
 							<div class="edit-form-group">
 								<label>Target Skill</label>
 								{{ form_widget(form.targetSkill, {'attr': {'class':'form-control'}}) }}
+								<div class="input-error">{{ form_errors(form.targetSkill) }}</div>
 							</div>
 							<div class="edit-form-group">
 								<label>Min / Max Group Number</label>
 								<div style="display:flex; gap:10px;">
-									{{ form_widget(form.minGroupNbr, {'attr': {'style':'flex:1;', 'placeholder':'Min'}}) }}
-									{{ form_widget(form.maxGroupNbr, {'attr': {'style':'flex:1;', 'placeholder':'Max'}}) }}
+									{{ form_widget(form.minGroupNbr, {'attr': {'style':'flex:1;', 'placeholder':'Min', 'min': 1}}) }}
+									{{ form_widget(form.maxGroupNbr, {'attr': {'style':'flex:1;', 'placeholder':'Max', 'min': 1}}) }}
 								</div>
+								<div class="input-error">{{ form_errors(form.minGroupNbr) }}</div>
+								<div class="input-error">{{ form_errors(form.maxGroupNbr) }}</div>
 							</div>
 						</div>
 
@@ -130,6 +161,7 @@
 							<div class="edit-form-group" style="flex:1">
 								<label>Deadline</label>
 								{{ form_widget(form.deadLine, {'attr': {'class':'form-control'}}) }}
+								<div class="input-error">{{ form_errors(form.deadLine) }}</div>
 							</div>
 						</div>
 
@@ -137,10 +169,12 @@
 							<div class="edit-form-group" style="flex:1">
 								<label>Description (text)</label>
 								{{ form_widget(form.description, {'attr': {'rows':3, 'class':'form-control'}}) }}
+								<div class="input-error">{{ form_errors(form.description) }}</div>
 							</div>
 							<div class="edit-form-group" style="flex:1">
 								<label>Replace PDF (optional)</label>
-								{{ form_widget(form.content) }}
+								{{ form_widget(form.content, {'attr': {'accept': '.pdf'}}) }}
+								<div class="input-error">{{ form_errors(form.content) }}</div>
 							</div>
 						</div>
 
@@ -149,13 +183,14 @@
 					</div>
 
 
-					<div id="proposition-form-1" style="display:none; margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; background: #f9f9f9;">
-						<p>
-							<strong>Group 1:</strong>
-							John Doe</p>
-						<p>
-							<strong>Group 2:</strong>
-							Jane Smith</p>
+					<div id="proposition-form-{{ challenge.id }}" style="display:none; margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; background: #f9f9f9;">
+						{% if groupsByChallenge[challenge.id] is defined and groupsByChallenge[challenge.id]|length > 0 %}
+							{% for g in groupsByChallenge[challenge.id] %}
+								<p><strong>Group {{ loop.index }}:</strong> {{ g.name }}</p>
+							{% endfor %}
+						{% else %}
+							<p>No groups for this challenge yet.</p>
+						{% endif %}
 					</div>
 				</div>
 				{% endfor%}
@@ -166,23 +201,49 @@
 
 				{{ form_start(formA, {'attr': {'class':'challenge-form', 'enctype':'multipart/form-data'}}) }}
 
-				{{ form_row(formA.title) }}
-				{{ form_row(formA.targetSkill) }}
-				{{ form_row(formA.difficulty) }}
+				{{ form_label(formA.title, 'Title') }}
+				{{ form_widget(formA.title, {'attr': {'placeholder':'Enter title'}}) }}
+				{{ form_errors(formA.title) }}
+
+				{{ form_label(formA.targetSkill, 'Target skill') }}
+				{{ form_widget(formA.targetSkill, {'attr': {'placeholder':'e.g. Algorithms'}}) }}
+				{{ form_errors(formA.targetSkill) }}
+
+				{{ form_label(formA.difficulty, 'Difficulty') }}
+				{{ form_widget(formA.difficulty) }}
+				{{ form_errors(formA.difficulty) }}
 
 				<div class="edit-form-row">
-					<div class="edit-form-group">{{ form_row(formA.minGroupNbr) }}</div>
-					<div class="edit-form-group">{{ form_row(formA.maxGroupNbr) }}</div>
+					<div class="edit-form-group">
+						{{ form_label(formA.minGroupNbr, 'Min group nbr') }}
+						{{ form_widget(formA.minGroupNbr, {'attr': {'min': 1}}) }}
+						{{ form_errors(formA.minGroupNbr) }}
+					</div>
+					<div class="edit-form-group">
+						{{ form_label(formA.maxGroupNbr, 'Max group nbr') }}
+						{{ form_widget(formA.maxGroupNbr, {'attr': {'min': 1}}) }}
+						{{ form_errors(formA.maxGroupNbr) }}
+					</div>
 				</div>
 
-				{{ form_row(formA.deadLine) }}
-				{{ form_row(formA.descriptionText) }}
-				{{form_row(formA.contentFile)}}
+				{{ form_label(formA.deadLine, 'Dead line') }}
+				{{ form_widget(formA.deadLine, {'attr': {'placeholder': 'jj/mm/aaaa'}}) }}
+				{{ form_errors(formA.deadLine) }}
+
+				{{ form_label(formA.descriptionText, 'Description (text)') }}
+				{{ form_widget(formA.descriptionText, {'attr': {'rows': 3, 'placeholder': 'Write a short description'}}) }}
+				{{ form_errors(formA.descriptionText) }}
+
+				{{ form_label(formA.contentFile, 'PDF File (required)') }}
+				{{ form_widget(formA.contentFile, {'attr': {'id': 'pdfFile', 'accept': '.pdf'}}) }}
+				<span id="pdfFileName">No file chosen</span>
+				{{ form_errors(formA.contentFile) }}
 
 				<button type="submit" class="btn-primary">Create Challenge</button>
 
 				{{ form_end(formA) }}
 			</aside>
+
 
 
 		</div>

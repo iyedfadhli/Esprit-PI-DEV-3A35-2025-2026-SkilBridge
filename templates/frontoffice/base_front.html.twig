@@ -55,6 +55,15 @@
 		</header>
 
 		<main>
+			{% for label, messages in app.flashes %}
+				<div class="flash-{{ label }}" style="margin:10px auto; max-width:1100px; padding:10px 14px; border-radius:8px; color:#fff; font-weight:600; background:
+					{% if label == 'success' %}#28a745{% elseif label == 'error' %}#dc3545{% elseif label == 'warning' %}#ffc107{% else %}#6c757d{% endif %};
+				">
+					{% for message in messages %}
+						<div>{{ message }}</div>
+					{% endfor %}
+				</div>
+			{% endfor %}
 			{% block body %}{% endblock %}
 		</main>
 

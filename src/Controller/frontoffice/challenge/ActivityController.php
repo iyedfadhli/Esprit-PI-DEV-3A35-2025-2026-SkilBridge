@@ -24,22 +24,43 @@ final class ActivityController extends AbstractController
     public function selectChallenges(Request $request, EntityManagerInterface $em): Response
     {
         $userId = 1; 
+        $user = $em->getRepository(User::class)->find($userId);
 
-        $challenges = $em->getRepository(Challenge::class)->findBy([], ['createdAt' => 'DESC']);
+        $challenges = $em->getRepository(Challenge::class)->findAllOrderedByCreatedAtDesc();
 
-        $memberships = $em->getRepository(Membership::class)->findBy(['user_id' => $userId]);
+        $memberships = $em->getRepository(Membership::class)->findAdminMembershipsByUser($userId);
 
         $groups = [];
         $userAdminGroups = [];
+        $participatedGroupsByChallenge = [];
+        $groupMemberBusy = [];
         foreach ($memberships as $membership) {
             $group = $membership->getGroupId();
-            if ($membership->getRole() === 'admin') {
-                $userAdminGroups[] = $group->getId();
-                $memberCount = $em->getRepository(Membership::class)->count(['group_id' => $group]);
+            $userAdminGroups[] = $group->getId();
+            $memberCount = $em->getRepository(Membership::class)->countMembersInGroup($group);
+            $groups[] = [
+                'group' => $group,
+                'memberCount' => $memberCount
+            ];
+            $groupMemberBusy[$group->getId()] = $em->getRepository(Activity::class)->hasAnyMemberInProgressConflict($group);
+        }
+        $leaderGroups = $em->getRepository(Group::class)->findBy(['leaderId' => $user]);
+        foreach ($leaderGroups as $lg) {
+            if (!in_array($lg->getId(), $userAdminGroups, true)) {
+                $userAdminGroups[] = $lg->getId();
+                $memberCount = $em->getRepository(Membership::class)->countMembersInGroup($lg);
                 $groups[] = [
-                    'group' => $group,
+                    'group' => $lg,
                     'memberCount' => $memberCount
                 ];
+                $groupMemberBusy[$lg->getId()] = $em->getRepository(Activity::class)->hasAnyMemberInProgressConflict($lg);
+            }
+        }
+        foreach ($challenges as $challenge) {
+            foreach ($groups as $g) {
+                $group = $g['group'];
+                $exists = $em->getRepository(Activity::class)->existsByChallengeAndGroup($challenge, $group);
+                $participatedGroupsByChallenge[$challenge->getId()][$group->getId()] = $exists;
             }
         }
 
@@ -47,6 +68,8 @@ final class ActivityController extends AbstractController
             'challenges' => $challenges,
             'groups' => $groups,
             'userAdminGroups' => $userAdminGroups,
+            'participatedGroups' => $participatedGroupsByChallenge,
+            'groupMemberBusy' => $groupMemberBusy,
         ]);
     }
 
@@ -64,18 +87,20 @@ final class ActivityController extends AbstractController
             throw $this->createNotFoundException('Challenge or group not found');
         }
 
-        // Prevent duplicate in-progress activity for the group
-        $existingActivity = $em->getRepository(Activity::class)->findOneBy([
-            'idChallenge' => $challenge,
-            'group_id' => $group,
-            'status' => 'in_progress',
-        ]);
+        // Prevent duplicate participation in this challenge for the group (any status)
+        $existingActivity = $em->getRepository(Activity::class)->findOneByChallengeAndGroup($challenge, $group);
 
         if ($existingActivity) {
+            $this->addFlash('warning', 'Ce groupe participe déjà à ce challenge.');
             return $this->redirectToRoute('activity_resume', [
                 'activity_id' => $existingActivity->getId(),
-                'role' => 'ADMIN', 
+                'role' => 'admin', 
             ]);
+        }
+        // Prevent starting if any member of this group is busy in another in-progress activity
+        if ($em->getRepository(Activity::class)->hasAnyMemberInProgressConflict($group)) {
+            $this->addFlash('warning', 'Un membre de ce groupe est déjà engagé sur un challenge en cours.');
+            return $this->redirectToRoute('activity_challenge');
         }
 
         // Create new activity
@@ -86,6 +111,7 @@ final class ActivityController extends AbstractController
 
         $em->persist($activity);
         $em->flush();
+        $this->addFlash('success', 'Activité démarrée pour ce groupe.');
 
         return $this->redirectToRoute('activity_resume', [
             'activity_id' => $activity->getId(),
@@ -99,7 +125,7 @@ final class ActivityController extends AbstractController
     #[Route('/activity/check', name: 'activity_check')]
     public function checkActivity(EntityManagerInterface $em): Response
     {
-        $userId = 1; // TODO: replace with actual logged-in user ID
+        $userId = 1;
 
         $result = $em->createQueryBuilder()
             ->select('a', 'm.role AS memberRole')
@@ -110,7 +136,7 @@ final class ActivityController extends AbstractController
             ->andWhere('a.status = :status')
             ->setParameter('user', $userId)
             ->setParameter('status', 'in_progress')
-            ->setMaxResults(1)
+            ->setMaxResults(maxResults: 1)
             ->getQuery()
             ->getOneOrNullResult();
 
@@ -144,17 +170,13 @@ final class ActivityController extends AbstractController
         }
 
         $challenge = $activity->getIdChallenge();
-        $problems = $em->getRepository(ProblemSolution::class)
-            ->findBy(['activityId' => $activity]);
-        $userId = 1;
-        $user = $em->getRepository(User::class)->find($userId);
+        $problems = $em->getRepository(ProblemSolution::class)->findByActivity($activity);
+        $user = $em->getRepository(User::class)->find(1);
         $memberActivityList = $em->getRepository(MemberActivity::class)
-        ->findBy(['user_id' => $em->getRepository(User::class)->find($userId), 'id_activity' => $activity]);
+            ->findListByUserAndActivity($user, $activity);
 
-        $memberActivity = $em->getRepository(MemberActivity::class)->findOneBy([
-            'user_id' => $user,
-            'id_activity' => $activity
-        ]);
+        $memberActivity = $em->getRepository(MemberActivity::class)
+            ->findOneByActivityAndUser($activity, $user);
 
 
         return $this->render('frontoffice/challenge/activity.html.twig', [
@@ -174,23 +196,24 @@ final class ActivityController extends AbstractController
             throw $this->createNotFoundException('Activity not found');
         }
 
-        $userId = 1;
+        $user = $em->getRepository(User::class)->find(1);
 
         $activityDescription = $request->request->get('activity_description');
         if ($activityDescription !== null) {
             $memberActivity = $em->getRepository(MemberActivity::class)
-                ->findOneBy(['id_activity' => $activity, 'user_id' => $userId]);
+                ->findOneByActivityAndUser($activity, $user);
 
             if (!$memberActivity) {
                 $memberActivity = new MemberActivity();
                 $memberActivity->setIdActivity($activity);
-                $memberActivity->setUserId($em->getRepository(User::class)->find($userId));
+                $memberActivity->setUserId($user);
             }
 
             $memberActivity->setActivityDescription($activityDescription);
             $em->persist($memberActivity);
             $activity->setStatus('in_progress');
             $em->flush();
+            $this->addFlash('success', 'Description d’activité enregistrée.');
 
             return $this->redirectToRoute('activity_resume', [
                 'activity_id' => $activity->getId(),
@@ -213,6 +236,11 @@ final class ActivityController extends AbstractController
 
             $em->persist($problem);
             $em->flush();
+            $message = 'Problème ajouté.';
+            if ($solutionDescription !== null && trim($solutionDescription) !== '') {
+                $message = 'Problème et solution ajoutés.';
+            }
+            $this->addFlash('success', $message);
         }
 
         // 3️⃣ Solution form (for existing unsolved problem)
@@ -224,6 +252,7 @@ final class ActivityController extends AbstractController
                 $problem->setGroupSolution($solutionDescription);
                 $em->persist($problem);
                 $em->flush();
+                $this->addFlash('success', 'Solution du groupe enregistrée.');
             }
         }
 
@@ -233,8 +262,10 @@ final class ActivityController extends AbstractController
             $filename = md5(uniqid()) . '.' . $file->guessExtension();
             $file->move($this->getParameter('CHALLENGES_UPLOAD_DIR'), $filename);
             $activity->setSubmissionFile($filename);
+            $activity->setSubmissionDate(new \DateTime());
             $activity->setStatus('submitted'); // mark as submitted
             $em->flush();
+            $this->addFlash('success', 'Fichier de soumission envoyé.');
 
             return $this->redirectToRoute('activity_check', [
                 'activity_id' => $activity->getId(),
@@ -253,13 +284,12 @@ final class ActivityController extends AbstractController
     #[Route('/activity/submit/member/{activity_id}', name: 'activity_submit_member', methods: ['POST'])]
     public function submitMember(Request $request, EntityManagerInterface $em, int $activity_id): Response
     {
-        $userId = 1; // bech nbadl l user id
         $activity = $em->getRepository(Activity::class)->find($activity_id);
         if (!$activity) {
             throw $this->createNotFoundException('Activity not found');
         }
 
-        $user = $em->getRepository(User::class)->find($userId);
+        $user = $em->getRepository(User::class)->find(1);
         if (!$user) {
             throw $this->createNotFoundException('User not found');
         }
@@ -285,6 +315,7 @@ final class ActivityController extends AbstractController
 
         $em->persist($memberActivity);
         $em->flush();
+        $this->addFlash('success', 'Contribution sauvegardée.');
 
         if ($problemDescription) {
             $problem = new ProblemSolution();
@@ -292,6 +323,7 @@ final class ActivityController extends AbstractController
             $problem->setProblemDescription($problemDescription);
             $em->persist($problem);
             $em->flush();
+            $this->addFlash('success', 'Problème ajouté.');
         }
 
         if ($problemId && $solutionDescription !== null && trim($solutionDescription) !== '') {
@@ -301,6 +333,7 @@ final class ActivityController extends AbstractController
                 $problem->setGroupSolution($solutionDescription);
                 $em->persist($problem);
                 $em->flush();
+                $this->addFlash('success', 'Solution ajoutée.');
             }
         }
         return $this->redirectToRoute('activity_resume', [
@@ -333,6 +366,7 @@ final class ActivityController extends AbstractController
             }
 
             $em->flush();
+            $this->addFlash('success', 'Problème mis à jour.');
 
             return $this->redirectToRoute('activity_check', [
                 'activity_id' => $problem->getActivityId()->getId(),
@@ -364,6 +398,7 @@ final class ActivityController extends AbstractController
 
         $em->remove($problem);
         $em->flush();
+        $this->addFlash('success', 'Problème supprimé.');
 
         return $this->redirectToRoute('activity_check', [
             'activity_id' => $activityId,
@@ -382,6 +417,7 @@ public function deleteMemberActivity(Request $request, EntityManagerInterface $e
     if ($this->isCsrfTokenValid('delete'.$memberActivity->getId(), $request->request->get('_token'))) {
         $em->remove($memberActivity);
         $em->flush();
+            $this->addFlash('success', 'Contribution supprimée.');
     }
 
     // Redirect back to activity page
@@ -408,6 +444,7 @@ public function editMemberActivity(Request $request, EntityManagerInterface $em,
 
    
     $em->flush();
+    $this->addFlash('success', 'Contribution mise à jour.');
 
     // Redirect back to activity page
     return $this->redirectToRoute('activity_resume', [

@@ -1,296 +1,188 @@
 {% extends 'frontoffice/base_front.html.twig' %}
 
 {% block stylesheets %}
-	{{ parent() }}
-	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/activity_challenge.css') }}">
-	<style>
-		/* Table Styling */
-		.activity-table {
-			width: 100%;
-			border-collapse: collapse;
-			margin-top: 20px;
-			font-family: Arial, sans-serif;
-		}
-
-		.activity-table thead {
-			background: #f5f7fa;
-		}
-
-		.activity-table th,
-		.activity-table td {
-			border: 1px solid #ddd;
-			padding: 10px;
-			vertical-align: top;
-		}
-
-		.activity-table th {
-			font-weight: 600;
-			text-align: left;
-		}
-
-		.activity-table tbody tr {
-			transition: background 0.2s;
-		}
-
-		.activity-table tbody tr:hover {
-			background: #f0f4ff;
-		}
-
-		.text-wrap {
-			max-width: 280px;
-			word-break: break-word;
-		}
-
-		/* Badges */
-		.badge {
-			padding: 4px 8px;
-			border-radius: 12px;
-			font-size: 12px;
-		}
-
-		.badge-success {
-			background: #28a745;
-			color: white;
-		}
-
-		.badge-pending {
-			background: #6c757d;
-			color: white;
-		}
-
-		/* Action buttons */
-		.actions {
-			display: flex;
-			gap: 6px;
-		}
-
-		.btn {
-			padding: 5px 10px;
-			font-size: 12px;
-			border-radius: 4px;
-			text-decoration: none;
-			cursor: pointer;
-		}
-
-		.btn-edit {
-			background: #ffc107;
-			color: #000;
-			border: none;
-		}
-
-		.btn-edit:hover {
-			background: #e0a800;
-		}
-
-		.btn-delete {
-			background: #dc3545;
-			color: #fff;
-			border: none;
-		}
-
-		.btn-delete:hover {
-			background: #c82333;
-		}
-
-		/* Inline edit form */
-		.inline-edit-form {
-			background: #f8f9fa;
-			padding: 15px;
-			border-radius: 10px;
-			border: 1px solid #d1d5db;
-		}
-
-		.inline-edit-form textarea {
-			width: 100%;
-			padding: 10px;
-			font-size: 13px;
-			border-radius: 6px;
-			border: 1px solid #ccc;
-		}
-
-		.inline-edit-form .form-actions {
-			display: flex;
-			gap: 10px;
-			justify-content: flex-end;
-			margin-top: 10px;
-		}
-
-		.btn-cancel {
-			background: #6c757d;
-			color: #fff;
-		}
-
-		.btn-cancel:hover {
-			background: #5a6268;
-		}
-	</style>
-{% endblock %}
-
-{% block javascripts %}
-	{{ parent() }}
-	 <script>
-	function toggleEditActivity(id) {
-    const viewRow = document.getElementById('view-activity-' + id);
-    const editRow = document.getElementById('edit-activity-' + id);
-    if (editRow.style.display === 'none') {
-        editRow.style.display = '';
-        viewRow.style.display = 'none';
-    } else {
-        editRow.style.display = 'none';
-        viewRow.style.display = '';
-    }
-}
-function toggleEdit(id) {
-    const viewRow = document.getElementById('view-row-' + id);
-    const editRow = document.getElementById('edit-row-' + id);
-    if (editRow.style.display === 'none') {
-        editRow.style.display = '';
-        viewRow.style.display = 'none';
-    } else {
-        editRow.style.display = 'none';
-        viewRow.style.display = '';
-    }
-}
-	</script>
-
+	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/old_activities.css') }}">
 {% endblock %}
 
 {% block body %}
-<div class="activity-page">
-    <div class="container">
+	<div class="challenge-wrapper">
 
-        <div class="challenge-card">
-            <div class="challenge-header">
-                <h3>📚 Historique des activités</h3>
-            </div>
+		{% for activity in activities %}
+			{% set challenge = activity.idChallenge %}
 
-            <p class="challenge-desc">
-                Consultez vos anciennes activités ainsi que leur évaluation.
-            </p>
+			<div class="module-card">
+				<div class="module-icon">🏆</div>
+				<h3>{{ challenge.title }}</h3>
 
-            <div class="activity-form">
-                <h4>📝 Activités soumises</h4>
+				<div class="challenge-meta">
+					Deadline:
+					{{ challenge.deadline|date('d F Y') }}
+					• Difficulty:
+					{{ challenge.difficulty }}
+				</div>
 
-                <table class="activity-history-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Activité</th>
-                            <th>Description</th>
-                            <th>Fichier</th>
-                            <th>État</th>
-                            <th>Note</th>
-                            <th>Feedback</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
+				<p>{{ challenge.description }}</p>
 
-                    <tbody>
-                        <tr>
-                            <td>1</td>
+				<hr>
 
-                            <td>
-                                <strong>Analyse UX</strong><br>
-                                <small>Challenge Design Thinking</small>
-                            </td>
+				<div class="submitted-section">
+					<h4 style="margin-top:20px;">📄 Your Submitted Activity</h4>
+					<div class="activity-card">
+						<h5>Submission Summary</h5>
 
-                            <td class="text-wrap">
-                                Analyse complète de l’expérience utilisateur avec propositions
-                                d’amélioration sur le parcours client.
-                            </td>
+						{% if activity.submissionFile %}
+							<p>
+								<button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ activity.submissionFile) }}">
+									📎
+									Open
+								</button>
+							</p>
+						{% endif %}
 
-                            <td>
-                                <a href="#">📎 Voir</a>
-                            </td>
+						<div class="challenge-meta" style="margin-top: 12px;">
+							Submitted on:
+							{{ activity.submissionDate|date('d F Y') }}
+						</div>
+					</div>
+				</div>
 
-                            <td>
-                                <span class="status validated">✔ Validée</span>
-                            </td>
+				<hr>
 
-                            <td>
-                                17 / 20
-                            </td>
+				<div class="evaluation-section" style="margin-top:20px;">
+					<h4>📝 Evaluation</h4>
 
-                            <td class="text-wrap">
-                                Travail bien structuré et très pertinent.
-                            </td>
+					{% if activity.status == "evaluated" %}
+						<p>Status:
+							{{ activity.status }}</p>
+						<button class="signin-btn open-modal" data-challenge="{{ challenge.id }}" data-group="{{ activity.getGroupId().id }}">
+							See Evaluation
+						</button>
+					{% else %}
+						<button class="signin-btn disabled-btn" disabled>
+							Not Evaluated Yet
+						</button>
+					{% endif %}
+				</div>
 
-                            <td>
-                                12/01/2026
-                            </td>
-                        </tr>
+			</div>
+			<div id="activities-data-{{ challenge.id }}-{{ activity.getGroupId().id }}" style="display: none;">
+				<div class="evaluation-popup">
 
-                        <tr>
-                            <td>2</td>
 
-                            <td>
-                                <strong>Audit sécurité</strong><br>
-                                <small>Challenge Cyber</small>
-                            </td>
+					{% for problem in problemSolutions[activity.id] %}
+						<div class="problem-card">
+							<p>
+								<strong>Problem:</strong>
+								{{ problem.problemDescription }}</p>
+							<p>
+								<strong>Group solution:</strong>
+								{{ problem.groupSolution }}</p>
+							<p>
+								<strong>Supervisor solution:</strong>
+								{{ problem.supervisorSolution }}</p>
+						</div>
+					{% else %}
+						<p>No problems submittet.</p>
+					{% endfor %}
+					{% if groupFeedback is defined and groupFeedback[activity.id] is defined %}
+						<div style="margin-top:10px; padding:10px; background:#e0e7ff; border-radius:8px;">
+							{% if indivScore[activity.id] is defined and indivScore[activity.id] != null %}
+								<p>
+									<strong>Your Individual Score:</strong>
+									{{ indivScore[activity.id] }}
+								</p>
+							{% endif %}
+							<p>
+								<strong>Submitted Group Score:</strong>
+								{{ groupFeedback[activity.id].score }}</p>
+							{% if groupFeedback[activity.id].pdfFilename %}
+								<p>
+									<strong>Feedback PDF:</strong>
+									<button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ groupFeedback[activity.id].pdfFilename) }}">
+										Open
+									</button>
+								</p>
+							{% endif %}
+						</div>
+					{% endif %}
 
-                            <td class="text-wrap">
-                                Identification des failles et proposition de correctifs.
-                            </td>
+				</div>
+			</div>
 
-                            <td>
-                                —
-                            </td>
+		{% else %}
+			<p>No activities found for your groups.</p>
+		{% endfor %}
 
-                            <td>
-                                <span class="status pending">⏳ En attente</span>
-                            </td>
+	</div>
 
-                            <td>
-                                —
-                            </td>
+	{# Modal #}
+	<div id="activity-modal" class="modal" style="display: none;">
+		<div class="modal-content">
+			<span class="close">&times;</span>
+			<div
+				id="modal-body"><!-- Evaluation content will be injected dynamically -->
+			</div>
+		</div>
+	</div>
+	<div id="pdf-modal" class="modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;">
+		<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+			<span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span>
+			<iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe>
+		</div>
+	</div>
+{% endblock %}
 
-                            <td class="text-wrap">
-                                —
-                            </td>
+{% block javascripts %}
+	 <script>
+																document.addEventListener('DOMContentLoaded', () => {
+																
+																    const modal = document.getElementById('activity-modal');
+																    if (!modal) return;
+																
+																    const modalBody = document.getElementById('modal-body');
+																    const closeBtn = modal.querySelector('.close');
+																
+																   document.querySelectorAll('.open-modal').forEach(btn => {
+																    btn.addEventListener('click', () => {
+																        const challengeId = btn.dataset.challenge;
+																        const groupId = btn.dataset.group;
+																        const contentDiv = document.getElementById(`activities-data-${challengeId}-${groupId}`);
+																        if (!contentDiv) return;
+																
+																        modalBody.innerHTML = contentDiv.innerHTML;
+																        modal.style.display = 'flex';
+																    });
+																});
+																
+																
+																    closeBtn.addEventListener('click', () => {
+																        modal.style.display = 'none';
+																        modalBody.innerHTML = '';
+																    });
+																
+																    window.addEventListener('click', (e) => {
+																        if (e.target === modal) {
+																            modal.style.display = 'none';
+																            modalBody.innerHTML = '';
+																        }
+																    });
+																
+																	const pdfModal = document.getElementById('pdf-modal');
+																	const pdfClose = pdfModal.querySelector('.close');
+																	const pdfFrame = document.getElementById('pdf-frame');
+																	document.addEventListener('click', (e) => {
+																		const btn = e.target.closest('.open-pdf');
+																		if (btn) {
+																			const src = btn.dataset.src;
+																			pdfFrame.src = src;
+																			pdfModal.style.display = 'flex';
+																		}
+																	});
+																	pdfClose.addEventListener('click', () => {
+																		pdfFrame.src = '';
+																		pdfModal.style.display = 'none';
+																	});
+																});
+																</script>
 
-                            <td>
-                                05/01/2026
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>3</td>
-
-                            <td>
-                                <strong>Étude de marché</strong><br>
-                                <small>Challenge Business</small>
-                            </td>
-
-                            <td class="text-wrap">
-                                Étude complète du marché cible et analyse concurrentielle.
-                            </td>
-
-                            <td>
-                                <a href="#">📎 Voir</a>
-                            </td>
-
-                            <td>
-                                <span class="status rejected">✖ Refusée</span>
-                            </td>
-
-                            <td>
-                                9 / 20
-                            </td>
-
-                            <td class="text-wrap">
-                                Analyse intéressante mais manque de données chiffrées.
-                            </td>
-
-                            <td>
-                                28/12/2025
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-    </div>
-</div>
-	{% endblock %}
+{% endblock %}

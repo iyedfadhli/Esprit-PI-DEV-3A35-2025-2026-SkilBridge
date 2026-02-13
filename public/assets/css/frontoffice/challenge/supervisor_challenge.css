@@ -16,10 +16,15 @@
 /* Challenge Card */
 .challenge-card {
     background: #fff;
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.challenge-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
 }
 
 .challenge-header {
@@ -30,6 +35,7 @@
 
 .challenge-header h3 {
     color: #1f3c88;
+    letter-spacing: 0.2px;
 }
 
 .description {
@@ -40,8 +46,9 @@
 .challenge-meta {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: #777;
+    gap: 10px;
 }
 
 /* Buttons */
@@ -51,12 +58,13 @@
 }
 
 .btn-outline {
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid #1f3c88;
+    padding: 8px 14px;
+    border-radius: 22px;
+    border: 1.5px solid #1f3c88;
     background: transparent;
     color: #1f3c88;
     cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .btn-outline.danger {
@@ -67,18 +75,24 @@
 .btn-outline:hover {
     background: #1f3c88;
     color: #fff;
+    transform: translateY(-1px);
 }
 
 .btn-outline.danger:hover {
+    color: #fff;
     background: #dc3545;
+}
+.btn-outline:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(31,60,136,0.25);
 }
 
 /* Create Section */
 .create-section {
     background: #fff;
-    border-radius: 14px;
-    padding: 25px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 26px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.06);
 }
 
 .challenge-form label {
@@ -91,30 +105,47 @@
 .challenge-form textarea,
 .challenge-form select {
     width: 100%;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     border: 1px solid #ddd;
-    margin-top: 5px;
+    margin-top: 6px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.challenge-form input:focus,
+.challenge-form textarea:focus,
+.challenge-form select:focus {
+    border-color: #1f3c88;
+    box-shadow: 0 0 0 3px rgba(31,60,136,0.15);
+    outline: none;
 }
 
 .btn-primary {
     margin-top: 20px;
     width: 100%;
     padding: 12px;
-    border-radius: 25px;
+    border-radius: 26px;
     border: none;
     background: #1f3c88;
     color: #fff;
     font-weight: bold;
     cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+.btn-primary:hover {
+    background: #16326c;
+    transform: translateY(-1px);
+}
+.btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(31,60,136,0.25);
 }
 .edit-form {
     margin-top: 15px;
-    padding: 15px;
+    padding: 16px;
     border-radius: 12px;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
 
 /* Rows to align two fields */
@@ -140,10 +171,10 @@
 .edit-form-group textarea,
 .edit-form-group select {
     width: 100%;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 12px;
+    border-radius: 10px;
     border: 1px solid #ccc;
-    transition: all 0.3s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .edit-form-group input:focus,
@@ -158,24 +189,30 @@
     margin-top: 15px;
     width: 100%;
     padding: 12px;
-    border-radius: 25px;
+    border-radius: 26px;
     border: none;
     background: #1f3c88;
     color: #fff;
     font-weight: bold;
     cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
 }
-
 .edit-form .btn-primary:hover {
     background: #16326c;
+    transform: translateY(-1px);
 }
 /* Edit Form Card */
 .edit-form-card {
     background: #fff;
-    border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 22px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.edit-form-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.08);
 }
 
 /* Two fields per row */
@@ -221,10 +258,11 @@
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.9rem;
+    transition: transform 0.2s ease, background 0.2s ease;
 }
-
 .file-upload-btn:hover {
     background-color: #162a5b;
+    transform: translateY(-1px);
 }
 
 .file-upload-name {
@@ -248,4 +286,9 @@
     padding: 10px;
     border-radius: 8px;
     background: #fafafa;
+}
+.input-error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 4px;
 }

@@ -194,9 +194,10 @@ function toggleEdit(id) {
 					<!-- 1️⃣ Activity Description Form -->
 					<div class="activity-form">
 						<h4>✏️ Description de l'activité</h4>
-						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}">
+						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" data-validate="true">
 							<div class="form-group">
-								<textarea name="activity_description" required>{{ activity.memberActivity.activityDescription ?? '' }}</textarea>
+								<textarea name="activity_description" required placeholder="Décrivez votre activité">{{ activity.memberActivity.activityDescription ?? '' }}</textarea>
+								<div class="input-error"></div>
 							</div>
 							<button type="submit" class="primary-btn">Enregistrer Description</button>
 						</form>
@@ -205,9 +206,10 @@ function toggleEdit(id) {
 					<!-- 2️⃣ Problem Description Form -->
 					<div class="activity-form">
 						<h4>⚠️ Problème rencontré</h4>
-						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}">
+						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" data-validate="true">
 							<div class="form-group">
 								<textarea name="problem_description" placeholder="Décrivez le problème"></textarea>
+								<div class="input-error"></div>
 							</div>
 							<button type="submit" class="primary-btn">Enregistrer Problème</button>
 						</form>
@@ -218,7 +220,7 @@ function toggleEdit(id) {
 					{% if unsolvedProblems|length > 0 %}
 						<div class="activity-form">
 							<h4>💡 Proposez une solution</h4>
-							<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}">
+							<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" data-validate="true">
 								<div class="form-group">
 									<label>Choisir un problème à résoudre</label>
 									<select name="problem_id" required>
@@ -226,10 +228,12 @@ function toggleEdit(id) {
 											<option value="{{ p.id }}">{{ p.problemDescription }}</option>
 										{% endfor %}
 									</select>
+									<div class="input-error"></div>
 								</div>
 								<div class="form-group">
 									<label>Solution proposée</label>
 									<textarea name="solution_description" placeholder="Votre solution"></textarea>
+									<div class="input-error"></div>
 								</div>
 								<button type="submit" class="primary-btn">Enregistrer Solution</button>
 							</form>
@@ -241,9 +245,11 @@ function toggleEdit(id) {
 					<!-- 4️⃣ Submission File Form -->
 					<div class="activity-form">
 						<h4>📤 Soumission du fichier</h4>
-						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" enctype="multipart/form-data">
+						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" enctype="multipart/form-data" data-validate="true">
 							<div class="form-group">
-								<input type="file" name="submission_file" required>
+								<input type="file" name="submission_file" id="submissionFileAdmin" accept=".pdf,.doc,.docx" required>
+								<span class="file-name"></span>
+								<div class="input-error"></div>
 							</div>
 							<button type="submit" class="primary-btn">Soumettre Fichier</button>
 						</form>
@@ -253,9 +259,10 @@ function toggleEdit(id) {
 					<!-- Member Forms -->
 					<div class="activity-form">
 						<h4>✏️ Votre activité</h4>
-						<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}">
+						<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}" data-validate="true">
 							<div class="form-group">
-								<textarea name="activity_description" required>{{ activity.memberActivity.activityDescription ?? '' }}</textarea>
+								<textarea name="activity_description" required placeholder="Décrivez votre activité">{{ activity.memberActivity.activityDescription ?? '' }}</textarea>
+								<div class="input-error"></div>
 							</div>
 							<button type="submit" class="primary-btn">Enregistrer Description</button>
 						</form>
@@ -264,9 +271,10 @@ function toggleEdit(id) {
 					<!-- Problem Description Form -->
 					<div class="activity-form">
 						<h4>⚠️ Problème rencontré</h4>
-						<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}">
+						<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}" data-validate="true">
 							<div class="form-group">
 								<textarea name="problem_description" placeholder="Décrivez le problème"></textarea>
+								<div class="input-error"></div>
 							</div>
 							<button type="submit" class="primary-btn">Enregistrer Problème</button>
 						</form>
@@ -277,7 +285,7 @@ function toggleEdit(id) {
 					{% if unsolvedProblems|length > 0 %}
 						<div class="activity-form">
 							<h4>💡 Proposez une solution</h4>
-							<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}">
+							<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}" data-validate="true">
 								<div class="form-group">
 									<label>Choisir un problème à résoudre</label>
 									<select name="problem_id" required>
@@ -285,10 +293,12 @@ function toggleEdit(id) {
 											<option value="{{ p.id }}">{{ p.problemDescription }}</option>
 										{% endfor %}
 									</select>
+									<div class="input-error"></div>
 								</div>
 								<div class="form-group">
 									<label>Solution proposée</label>
 									<textarea name="solution_description" placeholder="Votre solution"></textarea>
+									<div class="input-error"></div>
 								</div>
 								<button type="submit" class="primary-btn">Enregistrer Solution</button>
 							</form>
@@ -333,10 +343,11 @@ function toggleEdit(id) {
                         {# Edit Row #}
                         <tr id="edit-activity-{{ ma.id }}" style="display:none;">
                             <td colspan="4">
-                                <form method="post" action="{{ path('member_activity_edit', {id: ma.id}) }}" enctype="multipart/form-data">
+                                <form method="post" action="{{ path('member_activity_edit', {id: ma.id}) }}" enctype="multipart/form-data" data-validate="true">
                                     <div class="form-group">
                                         <label>Description</label>
                                         <textarea name="activity_description" required>{{ ma.activityDescription }}</textarea>
+                                        <div class="input-error"></div>
                                     </div>
                                     
                                     <div class="form-actions">
@@ -384,14 +395,16 @@ function toggleEdit(id) {
                     {# Edit Row #}
                     <tr id="edit-row-{{ problem.id }}" style="display:none;">
                         <td colspan="4">
-                            <form method="post" action="{{ path('problem_edit', { id: problem.id }) }}">
+                            <form method="post" action="{{ path('problem_edit', { id: problem.id }) }}" data-validate="true">
                                 <div class="form-group">
                                     <label>Problème</label>
                                     <textarea name="problem_description" required>{{ problem.problemDescription }}</textarea>
+                                    <div class="input-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label>Solution</label>
                                     <textarea name="solution_description">{{ problem.groupSolution }}</textarea>
+                                    <div class="input-error"></div>
                                 </div>
                                 <div class="form-actions">
                                     <button type="submit" class="btn btn-success">💾 Enregistrer</button>

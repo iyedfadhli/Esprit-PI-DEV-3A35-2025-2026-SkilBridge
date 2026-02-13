@@ -29,11 +29,16 @@
     font-weight: 600;
     cursor: pointer;
     box-shadow: 0 10px 25px rgba(74,127,215,0.3);
-    transition: 0.3s;
+    transition: 0.2s ease-in-out;
 }
 
 .primary-btn:hover {
     background: #3a6bb8;
+    transform: translateY(-1px);
+}
+.primary-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74,127,215,0.25);
 }
 
 /* Challenge Cards */
@@ -47,12 +52,13 @@
     background: #fff;
     border-radius: 20px;
     padding: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-    transition: transform 0.3s;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .challenge-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.08);
 }
 
 .challenge-header {
@@ -66,6 +72,7 @@
     font-size: 22px;
     font-weight: 800;
     color: #4a7fd7;
+    letter-spacing: 0.2px;
 }
 
 .challenge-desc {
@@ -91,12 +98,17 @@
     border-radius: 25px;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.3s;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .outline-btn:hover {
     background: #4a7fd7;
     color: white;
+    transform: translateY(-1px);
+}
+.outline-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74,127,215,0.25);
 }
 
 .danger-btn {
@@ -225,7 +237,23 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    min-width: 220px;
+    min-width: 240px;
+    border: 1px solid #eee;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.group-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    border-color: #e5e7eb;
+}
+.group-card.unavailable {
+    opacity: 0.6;
+}
+.group-card.unavailable .select-group-btn {
+    cursor: not-allowed;
+}
+.select-group-btn[disabled] {
+    opacity: 0.7;
 }
 
 /* Activity Form */
@@ -255,4 +283,30 @@
     border-radius: 10px;
     border: 1px solid #ddd;
     font-size: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-group select {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #4a7fd7;
+    box-shadow: 0 0 0 3px rgba(74,127,215,0.15);
+    outline: none;
+}
+.input-error {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 4px;
+}
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+    border-color: #dc3545;
+    box-shadow: none;
 }

@@ -17,7 +17,7 @@ class Activity
     #[ORM\JoinColumn(nullable: false,onDelete: 'CASCADE')]
     private ?Challenge $idChallenge = null;
 
-    #[ORM\ManyToOne(cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Group $group_id = null;
 
