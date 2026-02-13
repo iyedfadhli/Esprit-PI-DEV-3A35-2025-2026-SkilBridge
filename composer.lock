@@ -5,10 +5,14 @@
         "This file is @generated automatically"
     ],
 <<<<<<< HEAD
+<<<<<<< HEAD
     "content-hash": "0a1137dfe30f8976f2090ef910a19ffc",
 =======
     "content-hash": "089d570b04768188bc0056936112826f",
 >>>>>>> tasnim
+=======
+    "content-hash": "2da17adf9af9dcd140befbd63355b565",
+>>>>>>> gestion_cv
     "packages": [
         {
             "name": "composer/semver",
@@ -8136,6 +8140,9 @@
         },
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> gestion_cv
             "name": "thecodingmachine/safe",
             "version": "v3.3.0",
             "source": {
@@ -8247,6 +8254,7 @@
                     "lib/DateTimeImmutable.php",
                     "lib/Exceptions/",
                     "generated/Exceptions/"
+<<<<<<< HEAD
 =======
             "name": "tecnickcom/tcpdf",
             "version": "6.10.1",
@@ -8283,11 +8291,16 @@
                     "include/barcodes/pdf417.php",
                     "include/barcodes/qrcode.php"
 >>>>>>> tasnim
+=======
+>>>>>>> gestion_cv
                 ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> gestion_cv
                 "MIT"
             ],
             "description": "PHP core functions that throw exceptions instead of returning FALSE on error",
@@ -8310,6 +8323,7 @@
                 }
             ],
             "time": "2025-05-14T06:15:44+00:00"
+<<<<<<< HEAD
 =======
                 "LGPL-3.0-or-later"
             ],
@@ -8343,6 +8357,8 @@
             ],
             "time": "2025-11-21T10:58:21+00:00"
 >>>>>>> tasnim
+=======
+>>>>>>> gestion_cv
         },
         {
             "name": "twig/extra-bundle",
@@ -10811,5 +10827,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

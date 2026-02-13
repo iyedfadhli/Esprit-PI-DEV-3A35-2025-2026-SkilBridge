@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ cv.nomCv }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        h1 { font-size: 24px; }
+        h2 { font-size: 18px; margin-top: 20px; }
+        p { margin: 5px 0; }
+        .section { margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>{{ cv.nomCv }}</h1>
+    <p><strong>Langue:</strong> {{ cv.langue }}</p>
+
+    <div class="section">
+        <h2>Experiences</h2>
+        {% for exp in cv.experiences %}
+            <p><strong>{{ exp.jobTitle }}</strong> at {{ exp.company }} ({{ exp.startDate|date('Y') }} - {{ exp.endDate ? exp.endDate|date('Y') : 'Present' }})</p>
+            <p>{{ exp.description }}</p>
+        {% else %}
+            <p>Aucune experience.</p>
+        {% endfor %}
+    </div>
+
+    <div class="section">
+        <h2>Education</h2>
+        {% for edu in cv.educations %}
+            <p>{{ edu.degree }} in {{ edu.fieldOfStudy }} at {{ edu.school }} ({{ edu.startDate|date('Y') }} - {{ edu.endDate|date('Y') }})</p>
+        {% else %}
+            <p>Aucune formation.</p>
+        {% endfor %}
+    </div>
+
+    <div class="section">
+        <h2>Skills</h2>
+        {% for skill in cv.skills %}
+            <p>{{ skill.nom }} ({{ skill.level }})</p>
+        {% else %}
+            <p>Aucune competence.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

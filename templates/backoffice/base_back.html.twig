@@ -83,7 +83,9 @@
 
                 <span class="menu-section">Other Modules</span>
                 <a href="{{path('challengeback')}}"><i class="fa-solid fa-trophy"></i> Challenges</a>
-                <a href="#"><i class="fa-solid fa-file-lines"></i> CV & Internship</a>
+                <a href="{{ path('preview_back_cv_index') }}"><i class="fa-solid fa-file-lines"></i> CV </a>
+                <a href="{{ path('preview_back_offer_index') }}"><i class="fa-solid fa-file-lines"></i> Internship</a>
+<a href="{{ path('preview_back_application_index') }}"><i class="fa-solid fa-list"></i> Applications</a>
 
                 <span class="menu-section">Hackathon</span>
                 <a class="{{ app.request.get('_route') starts with 'app_back_hackathon' ? 'active' : '' }}" href="{{ path('app_back_hackathon_index') }}">

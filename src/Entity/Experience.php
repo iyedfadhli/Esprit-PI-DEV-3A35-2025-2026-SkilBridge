@@ -16,7 +16,7 @@ class Experience
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?cv $cv = null;
+    private ?Cv $cv = null;
 
     #[ORM\Column(length: 30)]
     private ?string $job_title = null;
@@ -44,12 +44,12 @@ class Experience
         return $this->id;
     }
 
-    public function getCv(): ?cv
+    public function getCv(): ?Cv
     {
         return $this->cv;
     }
 
-    public function setCv(?cv $cv): static
+    public function setCv(?Cv $cv): static
     {
         $this->cv = $cv;
 
@@ -61,7 +61,7 @@ class Experience
         return $this->job_title;
     }
 
-    public function setJobTitle(string $job_title): static
+    public function setJobTitle(?string $job_title): static
     {
         $this->job_title = $job_title;
 
@@ -73,7 +73,7 @@ class Experience
         return $this->company;
     }
 
-    public function setCompany(string $company): static
+    public function setCompany(?string $company): static
     {
         $this->company = $company;
 
@@ -133,7 +133,7 @@ class Experience
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
 

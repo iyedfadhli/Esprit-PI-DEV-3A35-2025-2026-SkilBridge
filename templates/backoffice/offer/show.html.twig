@@ -1,0 +1,132 @@
+{# ============================================================
+   File: templates/backoffice/offer/show.html.twig
+   Description: Admin page - display a single offer like frontoffice style
+============================================================ #}
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}{{ offer.title }} - Back Office{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message {{ type }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <div class="section-header">
+        <a href="{{ path('preview_back_offer_index') }}" class="btn-secondary">
+            <i class="fa fa-arrow-left"></i> Toutes les offres
+        </a>
+        <a href="{{ path('preview_back_offer_edit', {id: offer.id}) }}" class="btn-primary">
+            <i class="fa fa-pencil"></i> Modifier
+        </a>
+    </div>
+
+    <div class="offer-detail">
+        <div class="offer-detail-card">
+
+            {# Header #}
+            <div class="offer-detail-header">
+                <div class="offer-detail-tags">
+                    <span class="tag">{{ offer.offerType == 'internship' ? 'Stage' : 'Emploi' }}</span>
+                    {% if offer.contractType %}
+                        <span class="tag">{{ offer.contractType }}</span>
+                    {% endif %}
+                    {% if offer.status %}
+                        <span class="tag">{{ offer.status }}</span>
+                    {% endif %}
+                </div>
+                <h1>{{ offer.title }}</h1>
+                <div class="offer-detail-meta">
+                    <span><i class="fa fa-building"></i> {{ offer.entreprise.name|default('Entreprise') }}</span>
+                    <span><i class="fa fa-map-marker"></i> {{ offer.location }}</span>
+                    <span><i class="fa fa-calendar"></i> Publiee le {{ offer.createdAt|date('d/m/Y') }}</span>
+                </div>
+            </div>
+
+            {# Body #}
+            <div class="offer-detail-body">
+
+                {# Info grid #}
+                <div class="offer-info-grid">
+                    <div class="offer-info-item">
+                        <label>Domaine</label>
+                        <span>{{ offer.field }}</span>
+                    </div>
+                    <div class="offer-info-item">
+                        <label>Niveau requis</label>
+                        <span>{{ offer.requiredLevel }}</span>
+                    </div>
+                    <div class="offer-info-item">
+                        <label>Type de contrat</label>
+                        <span>{{ offer.contractType }}</span>
+                    </div>
+                    <div class="offer-info-item">
+                        <label>Duree</label>
+                        <span>{{ offer.duration|default('Non precisee') }}</span>
+                    </div>
+                    {% if offer.salaryRange %}
+                        <div class="offer-info-item">
+                            <label>Salaire</label>
+                            <span>{{ offer.salaryRange }}</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Description #}
+                <div class="offer-description">
+                    <h2>Description du poste</h2>
+                    <p>{{ offer.description|nl2br }}</p>
+                </div>
+
+                {# Required skills #}
+                {% if offer.requiredSkills %}
+                    <div class="offer-description">
+                        <h2>Competences requises</h2>
+                        <p>{{ offer.requiredSkills|nl2br }}</p>
+                    </div>
+                {% endif %}
+
+                {# Applications #}
+                {% if applications is defined and applications|length > 0 %}
+                    <div class="cv-display-section">
+                        <h3><i class="fa fa-users"></i> Candidatures ({{ applications|length }})</h3>
+                        {% for application in applications %}
+                            <div class="cv-display-card">
+                                <p><strong>Candidat :</strong> {{ application.cv.user.nom ?: 'Inconnu' }}</p>
+                                <p><strong>Email :</strong> {{ application.cv.user.email ?: '-' }}</p>
+                                <p><strong>Status :</strong> 
+                                    <span class="status-badge status-{{ application.status }}">
+                                        {% if application.status == 'pending' %}En attente
+                                        {% elseif application.status == 'interview' %}Entretien
+                                        {% elseif application.status == 'accepted' %}Accepté
+                                        {% elseif application.status == 'rejected' %}Rejeté
+                                        {% else %}{{ application.status }}{% endif %}
+                                    </span>
+                                </p>
+                                <p><strong>Date de candidature :</strong> {{ application.appliedAt ? application.appliedAt|date('d/m/Y') : '-' }}</p>
+                                <a href="{{ path('preview_back_application_show', {id: application.id}) }}" class="btn btn-primary">
+                                    <i class="fa fa-eye"></i> Voir
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="no-data">Aucune candidature pour cette offre.</p>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+</section>
+{% endblock %}

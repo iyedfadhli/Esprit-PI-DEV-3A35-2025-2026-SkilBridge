@@ -1,0 +1,136 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Modifier l'Offre - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+
+    <div class="section-header">
+        <div>
+            <h1>Modifier l'offre</h1>
+            <p class="section-subtitle">Mettez à jour les informations de votre offre</p>
+        </div>
+        <a href="{{ path('entreprise_offer_index') }}" class="btn-secondary">
+            <i class="fa fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <div class="cv-form-wrapper">
+        {{ form_start(form, {'attr': {'class': 'offer-form', 'novalidate': 'novalidate'}}) }}
+
+        {% if not form.vars.valid %}
+        <div class="global-errors">
+            <strong><i class="fa fa-exclamation-triangle"></i> Veuillez corriger les erreurs suivantes :</strong>
+            {{ form_errors(form) }}
+        </div>
+        {% endif %}
+        <div class="cv-form-section">
+            <h2><i class="fa fa-info-circle"></i> Détails de l'offre</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.title) }}
+                    {{ form_widget(form.title, {'attr': {'class': 'form-control' ~ (not form.title.vars.valid ? '
+                    is-invalid' : '')}}) }}
+                    {{ form_errors(form.title) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.offer_type) }}
+                    {{ form_widget(form.offer_type, {'attr': {'class': 'form-control' ~ (not form.offer_type.vars.valid
+                    ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.offer_type) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.field) }}
+                    {{ form_widget(form.field, {'attr': {'class': 'form-control' ~ (not form.field.vars.valid ? '
+                    is-invalid' : '')}}) }}
+                    {{ form_errors(form.field) }}
+                </div>
+            </div>
+
+            <div class="form-row single">
+                <div class="form-group">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (not
+                    form.description.vars.valid ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="cv-form-section">
+            <h2><i class="fa fa-list-ul"></i> Exigences & Conditions</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.required_level) }}
+                    {{ form_widget(form.required_level, {'attr': {'class': 'form-control' ~ (not
+                    form.required_level.vars.valid ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.required_level) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.location) }}
+                    {{ form_widget(form.location, {'attr': {'class': 'form-control' ~ (not form.location.vars.valid ? '
+                    is-invalid' : '')}}) }}
+                    {{ form_errors(form.location) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.contract_type) }}
+                    {{ form_widget(form.contract_type, {'attr': {'class': 'form-control' ~ (not
+                    form.contract_type.vars.valid ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.contract_type) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.status) }}
+                    {{ form_widget(form.status, {'attr': {'class': 'form-control' ~ (not form.status.vars.valid ? '
+                    is-invalid' : '')}}) }}
+                    {{ form_errors(form.status) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.duration) }}
+                    {{ form_widget(form.duration, {'attr': {'class': 'form-control' ~ (not form.duration.vars.valid ? '
+                    is-invalid' : '')}}) }}
+                    {{ form_errors(form.duration) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.salary_range) }}
+                    {{ form_widget(form.salary_range, {'attr': {'class': 'form-control' ~ (not
+                    form.salary_range.vars.valid ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.salary_range) }}
+                </div>
+            </div>
+
+            <div class="form-row single">
+                <div class="form-group">
+                    {{ form_label(form.required_skills) }}
+                    {{ form_widget(form.required_skills, {'attr': {'class': 'form-control' ~ (not
+                    form.required_skills.vars.valid ? ' is-invalid' : '')}}) }}
+                    {{ form_errors(form.required_skills) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="cv-form-submit">
+            <button type="submit" class="btn-primary">
+                <i class="fa fa-save"></i> Enregistrer les modifications
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+
+</section>
+{% endblock %}
