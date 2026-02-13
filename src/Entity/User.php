@@ -1,17 +1,14 @@
 <?php
+
 namespace App\Entity;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+
 use App\Repository\UserRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Entity\Admin;
-use App\Entity\Supervisor;
-use App\Entity\Student;
-use App\Entity\Entreprise;
 use Symfony\Component\Validator\Constraints as Assert;
+
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\InheritanceType('SINGLE_TABLE')]
 #[ORM\DiscriminatorColumn(name: 'type', type: 'string')]
@@ -29,6 +26,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 30)]
+    #[Assert\NotBlank(message: 'Nom is required')]
+    #[Assert\Length(min: 2, minMessage: 'Nom must be at least {{ limit }} characters')]
     private ?string $nom = null;
 
     #[ORM\Column(length: 30, nullable: true)]
@@ -37,11 +36,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTime $dateNaissance = null;
 
-  #[ORM\Column(type:"string", length:180, unique:true)]
-    #[Assert\NotBlank]
+    #[ORM\Column(type: "string", length: 180, unique: true)]
+    #[Assert\NotBlank(message: 'Email is required')]
     #[Assert\Email(message: 'Please enter a valid email address')]
-    private $email;
-//raz
+    private ?string $email = null;
+
     #[ORM\Column(options: ['default' => false])]
     private bool $ban = false;
 
@@ -49,6 +48,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $photo = null;
 
     #[ORM\Column(name: "passwd", length: 255)]
+    #[Assert\NotBlank(message: 'Password is required')]
+    #[Assert\Length(min: 6, minMessage: 'Password must be at least {{ limit }} characters')]
     private ?string $passwd = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
@@ -71,100 +72,35 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->dateInscrit = new \DateTime();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-    public function getNom(): ?string
-    {
-        return $this->nom;
-    }
-    public function setNom(string $nom): static
-    {
-        $this->nom = $nom;
-        return $this;
-    }
+    public function getId(): ?int { return $this->id; }
 
-    public function getPrenom(): ?string
-    {
-        return $this->prenom;
-    }
-    public function setPrenom(?string $prenom): static
-    {
-        $this->prenom = $prenom;
-        return $this;
-    }
+    public function getNom(): ?string { return $this->nom; }
+    public function setNom(string $nom): static { $this->nom = $nom; return $this; }
 
-    public function getDateNaissance(): ?\DateTime
-    {
-        return $this->dateNaissance;
-    }
-    public function setDateNaissance(?\DateTime $dateNaissance): static
-    {
-        $this->dateNaissance = $dateNaissance;
-        return $this;
-    }
+    public function getPrenom(): ?string { return $this->prenom; }
+    public function setPrenom(?string $prenom): static { $this->prenom = $prenom; return $this; }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-    public function setEmail(string $email): static
-    {
-        $this->email = $email;
-        return $this;
-    }
+    public function getDateNaissance(): ?\DateTime { return $this->dateNaissance; }
+    public function setDateNaissance(?\DateTime $dateNaissance): static { $this->dateNaissance = $dateNaissance; return $this; }
 
-    public function isBan(): bool
-    {
-        return $this->ban;
-    }
-    public function setBan(bool $ban): static
-    {
-        $this->ban = $ban;
-        return $this;
-    }
+    public function getEmail(): ?string { return $this->email; }
+    public function setEmail(string $email): static { $this->email = $email; return $this; }
 
-    public function getPhoto(): ?string
-    {
-        return $this->photo;
-    }
-    public function setPhoto(?string $photo): static
-    {
-        $this->photo = $photo;
-        return $this;
-    }
+    public function isBan(): bool { return $this->ban; }
+    public function setBan(bool $ban): static { $this->ban = $ban; return $this; }
 
-    public function getPassword(): string
-    {
-        return (string) $this->passwd;
-    }
+    public function getPhoto(): ?string { return $this->photo; }
+    public function setPhoto(?string $photo): static { $this->photo = $photo; return $this; }
 
-    public function setPassword(string $passwd): static
-    {
-        $this->passwd = $passwd;
-        return $this;
-    }
+    // Symfony security password getter
+    public function getPassword(): string { return (string) $this->passwd; }
+    public function setPassword(string $passwd): static { $this->passwd = $passwd; return $this; }
 
-    public function getDateInscrit(): \DateTime
-    {
-        return $this->dateInscrit;
-    }
-    public function setDateInscrit(\DateTime $dateInscrit): static
-    {
-        $this->dateInscrit = $dateInscrit;
-        return $this;
-    }
+    public function getDateInscrit(): \DateTime { return $this->dateInscrit; }
+    public function setDateInscrit(\DateTime $dateInscrit): static { $this->dateInscrit = $dateInscrit; return $this; }
 
-    public function isActive(): bool
-    {
-        return $this->is_active;
-    }
-    public function setIsActive(bool $is_active): static
-    {
-        $this->is_active = $is_active;
-        return $this;
-    }
+    public function isActive(): bool { return $this->is_active; }
+    public function setIsActive(bool $is_active): static { $this->is_active = $is_active; return $this; }
 
     public function getReportNbr(): int
     {
@@ -186,61 +122,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return 'Unknown';
     }
 
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
+    public function getUserIdentifier(): string { return (string) $this->email; }
 
     public function getRoles(): array
     {
         $roles = ['ROLE_USER'];
-        if ($this instanceof Admin)
-            $roles[] = 'ROLE_ADMIN';
-        if ($this instanceof Supervisor)
-            $roles[] = 'ROLE_SUPERVISOR';
-        if ($this instanceof Student)
-            $roles[] = 'ROLE_STUDENT';
-        if ($this instanceof Entreprise)
-            $roles[] = 'ROLE_ENTREPRISE';
+
+        if ($this instanceof Admin) $roles[] = 'ROLE_ADMIN';
+        if ($this instanceof Supervisor) $roles[] = 'ROLE_SUPERVISOR';
+        if ($this instanceof Student) $roles[] = 'ROLE_STUDENT';
+        if ($this instanceof Entreprise) $roles[] = 'ROLE_ENTREPRISE';
+
         return array_unique($roles);
     }
-     public function getMainRoleLabel(): string
+
+    public function getMainRoleLabel(): string
     {
         $roles = $this->getRoles();
 
-        if (in_array('ROLE_ADMIN', $roles))
-            return 'Admin';
-        if (in_array('ROLE_SUPERVISOR', $roles))
-            return 'Supervisor';
-        if (in_array('ROLE_STUDENT', $roles))
-            return 'Student';
-        if (in_array('ROLE_ENTREPRISE', $roles))
-            return 'Entreprise';
+        if (in_array('ROLE_ADMIN', $roles)) return 'Admin';
+        if (in_array('ROLE_SUPERVISOR', $roles)) return 'Supervisor';
+        if (in_array('ROLE_STUDENT', $roles)) return 'Student';
+        if (in_array('ROLE_ENTREPRISE', $roles)) return 'Entreprise';
 
-        return 'User'; // fallback
+        return 'User';
     }
-    public function setRoles($roles): self
-{
-    $this->type= $roles;
-    return $this;
+
+    public function eraseCredentials(): void {}
+
+    public function getPreviousRole(): ?string { return $this->previous_role; }
+    public function setPreviousRole(?string $previous_role): static { $this->previous_role = $previous_role; return $this; }
 }
-
-
-
-    public function eraseCredentials(): void
-    {
-    }
-
-    public function getPreviousRole(): ?string
-    {
-        return $this->previous_role;
-    }
-
-    public function setPreviousRole(?string $previous_role): static
-    {
-        $this->previous_role = $previous_role;
-
-        return $this;
-    }
-}
-

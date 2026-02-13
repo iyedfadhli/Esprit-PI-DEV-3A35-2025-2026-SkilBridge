@@ -1,0 +1,129 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Edit User{% endblock %}
+
+{% block body %}
+
+<style>
+.page-container{max-width:1000px;margin:40px auto;padding:0 20px;}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;}
+.page-title{font-size:32px;font-weight:800;margin:0;}
+.btn-back{text-decoration:none;background:#eef2ff;padding:10px 16px;border-radius:10px;font-weight:700;color:#111827;}
+.card{background:#fff;border-radius:16px;padding:30px;box-shadow:0 20px 45px rgba(0,0,0,.08);border:1px solid #eee;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.full-width{grid-column:span 2;}
+.actions{margin-top:25px;display:flex;gap:15px;}
+.btn-primary{background:linear-gradient(135deg,#5a7bd8,#4f46e5);color:#fff;border:none;padding:10px 20px;border-radius:10px;font-weight:700;cursor:pointer;}
+.btn-cancel{background:#f3f4f6;padding:10px 20px;border-radius:10px;text-decoration:none;font-weight:600;color:#111827;}
+.form-error{color:#dc2626;font-size:13px;margin-top:6px;}
+@media(max-width:800px){.form-grid{grid-template-columns:1fr}.full-width{grid-column:span 1}}
+</style>
+
+<div class="page-container">
+
+    <div class="page-header">
+        <h1 class="page-title">Edit User</h1>
+        <a href="{{ path('dashboard_user') }}" class="btn-back">← Back to users</a>
+    </div>
+
+    <div class="card">
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="form-error">{{ form_errors(form) }}</div>
+
+        <div class="form-grid">
+
+            <div>
+                {{ form_label(form.type) }}
+                {{ form_widget(form.type) }}
+                <div class="form-error">{{ form_errors(form.type) }}</div>
+            </div>
+
+            <div>
+                {{ form_label(form.nom) }}
+                {{ form_widget(form.nom) }}
+                <div class="form-error">{{ form_errors(form.nom) }}</div>
+            </div>
+
+            <div>
+                {{ form_label(form.prenom) }}
+                {{ form_widget(form.prenom) }}
+                <div class="form-error">{{ form_errors(form.prenom) }}</div>
+            </div>
+
+            <div>
+                {{ form_label(form.dateNaissance) }}
+                {{ form_widget(form.dateNaissance) }}
+                <div class="form-error">{{ form_errors(form.dateNaissance) }}</div>
+            </div>
+
+            <div class="full-width">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email) }}
+                <div class="form-error">{{ form_errors(form.email) }}</div>
+            </div>
+
+            {% if form.domaine is defined %}
+                <div class="full-width">
+                    {{ form_label(form.domaine) }}
+                    {{ form_widget(form.domaine) }}
+                    <div class="form-error">{{ form_errors(form.domaine) }}</div>
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="actions">
+            <button type="submit" class="btn-primary">Update User</button>
+            <a href="{{ path('dashboard_user') }}" class="btn-cancel">Cancel</a>
+        </div>
+
+        {{ form_end(form) }}
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const typeSelect = document.getElementById('edit_user_type');
+            
+            // wrappers
+            const prenomGroup = document.getElementById('edit_user_prenom').closest('div');
+            const dateGroup = document.getElementById('edit_user_dateNaissance').closest('div');
+            const domaineGroup = document.getElementById('edit_user_domaine').closest('div'); // might be null if not defined
+            
+            // inputs
+            const prenomInput = document.getElementById('edit_user_prenom');
+            const dateInput = document.getElementById('edit_user_dateNaissance');
+            const domaineInput = document.getElementById('edit_user_domaine');
+
+            function updateFields() {
+                const type = typeSelect.value;
+                
+                // Reset
+                if (prenomGroup) prenomGroup.style.display = 'none';
+                if (dateGroup) dateGroup.style.display = 'none';
+                if (domaineGroup) domaineGroup.style.display = 'none';
+                
+                if (prenomInput) prenomInput.removeAttribute('required');
+                if (dateInput) dateInput.removeAttribute('required');
+                if (domaineInput) domaineInput.removeAttribute('required');
+
+                if (['student', 'supervisor', 'admin'].includes(type)) {
+                    if (prenomGroup) prenomGroup.style.display = 'block';
+                    if (dateGroup) dateGroup.style.display = 'block';
+                    
+                    if (prenomInput) prenomInput.setAttribute('required', 'required');
+                    if (dateInput) dateInput.setAttribute('required', 'required');
+                } else if (type === 'entreprise') {
+                    if (domaineGroup) domaineGroup.style.display = 'block';
+                    if (domaineInput) domaineInput.setAttribute('required', 'required');
+                }
+            }
+
+            if (typeSelect) {
+                typeSelect.addEventListener('change', updateFields);
+                updateFields(); // Initial call
+            }
+        });
+    </script>
+</div>
+</div>
+
+{% endblock %}
