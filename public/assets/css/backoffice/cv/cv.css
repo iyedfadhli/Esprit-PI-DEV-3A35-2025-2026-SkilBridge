@@ -1,0 +1,508 @@
+/* =============================================
+   BACKOFFICE - CV & Internship Module Styles
+   File: public/assets/css/backoffice/cv/cv.css
+   ============================================= */
+
+/* ---------- Page Header ---------- */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.page-header .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #4568dc;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.page-header .btn-primary:hover {
+    background: #3a5bc7;
+}
+
+/* ---------- Stats Cards ---------- */
+.stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #eee;
+    text-align: center;
+}
+
+.stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #4568dc;
+}
+
+.stat-card .stat-label {
+    font-size: 13px;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* ---------- Data Table ---------- */
+.data-table-wrapper {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e8e8;
+    overflow: hidden;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-bottom: 1px solid #eee;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.table-header h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.table-search {
+    padding: 8px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 13px;
+    min-width: 220px;
+    background: #fafafa;
+}
+
+.table-search:focus {
+    outline: none;
+    border-color: #4568dc;
+    background: #fff;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background: #f8f9fb;
+}
+
+.data-table th {
+    padding: 12px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.data-table td {
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.data-table tbody tr:hover {
+    background: #fafbff;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ---------- Status Badges ---------- */
+.badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-warning {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.badge-danger {
+    background: #fce4ec;
+    color: #c62828;
+}
+
+.badge-info {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.badge-secondary {
+    background: #f0f0f5;
+    color: #555;
+}
+
+/* ---------- Action Buttons (table) ---------- */
+.action-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.action-btn.view {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.action-btn.view:hover {
+    background: #bbdefb;
+}
+
+.action-btn.edit {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.action-btn.edit:hover {
+    background: #ffe0b2;
+}
+
+.action-btn.delete {
+    background: #fce4ec;
+    color: #c62828;
+}
+
+.action-btn.delete:hover {
+    background: #f8bbd0;
+}
+
+/* ---------- Backoffice Form ---------- */
+.bo-form-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e8e8;
+    max-width: 800px;
+}
+
+.bo-form-card h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bo-form-card h2 i {
+    color: #4568dc;
+}
+
+.bo-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.bo-form-row.single {
+    grid-template-columns: 1fr;
+}
+
+.bo-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bo-form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+.bo-form-group input,
+.bo-form-group select,
+.bo-form-group textarea {
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background: #fafafa;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.bo-form-group input:focus,
+.bo-form-group select:focus,
+.bo-form-group textarea:focus {
+    outline: none;
+    border-color: #4568dc;
+    background: #fff;
+}
+
+.bo-form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.bo-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #4568dc;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #3a5bc7;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f0f5;
+    color: #1a1a2e;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #e0e0ea;
+}
+
+/* ---------- CV Show (backoffice detail) ---------- */
+.bo-cv-detail {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e8e8;
+    overflow: hidden;
+    max-width: 900px;
+}
+
+.bo-cv-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    padding: 28px;
+}
+
+.bo-cv-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 12px;
+}
+
+.bo-cv-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.bo-cv-meta i {
+    margin-right: 4px;
+}
+
+.bo-cv-body {
+    padding: 28px;
+}
+
+.bo-cv-section {
+    margin-bottom: 28px;
+}
+
+.bo-cv-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a2e;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #4568dc;
+    margin-bottom: 14px;
+}
+
+.bo-entry {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.bo-entry:last-child {
+    border-bottom: none;
+}
+
+.bo-entry strong {
+    color: #1a1a2e;
+}
+
+.bo-entry .text-muted {
+    color: #888;
+    font-size: 13px;
+}
+
+.bo-skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.bo-skill-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.bo-skill-tag.hard {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.bo-skill-tag.soft {
+    background: #fce4ec;
+    color: #c62828;
+}
+
+.bo-cv-actions {
+    display: flex;
+    gap: 12px;
+    padding: 0 28px 28px;
+}
+
+/* ---------- Flash Messages ---------- */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.flash-message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.flash-message.error {
+    background: #fce4ec;
+    color: #c62828;
+    border: 1px solid #f8bbd0;
+}
+
+/* ---------- Empty State ---------- */
+.empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 42px;
+    margin-bottom: 12px;
+    display: block;
+    color: #ccc;
+}
+
+.empty-state p {
+    font-size: 15px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .bo-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .data-table {
+        font-size: 13px;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 10px 12px;
+    }
+}

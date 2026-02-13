@@ -1,0 +1,862 @@
+/* =============================================
+   FRONTOFFICE - CV & Internship Module Styles
+   File: public/assets/css/frontoffice/cv/cv.css
+   ============================================= */
+
+/* ---------- General Section ---------- */
+.cv-section {
+    max-width: 960px;
+    margin: 40px auto;
+    padding: 0 20px 60px;
+}
+
+.cv-section h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+}
+
+.cv-section .section-subtitle {
+    color: #6c757d;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+/* ---------- CV List (index) ---------- */
+.cv-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.cv-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e8e8;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cv-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cv-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cv-card-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.cv-card-badge {
+    display: inline-block;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.cv-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.cv-card-meta span i {
+    margin-right: 4px;
+    color: #999;
+}
+
+.cv-progress-bar {
+    background: #eee;
+    border-radius: 10px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.cv-progress-bar-fill {
+    background: linear-gradient(90deg, #4568dc, #b06ab3);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.4s;
+}
+
+.cv-card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: auto;
+}
+
+.cv-card-actions a {
+    flex: 1;
+    text-align: center;
+    padding: 8px 0;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.btn-view {
+    background: #f0f0f5;
+    color: #1a1a2e;
+}
+
+.btn-view:hover {
+    background: #e0e0ea;
+}
+
+.btn-edit {
+    background: #4568dc;
+    color: #fff;
+}
+
+.btn-edit:hover {
+    background: #3a5bc7;
+}
+
+.btn-delete {
+    background: #fce4ec;
+    color: #c62828;
+}
+
+.btn-delete:hover {
+    background: #f8bbd0;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #4568dc;
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #3a5bc7;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f0f0f5;
+    color: #1a1a2e;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: #e0e0ea;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.section-header h1 {
+    margin-bottom: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    display: block;
+    color: #ccc;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* ---------- CV Form (new / edit) ---------- */
+.cv-form-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.cv-form-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e8e8;
+}
+
+.cv-form-section h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cv-form-section h2 i {
+    color: #4568dc;
+    font-size: 18px;
+}
+
+.cv-form-section .section-desc {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.form-row.single {
+    grid-template-columns: 1fr;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #333;
+    background: #fafafa;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4568dc;
+    box-shadow: 0 0 0 3px rgba(69, 104, 220, 0.1);
+    background: #fff;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.form-check input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #4568dc;
+}
+
+.form-check label {
+    font-size: 13px;
+    color: #555;
+}
+
+/* Repeatable entry blocks (Experience, Education, etc.) */
+.entry-block {
+    background: #f8f9fb;
+    border: 1px dashed #d0d5dd;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.entry-block .entry-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: #4568dc;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.btn-add-entry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: 1px dashed #4568dc;
+    color: #4568dc;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-add-entry:hover {
+    background: rgba(69, 104, 220, 0.05);
+}
+
+.btn-remove-entry {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #fce4ec;
+    color: #c62828;
+    border: none;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+
+.btn-remove-entry:hover {
+    background: #f8bbd0;
+}
+
+.cv-form-submit {
+    text-align: center;
+    padding: 20px 0 40px;
+}
+
+.cv-form-submit .btn-primary {
+    padding: 14px 48px;
+    font-size: 16px;
+    border-radius: 12px;
+}
+
+/* ---------- CV Show (full CV display) ---------- */
+.cv-display {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.cv-display-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    padding: 36px 32px;
+}
+
+.cv-display-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 4px;
+}
+
+.cv-display-header .cv-name-label {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 16px;
+}
+
+.cv-display-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.cv-display-meta span i {
+    margin-right: 6px;
+}
+
+.cv-display-meta a {
+    color: #90caf9;
+    text-decoration: none;
+}
+
+.cv-display-meta a:hover {
+    text-decoration: underline;
+}
+
+.cv-display-body {
+    padding: 32px;
+}
+
+.cv-display-section {
+    margin-bottom: 32px;
+}
+
+.cv-display-section:last-child {
+    margin-bottom: 0;
+}
+
+.cv-display-section h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #4568dc;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cv-display-section h2 i {
+    color: #4568dc;
+}
+
+.cv-summary-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #444;
+}
+
+.cv-entry {
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cv-entry:last-child {
+    border-bottom: none;
+}
+
+.cv-entry-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.cv-entry-sub {
+    font-size: 14px;
+    color: #4568dc;
+    font-weight: 500;
+    margin: 2px 0;
+}
+
+.cv-entry-date {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 6px;
+}
+
+.cv-entry-desc {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.cv-skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.cv-skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0f0f5;
+    color: #1a1a2e;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.cv-skill-tag.hard {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.cv-skill-tag.soft {
+    background: #fce4ec;
+    color: #c62828;
+}
+
+.cv-skill-level {
+    font-size: 11px;
+    color: #999;
+}
+
+.cv-lang-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.cv-lang-item {
+    background: #f8f9fb;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1px solid #e8e8e8;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
+
+.cv-lang-item span {
+    font-weight: 400;
+    color: #888;
+    margin-left: 6px;
+}
+
+.cv-display-actions {
+    display: flex;
+    gap: 12px;
+    padding: 0 32px 32px;
+}
+
+/* ---------- Offer List & Detail ---------- */
+.offer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+}
+
+.offer-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e8e8e8;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.offer-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.offer-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.offer-card-header h3 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin: 0;
+}
+
+.offer-type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.offer-type-badge.internship {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.offer-type-badge.job {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.offer-card-info {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.offer-card-info span i {
+    margin-right: 4px;
+    color: #999;
+}
+
+.offer-card-desc {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.offer-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.offer-salary {
+    font-size: 14px;
+    font-weight: 600;
+    color: #4568dc;
+}
+
+/* ---------- Offer Detail ---------- */
+.offer-detail {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.offer-detail-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.offer-detail-header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    padding: 36px 32px;
+}
+
+.offer-detail-header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 12px;
+}
+
+.offer-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.offer-detail-tags .tag {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.offer-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.offer-detail-meta i {
+    margin-right: 6px;
+}
+
+.offer-detail-body {
+    padding: 32px;
+}
+
+.offer-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.offer-info-item {
+    background: #f8f9fb;
+    padding: 14px 18px;
+    border-radius: 10px;
+}
+
+.offer-info-item label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.offer-info-item span {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.offer-description {
+    margin-bottom: 28px;
+}
+
+.offer-description h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 12px;
+}
+
+.offer-description p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #444;
+}
+
+.offer-apply-box {
+    background: #f8f9fb;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+}
+
+.offer-apply-box h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+}
+
+.offer-apply-box p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.offer-apply-box select {
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    min-width: 200px;
+}
+
+/* ---------- Filters ---------- */
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+    align-items: center;
+}
+
+.filter-bar input,
+.filter-bar select {
+    padding: 10px 14px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    background: #fff;
+}
+
+.filter-bar input {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* ---------- Flash Messages ---------- */
+.flash-messages {
+    margin-bottom: 20px;
+}
+
+.flash-message {
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.flash-message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.flash-message.error {
+    background: #fce4ec;
+    color: #c62828;
+    border: 1px solid #f8bbd0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .offer-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cv-display-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .offer-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cv-grid {
+        grid-template-columns: 1fr;
+    }
+}

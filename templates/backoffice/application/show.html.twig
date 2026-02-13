@@ -1,0 +1,75 @@
+{# ============================================================
+   File: templates/backoffice/application/show.html.twig
+   Description: Admin view - show a single CV application
+   ============================================================ #}
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Détails de la candidature - Back Office{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    <div class="page-header">
+        <h1><i class="fa fa-paper-plane"></i> Détails de la candidature</h1>
+        <div>
+            <a href="{{ path('preview_back_application_index') }}" class="btn-secondary">
+                <i class="fa fa-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="bo-form-card">
+        <h2><i class="fa fa-user"></i> Informations du candidat</h2>
+
+        <div class="bo-show-grid">
+            <div class="bo-show-item">
+                <label>Nom du CV</label>
+                <p>{{ application.cv.nom_cv|default('Inconnu') }}</p>
+            </div>
+            <div class="bo-show-item">
+                <label>Email</label>
+                <p>{{ application.cv.user.email|default('N/A') }}</p>
+            </div>
+            <div class="bo-show-item">
+                <label>Telephone</label>
+                <p>{{ application.cv.user.phone|default('-') }}</p>
+            </div>
+            <div class="bo-show-item">
+                <label>Offre</label>
+                <p>{{ application.offer.title|default('N/A') }}</p>
+            </div>
+            <div class="bo-show-item">
+                <label>Status</label>
+                <p>
+                    {% if application.status == 'pending' %}
+                        En attente
+                    {% elseif application.status == 'accepted' %}
+                        Acceptee
+                    {% elseif application.status == 'rejected' %}
+                        Refusee
+                    {% elseif application.status == 'interview' %}
+                        Entretien
+                    {% else %}
+                        {{ application.status }}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="bo-show-item">
+                <label>Date de candidature</label>
+                <p>{{ application.appliedAt ? application.appliedAt|date('d/m/Y H:i') : '-' }}</p>
+            </div>
+        </div>
+
+        <div class="bo-form-actions" style="margin-top:20px;">
+           <form method="post" action="{{ path('preview_back_application_delete', {id: application.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cette candidature ?');" style="display:inline;">
+    <button type="submit" class="action-btn delete" title="Supprimer">
+        <i class="fa fa-trash"></i>
+    </button>
+</form>
+
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,158 @@
+{# ============================================================
+   File: templates/backoffice/cv/show.html.twig
+   Description: Admin view - detailed read-only CV display
+   ============================================================ #}
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}CV: {{ cv.nomCv }} - Back Office{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    <div class="page-header">
+        <h1><i class="fa fa-file-text"></i> Detail du CV</h1>
+    
+        <a href="{{ path('preview_back_cv_index') }}" class="btn-secondary">
+            <i class="fa fa-arrow-left"></i> Retour a la liste
+        </a>
+    </div>
+
+    <div class="bo-cv-detail">
+
+        {# Header #}
+        <div class="bo-cv-header">
+            <h1>{{ cv.nomCv }}</h1>
+            <div class="bo-cv-meta">
+                <span><i class="fa fa-user"></i> {{ cv.user.email|default('N/A') }}</span>
+                <span><i class="fa fa-globe"></i> {{ cv.langue }}</span>
+                <span><i class="fa fa-calendar"></i> {{ cv.creationDate|date('d/m/Y H:i') }}</span>
+                <span><i class="fa fa-refresh"></i> MAJ: {{ cv.updatedAt|date('d/m/Y H:i') }}</span>
+                {% if cv.linkedinUrl %}
+                    <span><i class="fa fa-linkedin"></i> <a href="{{ cv.linkedinUrl }}" target="_blank" style="color:#90caf9;">LinkedIn</a></span>
+                {% endif %}
+                <span><i class="fa fa-tasks"></i> Progression: {{ cv.progression }}%</span>
+            </div>
+        </div>
+
+        <div class="bo-cv-body">
+
+            {# Summary #}
+            {% if cv.summary %}
+                <div class="bo-cv-section">
+                    <h3><i class="fa fa-user" style="color:#4568dc;margin-right:6px;"></i> Profil / Resume</h3>
+                    <p>{{ cv.summary|nl2br }}</p>
+                </div>
+            {% endif %}
+
+            {# Experiences #}
+            {% if experiences is defined and experiences|length > 0 %}
+                <div class="bo-cv-section">
+                    <h3><i class="fa fa-briefcase" style="color:#4568dc;margin-right:6px;"></i> Experiences ({{ experiences|length }})</h3>
+                    {% for exp in experiences %}
+                        <div class="bo-entry">
+                            <strong>{{ exp.jobTitle }}</strong> chez {{ exp.company }}
+                            {% if exp.location %}<span class="text-muted"> - {{ exp.location }}</span>{% endif %}
+                            <br>
+                            <span class="text-muted">
+                                {{ exp.startDate|date('m/Y') }} -
+                                {% if exp.currentlyWorking %}Present{% elseif exp.endDate %}{{ exp.endDate|date('m/Y') }}{% endif %}
+                            </span>
+                            {% if exp.description %}
+                                <p style="margin-top:6px;color:#555;font-size:14px;">{{ exp.description|nl2br }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Education #}
+            {% if educations is defined and educations|length > 0 %}
+                <div class="bo-cv-section">
+                    <h3><i class="fa fa-graduation-cap" style="color:#4568dc;margin-right:6px;"></i> Formation ({{ educations|length }})</h3>
+                    {% for edu in educations %}
+                        <div class="bo-entry">
+                            <strong>{{ edu.degree }}</strong>
+                            {% if edu.fieldOfStudy %} - {{ edu.fieldOfStudy }}{% endif %}
+                            <br>
+                            {{ edu.school }}{% if edu.city %}, {{ edu.city }}{% endif %}
+                            <br>
+                            <span class="text-muted">
+                                {% if edu.startDate %}{{ edu.startDate|date('Y') }}{% endif %}
+                                {% if edu.endDate %} - {{ edu.endDate|date('Y') }}{% endif %}
+                            </span>
+                            {% if edu.description %}
+                                <p style="margin-top:6px;color:#555;font-size:14px;">{{ edu.description|nl2br }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Skills #}
+            {% if skills is defined and skills|length > 0 %}
+                <div class="bo-cv-section">
+                    <h3><i class="fa fa-cogs" style="color:#4568dc;margin-right:6px;"></i> Competences ({{ skills|length }})</h3>
+                    <div class="bo-skills-list">
+                        {% for skill in skills %}
+                            <span class="bo-skill-tag {{ skill.type }}">
+                                {{ skill.nom }}
+                                {% if skill.level %} ({{ skill.level }}){% endif %}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# Certifications #}
+            {% if certifs is defined and certifs|length > 0 %}
+                <div class="bo-cv-section">
+                    <h3><i class="fa fa-certificate" style="color:#4568dc;margin-right:6px;"></i> Certifications ({{ certifs|length }})</h3>
+                    {% for certif in certifs %}
+                        <div class="bo-entry">
+                            <strong>{{ certif.name }}</strong>
+                            {% if certif.issuedBy %} - {{ certif.issuedBy }}{% endif %}
+                            <br>
+                            <span class="text-muted">
+                                {% if certif.issueDate %}Obtenu: {{ certif.issueDate|date('d/m/Y') }}{% endif %}
+                                {% if certif.expDate %} | Expire: {{ certif.expDate|date('d/m/Y') }}{% endif %}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# Languages #}
+            {% if languages is defined and languages|length > 0 %}
+                <div class="bo-cv-section">
+                    <h3><i class="fa fa-language" style="color:#4568dc;margin-right:6px;"></i> Langues ({{ languages|length }})</h3>
+                    {% for lang in languages %}
+                        <div class="bo-entry">
+                            <strong>{{ lang.nom }}</strong> - <span class="text-muted">{{ lang.niveau }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+        </div>
+
+        {# Actions #}
+        <div class="bo-cv-actions">
+            
+            <a href="{{ path('preview_back_cv_index') }}" class="btn-secondary">
+                <i class="fa fa-arrow-left"></i> Retour
+            </a>
+            {# TODO: replace href="#" with {{ path('backoffice_cv_delete', {id: cv.id}) }} #}
+            <a href="#"
+               class="btn-primary"
+               style="background:#c62828;"
+               onclick="return confirm('Supprimer definitivement ce CV ?')">
+                <i class="fa fa-trash"></i> Supprimer
+            </a>
+        </div>
+
+    </div>
+
+{% endblock %}

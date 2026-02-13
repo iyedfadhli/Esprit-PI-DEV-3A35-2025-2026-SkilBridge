@@ -1,0 +1,154 @@
+{# ============================================================
+   File: templates/backoffice/application/index.html.twig
+   Description: Admin view - list all CV applications
+   ============================================================ #}
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Candidatures - Back Office{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message {{ type }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    {# Page header #}
+    <div class="page-header">
+        <h1><i class="fa fa-paper-plane"></i> Gestion des Candidatures</h1>
+    </div>
+
+    {# Stats #}
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ applications is defined ? applications|length : 0 }}</div>
+            <div class="stat-label">Total Candidatures</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ applications is defined ? applications|filter(a => a.status == 'pending')|length : 0 }}</div>
+            <div class="stat-label">En attente</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ applications is defined ? applications|filter(a => a.status == 'accepted')|length : 0 }}</div>
+            <div class="stat-label">Acceptees</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ applications is defined ? applications|filter(a => a.status == 'rejected')|length : 0 }}</div>
+            <div class="stat-label">Refusees</div>
+        </div>
+    </div>
+
+    {# Table #}
+    <div class="data-table-wrapper">
+        <div class="table-header">
+            <h2>Liste des Candidatures</h2>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <select id="status-filter" onchange="filterByStatus()" style="padding:8px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;">
+                    <option value="">Tous les statuts</option>
+                    <option value="pending">En attente</option>
+                    <option value="accepted">Acceptee</option>
+                    <option value="rejected">Refusee</option>
+                    <option value="interview">Entretien</option>
+                </select>
+                <input type="text" class="table-search" id="app-table-search" placeholder="Rechercher..." onkeyup="searchAppTable()">
+            </div>
+        </div>
+
+        {% if applications is defined and applications|length > 0 %}
+            <table class="data-table" id="app-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Candidat (CV)</th>
+                        <th>Offre</th>
+                        <th>Statut</th>
+                        <th>Date de candidature</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                        <tr data-status="{{ app.status|lower }}">
+                            <td>#{{ app.id }}</td>
+                            <td>
+                                <strong>{{ app.cv.nom_cv|default('N/A') }}</strong>
+                                <br>
+                                <span style="font-size:12px;color:#888;">{{ app.cv.user.email|default('N/A') }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ app.offer.title|default('N/A') }}</strong>
+                                <br>
+                                <span style="font-size:12px;color:#888;">{{ app.offer.entreprise.nom|default('') }}</span>
+                            </td>
+                            <td>
+                                {% if app.status == 'pending' %}
+                                    <span class="badge badge-warning">En attente</span>
+                                {% elseif app.status == 'accepted' %}
+                                    <span class="badge badge-success">Acceptee</span>
+                                {% elseif app.status == 'rejected' %}
+                                    <span class="badge badge-danger">Refusee</span>
+                                {% elseif app.status == 'interview' %}
+                                    <span class="badge badge-info">Entretien</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">{{ app.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ app.appliedAt ? app.appliedAt|date('d/m/Y H:i') : '-' }}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <a href="{{ path('preview_back_cv_show', {id: app.cv.id}) }}" class="action-btn view" title="Voir le CV">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+
+                                 
+                                    {% if app.status == 'pending' %}
+                                        <a href="#" class="action-btn edit" title="Accepter" style="background:#e8f5e9;color:#2e7d32;">
+                                            <i class="fa fa-check"></i>
+                                        </a>
+                                        <a href="#" class="action-btn delete" title="Refuser" onclick="return confirm('Refuser cette candidature ?')">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fa fa-paper-plane-o"></i>
+                <p>Aucune candidature pour le moment.</p>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function searchAppTable() {
+            const input = document.getElementById('app-table-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#app-table tbody tr');
+            rows.forEach(function(row) {
+                const text = row.textContent.toLowerCase();
+                const statusFilter = document.getElementById('status-filter').value;
+                const matchText = text.includes(input);
+                const matchStatus = !statusFilter || row.getAttribute('data-status') === statusFilter;
+                row.style.display = (matchText && matchStatus) ? '' : 'none';
+            });
+        }
+
+        function filterByStatus() {
+            searchAppTable();
+        }
+    </script>
+{% endblock %}

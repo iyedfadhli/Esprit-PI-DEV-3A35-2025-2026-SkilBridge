@@ -15,41 +15,42 @@ class CvApplication
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?cv $cv = null;
+    private ?Cv $cv = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?offer $offer = null;
+    private ?Offer $offer = null;
 
     #[ORM\Column(length: 30)]
     private ?string $status = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $applied_at = null;
+    
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCv(): ?cv
+    public function getCv(): ?Cv
     {
         return $this->cv;
     }
 
-    public function setCv(?cv $cv): static
+    public function setCv(?Cv $cv): static
     {
         $this->cv = $cv;
 
         return $this;
     }
 
-    public function getOffer(): ?offer
+    public function getOffer(): ?Offer
     {
         return $this->offer;
     }
 
-    public function setOffer(?offer $offer): static
+    public function setOffer(?Offer $offer): static
     {
         $this->offer = $offer;
 
