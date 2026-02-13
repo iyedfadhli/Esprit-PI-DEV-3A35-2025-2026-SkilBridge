@@ -15,16 +15,23 @@ class LoginType extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-                'required' => true,
+                'required' => false, // Disable HTML5 validation
                 'attr' => [
                     'placeholder' => 'you@example.com',
+                ],
+                'constraints' => [
+                    new \Symfony\Component\Validator\Constraints\NotBlank(['message' => 'Email is required.']),
+                    new \Symfony\Component\Validator\Constraints\Email(['message' => 'Please enter a valid email address.']),
                 ],
             ])
             ->add('password', PasswordType::class, [
                 'label' => 'Password',
-                'required' => true,
+                'required' => false, // Disable HTML5 validation
                 'attr' => [
                     'placeholder' => '••••••••',
+                ],
+                'constraints' => [
+                    new \Symfony\Component\Validator\Constraints\NotBlank(['message' => 'Password is required.']),
                 ],
             ]);
     }
@@ -32,7 +39,7 @@ class LoginType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => null,
         ]);
     }
 }
