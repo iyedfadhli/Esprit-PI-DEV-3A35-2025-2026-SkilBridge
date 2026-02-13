@@ -1,0 +1,203 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/evaluation_challenge.css') }}">
+{% endblock %}
+
+{% block body %}
+	<section class="about-section">
+		<div class="section-header">
+			<p class="section-subtitle">Supervisor Area</p>
+			<h2 class="section-title">My Challenges with Submitted Activities</h2>
+		</div>
+
+		<div class="modules">
+			{% for challenge in challenges %}
+<div class="challenge-wrapper">
+    <div class="module-card">
+        <div class="module-icon">📘</div>
+        <h3>{{ challenge.title }}</h3>
+        <p class="challenge-meta">Activities Submitted</p>
+        <button class="signin-btn toggle-groups">See Groups</button>
+    </div>
+
+    <div class="groups-container">
+        {% for group in groups[challenge.id] %}
+        <div class="group-card">
+            <h4>{{ group.name }}</h4>
+            <button class="signin-btn open-modal" data-challenge="{{ challenge.id }}" data-group="{{ group.id }}">
+                See Activity
+            </button>
+        </div>
+
+        <div id="activities-data-{{ challenge.id }}-{{ group.id }}" style="display:none;">
+            {% for activity in activitiesByChallengeAndGroup[challenge.id][group.id] %}
+            <div class="activity-card">
+                <h5>Activity ID: {{ activity.id }}</h5>
+                <p>
+                    <strong>Submission File:</strong>
+                    {% if activity.submissionFile %}
+                        <button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ activity.submissionFile) }}">Open</button>
+                    {% else %}
+                        Not submitted
+                    {% endif %}
+                </p>
+                <div class="problems-section">
+                    <h6>Problems & Solutions</h6>
+                    {% for problem in problemSolutionsByActivity[activity.id] %}
+                    <div class="problem-card">
+                        <p><strong>Problem:</strong> {{ problem.problemDescription }}</p>
+                        <p><strong>Solution:</strong> {{ problem.groupSolution }}</p>
+
+                        <form action="{{ path('submit_problem_solution', {'problemId': problem.id}) }}" method="POST">
+                            <input type="text" name="supervisorSolution" value="{{ problem.supervisorSolution ?: '' }}" style="width:80%;" placeholder="Supervisor solution">
+                            <button type="submit" class="signin-btn">{{ problem.supervisorSolution ? 'Modify' : 'Add' }} Solution</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Members Section -->
+                <div class="members-section">
+                    <h6>Members</h6>
+                    {% for item in memberActivitiesByActivity[activity.id] %}
+                    <div class="member-card">
+                        <p>{{ item.user.nom }} - Activity: {{ item.member.activityDescription }}</p>
+                        <form action="{{ path('submit_member_score', {'memberActivityId': item.member.id}) }}" method="POST">
+                            <input type="number" name="score" value="{{ item.member.indivScore ?: '' }}" min="0" max="20" step="1" style="width:60px;" placeholder="Score">
+                            <button type="submit" class="signin-btn">{{ item.member.indivScore ? 'Modify' : 'Submit' }} Score</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+<div class="activity-form" style="margin-top:15px;">
+    {% if groupFeedback is not defined or groupFeedback[activity.id] is not defined %}
+        <h4>📤 Submit Group Feedback</h4>
+        <form method="post" action="{{ path('submit_group_feedback', {'activityId': activity.id}) }}" enctype="multipart/form-data">
+            <div class="form-group" style="margin-bottom:10px;">
+                <label for="groupScore_{{ activity.id }}">Group Score:</label>
+                <input type="number" name="groupScore" id="groupScore_{{ activity.id }}" min="0" max="20" step="1" required style="width:60px;">
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+                <input type="file" name="feedbackPdf" accept=".pdf">
+            </div>
+            <button type="submit" class="signin-btn">Submit Feedback</button>
+        </form>
+    {% else %}
+        <h4>📤 Modify Group Feedback</h4>
+        <form method="post" action="{{ path('submit_group_feedback', {'activityId': activity.id}) }}" enctype="multipart/form-data">
+            <div class="form-group" style="margin-bottom:10px;">
+                <label for="groupScore_{{ activity.id }}">Group Score:</label>
+                <input type="number" value="{{ groupFeedback[activity.id].score }}" name="groupScore" id="groupScore_{{ activity.id }}" min="0" max="20" step="1" style="width:60px;">
+            </div>
+            <div class="form-group" style="margin-bottom:10px;">
+                <input type="file" name="feedbackPdf" accept=".pdf">
+            </div>
+            <button type="submit" class="signin-btn">Modif Feedback</button>
+        </form>
+    {% endif %}
+
+    {% if groupFeedback is defined and groupFeedback[activity.id] is defined %}
+        <div style="margin-top:10px; padding:10px; background:#e0e7ff; border-radius:8px;">
+            <p><strong>Submitted Group Score:</strong> {{ groupFeedback[activity.id].score }}</p>
+                    {% if groupFeedback[activity.id].pdfFilename %}
+                <p>
+                    <strong>Feedback PDF:</strong>
+                    <button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ groupFeedback[activity.id].pdfFilename) }}">Open</button>
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<p>No challenges found for this user.</p>
+{% endfor %}
+
+<!-- Modal -->
+<div id="activity-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="modal-body"></div>
+    </div>
+</div>
+
+	</section>
+{% endblock %}
+
+{% block javascripts %}
+	 <script>
+					document.addEventListener('DOMContentLoaded', function() {
+					    document.querySelectorAll('.toggle-groups').forEach(btn => {
+					        btn.addEventListener('click', function() {
+					            const container = btn.parentElement.nextElementSibling;
+					            if (!container) return;
+					            if (container.style.maxHeight && container.style.maxHeight !== '0px') {
+					                container.style.maxHeight = '0';
+					                container.style.opacity = 0;
+					            } else {
+					                container.style.maxHeight = container.scrollHeight + 'px';
+					                container.style.opacity = 1;
+					            }
+					        });
+					    });
+					
+					    const modal = document.getElementById('activity-modal');
+					    const modalBody = document.getElementById('modal-body');
+					    const closeBtn = modal.querySelector('.close');
+					
+					    document.querySelectorAll('.open-modal').forEach(btn => {
+					        btn.addEventListener('click', function() {
+					            const challengeId = btn.dataset.challenge;
+					            const groupId = btn.dataset.group;
+					
+					            const contentDiv = document.getElementById('activities-data-' + challengeId + '-' + groupId);
+					            if (!contentDiv) return;
+					
+					            modalBody.innerHTML = contentDiv.innerHTML;
+					            modal.style.display = 'block';
+					        });
+					    });
+					
+					    closeBtn.addEventListener('click', function() {
+					        modal.style.display = 'none';
+					        modalBody.innerHTML = '';
+					    });
+					
+					    window.addEventListener('click', function(e) {
+					        if (e.target === modal) {
+					            modal.style.display = 'none';
+					            modalBody.innerHTML = '';
+					        }
+					    });
+
+                        const pdfModal = document.createElement('div');
+                        pdfModal.id = 'pdf-modal';
+                        pdfModal.className = 'modal';
+                        pdfModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;';
+                        pdfModal.innerHTML = '<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);"><span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span><iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe></div>';
+                        document.body.appendChild(pdfModal);
+                        const pdfClose = pdfModal.querySelector('.close');
+                        const pdfFrame = document.getElementById('pdf-frame');
+                        document.addEventListener('click', function(e) {
+                            const btn = e.target.closest('.open-pdf');
+                            if (btn) {
+                                const src = btn.dataset.src;
+                                pdfFrame.src = src;
+                                pdfModal.style.display = 'block';
+                            }
+                        });
+                        pdfClose.addEventListener('click', function() {
+                            pdfFrame.src = '';
+                            pdfModal.style.display = 'none';
+                        });
+					});
+					</script>
+{% endblock %}

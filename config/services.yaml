@@ -7,6 +7,7 @@
 parameters:
     mercure.public_url: '%env(MERCURE_PUBLIC_URL)%'
     mercure.jwt_secret: '%env(MERCURE_JWT_SECRET)%'
+    CHALLENGES_UPLOAD_DIR: '%env(resolve:CHALLENGES_UPLOAD_DIR)%'
 
 
 services:

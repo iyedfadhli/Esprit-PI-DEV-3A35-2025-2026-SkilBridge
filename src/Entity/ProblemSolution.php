@@ -24,7 +24,7 @@ class ProblemSolution
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $groupSolution = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $supervisorSolution = null;
 
     public function getId(): ?int

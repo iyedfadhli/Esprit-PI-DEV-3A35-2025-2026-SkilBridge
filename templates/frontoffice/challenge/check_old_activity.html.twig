@@ -1,0 +1,188 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/old_activities.css') }}">
+{% endblock %}
+
+{% block body %}
+	<div class="challenge-wrapper">
+
+		{% for activity in activities %}
+			{% set challenge = activity.idChallenge %}
+
+			<div class="module-card">
+				<div class="module-icon">🏆</div>
+				<h3>{{ challenge.title }}</h3>
+
+				<div class="challenge-meta">
+					Deadline:
+					{{ challenge.deadline|date('d F Y') }}
+					• Difficulty:
+					{{ challenge.difficulty }}
+				</div>
+
+				<p>{{ challenge.description }}</p>
+
+				<hr>
+
+				<div class="submitted-section">
+					<h4 style="margin-top:20px;">📄 Your Submitted Activity</h4>
+					<div class="activity-card">
+						<h5>Submission Summary</h5>
+
+						{% if activity.submissionFile %}
+							<p>
+								<button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ activity.submissionFile) }}">
+									📎
+									Open
+								</button>
+							</p>
+						{% endif %}
+
+						<div class="challenge-meta" style="margin-top: 12px;">
+							Submitted on:
+							{{ activity.submissionDate|date('d F Y') }}
+						</div>
+					</div>
+				</div>
+
+				<hr>
+
+				<div class="evaluation-section" style="margin-top:20px;">
+					<h4>📝 Evaluation</h4>
+
+					{% if activity.status == "evaluated" %}
+						<p>Status:
+							{{ activity.status }}</p>
+						<button class="signin-btn open-modal" data-challenge="{{ challenge.id }}" data-group="{{ activity.getGroupId().id }}">
+							See Evaluation
+						</button>
+					{% else %}
+						<button class="signin-btn disabled-btn" disabled>
+							Not Evaluated Yet
+						</button>
+					{% endif %}
+				</div>
+
+			</div>
+			<div id="activities-data-{{ challenge.id }}-{{ activity.getGroupId().id }}" style="display: none;">
+				<div class="evaluation-popup">
+
+
+					{% for problem in problemSolutions[activity.id] %}
+						<div class="problem-card">
+							<p>
+								<strong>Problem:</strong>
+								{{ problem.problemDescription }}</p>
+							<p>
+								<strong>Group solution:</strong>
+								{{ problem.groupSolution }}</p>
+							<p>
+								<strong>Supervisor solution:</strong>
+								{{ problem.supervisorSolution }}</p>
+						</div>
+					{% else %}
+						<p>No problems submittet.</p>
+					{% endfor %}
+					{% if groupFeedback is defined and groupFeedback[activity.id] is defined %}
+						<div style="margin-top:10px; padding:10px; background:#e0e7ff; border-radius:8px;">
+							{% if indivScore[activity.id] is defined and indivScore[activity.id] != null %}
+								<p>
+									<strong>Your Individual Score:</strong>
+									{{ indivScore[activity.id] }}
+								</p>
+							{% endif %}
+							<p>
+								<strong>Submitted Group Score:</strong>
+								{{ groupFeedback[activity.id].score }}</p>
+							{% if groupFeedback[activity.id].pdfFilename %}
+								<p>
+									<strong>Feedback PDF:</strong>
+									<button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ groupFeedback[activity.id].pdfFilename) }}">
+										Open
+									</button>
+								</p>
+							{% endif %}
+						</div>
+					{% endif %}
+
+				</div>
+			</div>
+
+		{% else %}
+			<p>No activities found for your groups.</p>
+		{% endfor %}
+
+	</div>
+
+	{# Modal #}
+	<div id="activity-modal" class="modal" style="display: none;">
+		<div class="modal-content">
+			<span class="close">&times;</span>
+			<div
+				id="modal-body"><!-- Evaluation content will be injected dynamically -->
+			</div>
+		</div>
+	</div>
+	<div id="pdf-modal" class="modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;">
+		<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+			<span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span>
+			<iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe>
+		</div>
+	</div>
+{% endblock %}
+
+{% block javascripts %}
+	 <script>
+																document.addEventListener('DOMContentLoaded', () => {
+																
+																    const modal = document.getElementById('activity-modal');
+																    if (!modal) return;
+																
+																    const modalBody = document.getElementById('modal-body');
+																    const closeBtn = modal.querySelector('.close');
+																
+																   document.querySelectorAll('.open-modal').forEach(btn => {
+																    btn.addEventListener('click', () => {
+																        const challengeId = btn.dataset.challenge;
+																        const groupId = btn.dataset.group;
+																        const contentDiv = document.getElementById(`activities-data-${challengeId}-${groupId}`);
+																        if (!contentDiv) return;
+																
+																        modalBody.innerHTML = contentDiv.innerHTML;
+																        modal.style.display = 'flex';
+																    });
+																});
+																
+																
+																    closeBtn.addEventListener('click', () => {
+																        modal.style.display = 'none';
+																        modalBody.innerHTML = '';
+																    });
+																
+																    window.addEventListener('click', (e) => {
+																        if (e.target === modal) {
+																            modal.style.display = 'none';
+																            modalBody.innerHTML = '';
+																        }
+																    });
+																
+																	const pdfModal = document.getElementById('pdf-modal');
+																	const pdfClose = pdfModal.querySelector('.close');
+																	const pdfFrame = document.getElementById('pdf-frame');
+																	document.addEventListener('click', (e) => {
+																		const btn = e.target.closest('.open-pdf');
+																		if (btn) {
+																			const src = btn.dataset.src;
+																			pdfFrame.src = src;
+																			pdfModal.style.display = 'flex';
+																		}
+																	});
+																	pdfClose.addEventListener('click', () => {
+																		pdfFrame.src = '';
+																		pdfModal.style.display = 'none';
+																	});
+																});
+																</script>
+
+{% endblock %}

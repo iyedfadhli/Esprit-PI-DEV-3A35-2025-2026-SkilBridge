@@ -55,6 +55,7 @@ class DashboardController extends AbstractController
             'user' => $currentUser, // Added for compatibility if template needs it
         ]);
     }
+    
 
     #[Route('/user_dashboard', name: 'dashboard_user')]
     public function user(EntityManagerInterface $em, Request $request): Response
