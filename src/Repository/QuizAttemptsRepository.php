@@ -31,13 +31,23 @@ class QuizAttemptsRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?QuizAttempts
-    //    {
-    //        return $this->createQueryBuilder('q')
-    //            ->andWhere('q.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Récupère les 3 derniers quiz réussis d'un étudiant (score >= passing_score).
+     * Utilisé pour calculer le score moyen récent.
+     *
+     * @return QuizAttempts[]
+     */
+    public function findLastPassedAttempts(int $studentId, int $limit = 3): array
+    {
+        return $this->createQueryBuilder('qa')
+            ->innerJoin('qa.quiz', 'q')
+            ->addSelect('q')
+            ->where('qa.student = :studentId')
+            ->andWhere('qa.score >= q.passing_score')
+            ->setParameter('studentId', $studentId)
+            ->orderBy('qa.submitted_at', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
 }

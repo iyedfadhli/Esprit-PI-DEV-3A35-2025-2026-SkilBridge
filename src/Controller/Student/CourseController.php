@@ -47,17 +47,28 @@ class CourseController extends AbstractController
         foreach ($chapters as $chapter) {
             $quiz = $em->getRepository(\App\Entity\Quiz::class)->findOneBy(['chapter' => $chapter]);
             $passed = false;
+            $bestAttempt = null;
             if ($quiz) {
+                // Find attempts that meet the passing score
                 $qb = $attemptRepo->createQueryBuilder('a')
-                    ->select('count(a.id)')
                     ->where('a.quiz = :q')
                     ->andWhere('a.student = :s')
                     ->andWhere('a.score >= :min')
                     ->setParameter('q', $quiz)
                     ->setParameter('s', $student)
-                    ->setParameter('min', $quiz->getPassingScore() ?? 0);
-                $count = (int) $qb->getQuery()->getSingleScalarResult();
-                $passed = $count > 0;
+                    ->setParameter('min', $quiz->getPassingScore() ?? 0)
+                    ->orderBy('a.score', 'DESC')
+                    ->setMaxResults(1);
+                $bestAttempt = $qb->getQuery()->getOneOrNullResult();
+                $passed = $bestAttempt !== null;
+
+                // If no passing attempt, get the latest attempt anyway (for "Voir résultats")
+                if (!$bestAttempt) {
+                    $bestAttempt = $attemptRepo->findOneBy(
+                        ['quiz' => $quiz, 'student' => $student],
+                        ['id' => 'DESC']
+                    );
+                }
             } else {
                 $allPassed = false;
             }
@@ -66,7 +77,41 @@ class CourseController extends AbstractController
                 $allPassed = false;
             }
 
-            $chapterItems[] = ['chapter' => $chapter, 'quiz' => $quiz, 'passed' => $passed];
+            $chapterItems[] = [
+                'chapter' => $chapter,
+                'quiz' => $quiz,
+                'passed' => $passed,
+                'bestAttempt' => $bestAttempt,
+            ];
+        }
+
+        // ── Update enrollment progress from quiz results ──
+        $totalChapters = count($chapters);
+        $passedChapters = 0;
+        foreach ($chapterItems as $ci) {
+            if ($ci['passed']) {
+                $passedChapters++;
+            }
+        }
+        $computedProgress = $totalChapters > 0
+            ? (int) round(($passedChapters / $totalChapters) * 100)
+            : 0;
+
+        if ($enrol) {
+            $dirty = false;
+            if ($enrol->getProgress() !== $computedProgress) {
+                $enrol->setProgress($computedProgress);
+                $dirty = true;
+            }
+            if ($allPassed && $totalChapters > 0 && $status !== 'COMPLETED') {
+                $enrol->setStatus('COMPLETED');
+                $enrol->setCompletedAt(new \DateTime());
+                $status = 'COMPLETED';
+                $dirty = true;
+            }
+            if ($dirty) {
+                $em->flush();
+            }
         }
 
         return $this->render('student/course.html.twig', [

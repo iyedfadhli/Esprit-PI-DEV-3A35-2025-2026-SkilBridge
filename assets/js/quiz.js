@@ -1,6 +1,6 @@
 /**
  * Quiz Application - Student Quiz Interface
- * High-quality interactive quiz experience
+ * With secure server-side timer & auto-submit on expiry
  */
 document.addEventListener('DOMContentLoaded', function () {
   const app = document.getElementById('quiz-app');
@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const attemptId = app.dataset.attemptId;
   const quizTitle = app.dataset.quizTitle || 'Quiz';
   const passingScore = parseInt(app.dataset.passingScore) || 70;
+  const timeLimit = parseInt(app.dataset.timeLimit) || 0; // minutes, 0 = unlimited
   
   // DOM Elements
   const startScreen = document.getElementById('quiz-start-screen');
@@ -35,11 +36,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const answeredCount = document.getElementById('answered-count');
   const unansweredCount = document.getElementById('unanswered-count');
 
+  // Timer elements
+  const timerContainer = document.getElementById('quiz-timer');
+  const timerDisplay = document.getElementById('timer-display');
+
   // State
   let questions = [];
   let currentIndex = 0;
   let selections = {}; // { questionIndex: answerId }
   let questionToAnswerMap = {}; // { questionId: answerId } for submission
+  let timerInterval = null;
+  let remainingSeconds = 0;
+  let isSubmitting = false; // prevent double-submit
 
   /**
    * Initialize and start the quiz
@@ -71,12 +79,115 @@ document.addEventListener('DOMContentLoaded', function () {
       initializeQuestionDots();
       renderQuestion();
       updateNavigation();
+
+      // ── Start the countdown timer if timeLimit > 0 ──
+      if (timeLimit > 0) {
+        remainingSeconds = timeLimit * 60;
+        timerContainer.style.display = 'flex';
+        updateTimerDisplay();
+        timerInterval = setInterval(timerTick, 1000);
+      }
       
     } catch (error) {
       console.error('Error starting quiz:', error);
       alert('Impossible de démarrer le quiz. Veuillez réessayer.');
       loadingScreen.style.display = 'none';
       startScreen.style.display = 'block';
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // TIMER – Countdown & auto-submit on expiry
+  // ════════════════════════════════════════════════════════════════
+
+  /**
+   * Called every second while the quiz is in progress.
+   * When remaining time hits 0, auto-submits the quiz.
+   */
+  function timerTick() {
+    remainingSeconds--;
+
+    updateTimerDisplay();
+
+    // Warning state: last 60 seconds
+    if (remainingSeconds <= 60 && remainingSeconds > 0) {
+      timerContainer.classList.add('timer-warning');
+    }
+
+    // Critical state: last 10 seconds
+    if (remainingSeconds <= 10 && remainingSeconds > 0) {
+      timerContainer.classList.remove('timer-warning');
+      timerContainer.classList.add('timer-critical');
+    }
+
+    // ╔══════════════════════════════════════════════════════════╗
+    // ║  TEMPS ÉCOULÉ → Auto-soumission immédiate              ║
+    // ║  Le backend validera aussi côté serveur (double check)  ║
+    // ╚══════════════════════════════════════════════════════════╝
+    if (remainingSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      autoSubmitExpired();
+    }
+  }
+
+  /**
+   * Update the timer visual display (MM:SS format)
+   */
+  function updateTimerDisplay() {
+    const mins = Math.max(0, Math.floor(remainingSeconds / 60));
+    const secs = Math.max(0, remainingSeconds % 60);
+    timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  /**
+   * Auto-submit when time expires.
+   * Shows an overlay message then submits whatever answers exist.
+   */
+  async function autoSubmitExpired() {
+    if (isSubmitting) return;
+    isSubmitting = true;
+
+    // Close any open modal
+    hideSubmitModal();
+
+    // Show time-up overlay
+    progressScreen.innerHTML = `
+      <div class="quiz-loading" style="display: block;">
+        <div class="timer-expired-icon" style="font-size: 3rem; margin-bottom: 1rem;">⏰</div>
+        <h2 style="color: #e74c3c; margin-bottom: 0.5rem;">Temps écoulé !</h2>
+        <p>Soumission automatique de vos réponses...</p>
+        <div class="spinner"></div>
+      </div>
+    `;
+
+    try {
+      const payload = {
+        attemptId: parseInt(attemptId),
+        answers: Object.values(selections),
+        responses: questionToAnswerMap
+      };
+
+      const resp = await fetch(`/api/quizzes/${quizId}/attempts/${attemptId}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await resp.json();
+
+      // Redirect to result page (works for both EXPIRED and SUBMITTED)
+      if (result.attempt_id || result.attemptId) {
+        const resultId = result.attempt_id || result.attemptId;
+        window.location.href = `/student/quiz/result/${resultId}`;
+      } else {
+        window.location.href = `/student/quiz/result/${attemptId}`;
+      }
+
+    } catch (error) {
+      console.error('Error auto-submitting expired quiz:', error);
+      // Even on error, redirect to result page
+      window.location.href = `/student/quiz/result/${attemptId}`;
     }
   }
 
@@ -207,6 +318,20 @@ document.addEventListener('DOMContentLoaded', function () {
     
     answeredCount.textContent = answered;
     unansweredCount.textContent = unanswered;
+
+    // Show remaining time in modal when timer is active
+    const modalBody = submitModal.querySelector('.submit-modal-body');
+    const existingTimerNote = modalBody?.querySelector('.timer-note');
+    if (existingTimerNote) existingTimerNote.remove();
+    if (timeLimit > 0 && remainingSeconds > 0) {
+      const mins = Math.floor(remainingSeconds / 60);
+      const secs = remainingSeconds % 60;
+      const note = document.createElement('p');
+      note.className = 'timer-note';
+      note.style.cssText = 'color: #e67e22; font-weight: 600; margin-top: 0.5rem;';
+      note.textContent = `⏱ Temps restant : ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      modalBody?.appendChild(note);
+    }
     
     submitModal.classList.add('active');
   }
@@ -219,10 +344,19 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /**
-   * Submit the quiz
+   * Submit the quiz (manual or timer-triggered)
    */
   async function submitQuiz() {
+    if (isSubmitting) return;
+    isSubmitting = true;
+
     hideSubmitModal();
+
+    // Stop timer
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
     
     // Show loading state
     progressScreen.innerHTML = `
@@ -240,29 +374,22 @@ document.addEventListener('DOMContentLoaded', function () {
         responses: questionToAnswerMap
       };
       
-      const resp = await fetch(`/api/quizzes/${quizId}/submit`, {
+      const resp = await fetch(`/api/quizzes/${quizId}/attempts/${attemptId}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       
-      if (!resp.ok) {
-        throw new Error('Submission failed');
-      }
-      
       const result = await resp.json();
-      
-      // Redirect to result page
-      if (result.attemptId) {
-        window.location.href = `/student/quiz/result/${result.attemptId}`;
-      } else {
-        alert('Quiz soumis avec succès!');
-        window.location.href = '/student/dashboard';
-      }
+
+      // Handle both success (200) and expired (400) — backend always saves answers
+      const resultId = result.attempt_id || result.attemptId || attemptId;
+      window.location.href = `/student/quiz/result/${resultId}`;
       
     } catch (error) {
       console.error('Error submitting quiz:', error);
       alert('Erreur lors de la soumission. Veuillez réessayer.');
+      isSubmitting = false;
       window.location.reload();
     }
   }

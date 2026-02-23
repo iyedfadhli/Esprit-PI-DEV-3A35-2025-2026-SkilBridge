@@ -37,33 +37,79 @@ class StudentDashboardController extends AbstractController
 
             // determine whether the student passed all chapter quizzes
             $chapters = $em->getRepository(\App\Entity\Chapter::class)->findBy(['course' => $course]);
+            $totalChapters = count($chapters);
+            $passedChapters = 0;
             $allPassed = true;
+            $scoreSum = 0.0;
+            $scoreAttempts = 0;
+
             foreach ($chapters as $chapter) {
                 $quiz = $quizRepo->findOneBy(['chapter' => $chapter]);
                 if (!$quiz) {
                     $allPassed = false;
-                    break;
+                    continue;
                 }
                 $qb = $attemptRepo->createQueryBuilder('a')
-                    ->select('count(a.id)')
+                    ->select('MAX(a.score)')
                     ->where('a.quiz = :q')
                     ->andWhere('a.student = :s')
-                    ->andWhere('a.score >= :min')
                     ->setParameter('q', $quiz)
-                    ->setParameter('s', $student)
-                    ->setParameter('min', $quiz->getPassingScore() ?? 0);
-                $count = (int) $qb->getQuery()->getSingleScalarResult();
-                if ($count === 0) {
+                    ->setParameter('s', $student);
+                $bestScore = $qb->getQuery()->getSingleScalarResult();
+
+                if ($bestScore !== null) {
+                    $scoreSum += (float) $bestScore;
+                    $scoreAttempts++;
+                }
+
+                if ($bestScore !== null && (float) $bestScore >= ($quiz->getPassingScore() ?? 0)) {
+                    $passedChapters++;
+                } else {
                     $allPassed = false;
-                    break;
+                }
+            }
+
+            // ── Compute real progress % from passed chapters ──
+            $computedProgress = $totalChapters > 0
+                ? (int) round(($passedChapters / $totalChapters) * 100)
+                : 0;
+
+            // ── Average best score across attempted quizzes ──
+            $avgScore = $scoreAttempts > 0
+                ? round($scoreSum / $scoreAttempts, 2)
+                : null;
+
+            // ── Persist updated progress / status into enrollment ──
+            if ($enrol && $status !== 'LOCKED') {
+                $dirty = false;
+
+                if ($enrol->getProgress() !== $computedProgress) {
+                    $enrol->setProgress($computedProgress);
+                    $dirty = true;
+                }
+
+                if ($avgScore !== null && $enrol->getScore() !== $avgScore) {
+                    $enrol->setScore($avgScore);
+                    $dirty = true;
+                }
+
+                if ($allPassed && $totalChapters > 0 && $status !== 'COMPLETED') {
+                    $enrol->setStatus('COMPLETED');
+                    $enrol->setCompletedAt(new \DateTime());
+                    $status = 'COMPLETED';
+                    $dirty = true;
+                }
+
+                if ($dirty) {
+                    $em->flush();
                 }
             }
 
             $items[] = [
                 'course' => $course,
                 'status' => $status,
-                'progress' => $enrol ? $enrol->getProgress() : 0,
-                'score' => $enrol ? $enrol->getScore() : null,
+                'progress' => $computedProgress,
+                'score' => $avgScore ?? ($enrol ? $enrol->getScore() : null),
                 'enrolment' => $enrol,
                 'all_chapter_quizzes_passed' => $allPassed,
             ];

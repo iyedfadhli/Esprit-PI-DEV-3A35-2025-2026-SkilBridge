@@ -31,28 +31,44 @@ class QuizController extends AbstractController
         $attemptRepo = $em->getRepository(\App\Entity\QuizAttempts::class);
         $existingAttempts = $attemptRepo->findBy(['student' => $student, 'quiz' => $quiz]);
         $maxAttempts = $quiz->getMaxAttempts();
-        
-        // If max_attempts is null or 0, allow unlimited attempts
-        if ($maxAttempts !== null && $maxAttempts > 0 && count($existingAttempts) >= $maxAttempts) {
-            $this->addFlash('error', 'Vous avez atteint le nombre maximum de tentatives pour ce quiz.');
-            // Redirect back to course page instead of dashboard
-            if ($quiz->getCourse()) {
-                return $this->redirectToRoute('student_course', ['id' => $quiz->getCourse()->getId()]);
+
+        // ── Reuse an existing IN_PROGRESS attempt (avoids duplicates on refresh) ──
+        $attempt = null;
+        foreach ($existingAttempts as $ea) {
+            if ($ea->getStatus() === 'IN_PROGRESS') {
+                $attempt = $ea;
+                break;
             }
-            return $this->redirectToRoute('student_dashboard');
         }
 
-        $nextNbr = count($existingAttempts) + 1;
+        if (!$attempt) {
+            // If max_attempts is null or 0, allow unlimited attempts
+            if ($maxAttempts !== null && $maxAttempts > 0 && count($existingAttempts) >= $maxAttempts) {
+                $this->addFlash('error', 'Vous avez atteint le nombre maximum de tentatives pour ce quiz.');
+                // Redirect back to course page instead of dashboard
+                if ($quiz->getCourse()) {
+                    return $this->redirectToRoute('student_course', ['id' => $quiz->getCourse()->getId()]);
+                }
+                return $this->redirectToRoute('student_dashboard');
+            }
 
-        $attempt = new QuizAttempts();
-        $attempt->setStudent($student);
-        $attempt->setQuiz($quiz);
-        $attempt->setAttemptNbr($nextNbr);
-        $attempt->setScore(0.0);
-        $attempt->setSubmittedAt(new \DateTimeImmutable());
+            $nextNbr = count($existingAttempts) + 1;
 
-        $em->persist($attempt);
-        $em->flush();
+            $attempt = new QuizAttempts();
+            $attempt->setStudent($student);
+            $attempt->setQuiz($quiz);
+            $attempt->setAttemptNbr($nextNbr);
+            $attempt->setScore(0.0);
+            $attempt->setSubmittedAt(new \DateTimeImmutable());
+            // NOTE: startedAt is intentionally NOT set here.
+            // It will be set by QuizTimerController::startAttempt when the
+            // student actually clicks "Start Quiz", so the timer doesn't
+            // tick while the student reads the instructions.
+            $attempt->setStatus('IN_PROGRESS');
+
+            $em->persist($attempt);
+            $em->flush();
+        }
 
         return $this->render('student/quiz_attempt.html.twig', [
             'attempt' => $attempt,

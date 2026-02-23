@@ -14,6 +14,10 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class QuizApiController extends AbstractController
 {
+    /**
+     * @deprecated Utilisez POST /api/quizzes/{id}/start-attempt (QuizTimerController) à la place.
+     * Ce endpoint est conservé pour compatibilité mais ne gère pas le timer.
+     */
     #[Route('/api/quizzes/{quizId}/start', name: 'api_quiz_start', methods: ['POST'])]
     public function start(int $quizId, EntityManagerInterface $em): JsonResponse
     {
@@ -40,7 +44,10 @@ class QuizApiController extends AbstractController
             $out[] = ['id' => $q->getId(), 'text' => $q->getContent(), 'answers' => $answers];
         }
 
-        return new JsonResponse(['questions' => $out]);
+        return new JsonResponse([
+            'questions'          => $out,
+            'time_limit_seconds' => $quiz->getTimeLimitSeconds(),
+        ]);
     }
 
     #[Route('/api/quizzes/{quizId}/submit', name: 'api_quiz_submit', methods: ['POST'])]
@@ -98,11 +105,20 @@ class QuizApiController extends AbstractController
             $em->flush();
         }
 
-        // Process responses and store StudentResponse entities
+        // ── Calculer les points totaux sur TOUTES les questions du quiz ──
+        // Les questions non répondues comptent comme fausses (0 points).
+        $allQuestions = $em->getRepository(Question::class)->findBy(['quiz' => $quiz]);
+        $limit = $quiz->getQuestionsPerAttempt() ?? count($allQuestions);
+        $questionsSlice = array_slice($allQuestions, 0, $limit);
+
         $totalPoints = 0;
+        foreach ($questionsSlice as $q) {
+            $totalPoints += $q->getPoint();
+        }
+        $totalQuestions = count($questionsSlice);
+
         $earnedPoints = 0;
         $correctCount = 0;
-        $totalQuestions = 0;
 
         // Handle new format with question-answer mapping
         if (!empty($questionIdToAnswerId)) {
@@ -112,8 +128,6 @@ class QuizApiController extends AbstractController
                 
                 if (!$question || !$answer) continue;
                 
-                $totalQuestions++;
-                $totalPoints += $question->getPoint();
                 $isCorrect = $answer->isCorrect();
                 $pointsEarned = $isCorrect ? $question->getPoint() : 0;
                 
@@ -138,8 +152,6 @@ class QuizApiController extends AbstractController
                 if (!$answer) continue;
                 
                 $question = $answer->getQuestion();
-                $totalQuestions++;
-                $totalPoints += $question->getPoint();
                 $isCorrect = $answer->isCorrect();
                 $pointsEarned = $isCorrect ? $question->getPoint() : 0;
                 
@@ -159,7 +171,7 @@ class QuizApiController extends AbstractController
             }
         }
 
-        // Calculate score as percentage
+        // Score calculé sur TOUTES les questions assignées (non répondues = 0 points)
         $percent = $totalPoints > 0 ? round(($earnedPoints / $totalPoints) * 100, 2) : 0;
 
         $attempt->setScore($percent);

@@ -827,9 +827,11 @@
                                     <div class="chapter-actions">
                                         {% if item.quiz %}
                                             {% if item.passed %}
-                                                <a href="{{ path('student_quiz_result', {'attemptId': 1}) }}" class="btn-chapter secondary">
-                                                    <i class="fa fa-eye"></i> Voir résultats
-                                                </a>
+                                                {% if item.bestAttempt %}
+                                                    <a href="{{ path('student_quiz_result', {'attemptId': item.bestAttempt.id}) }}" class="btn-chapter secondary">
+                                                        <i class="fa fa-eye"></i> Voir résultats
+                                                    </a>
+                                                {% endif %}
                                                 <a href="{{ path('student_quiz_attempt', {'quizId': item.quiz.id}) }}" class="btn-chapter secondary">
                                                     <i class="fa fa-refresh"></i> Refaire le quiz
                                                 </a>

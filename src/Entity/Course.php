@@ -11,23 +11,53 @@ use Doctrine\Common\Collections\ArrayCollection;
 use App\Entity\Chapter;
 use App\Entity\Enrollement;
 use App\Entity\Challenge;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: CourseRepository::class)]
 class Course
 {
+    /**
+     * Constantes de difficulté pour le système de recommandation
+     */
+    public const DIFFICULTY_BEGINNER = 'BEGINNER';
+    public const DIFFICULTY_INTERMEDIATE = 'INTERMEDIATE';
+    public const DIFFICULTY_ADVANCED = 'ADVANCED';
+
+    /**
+     * Mapping difficulté → niveau numérique pour le calcul de progression
+     */
+    public const DIFFICULTY_LEVELS = [
+        self::DIFFICULTY_BEGINNER => 1,
+        self::DIFFICULTY_INTERMEDIATE => 2,
+        self::DIFFICULTY_ADVANCED => 3,
+    ];
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['course:recommendation'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 30)]
+    #[Groups(['course:recommendation'])]
     private ?string $title = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Groups(['course:recommendation'])]
     private ?string $description = null;
 
     #[ORM\Column]
+    #[Groups(['course:recommendation'])]
     private ?int $duration = null;
+
+    /** Niveau de difficulté du cours : BEGINNER, INTERMEDIATE, ADVANCED */
+    #[ORM\Column(length: 20, options: ['default' => 'BEGINNER'])]
+    #[Groups(['course:recommendation'])]
+    private ?string $difficulty = self::DIFFICULTY_BEGINNER;
+
+    /** Indique si le cours est actif et visible pour les étudiants */
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    #[Groups(['course:recommendation'])]
+    private bool $isActive = true;
 
     #[ORM\Column]
     private ?float $validation_score = null;
@@ -172,6 +202,38 @@ class Course
         $this->sections_to_review = $sections_to_review;
 
         return $this;
+    }
+
+    public function getDifficulty(): ?string
+    {
+        return $this->difficulty;
+    }
+
+    public function setDifficulty(string $difficulty): static
+    {
+        $this->difficulty = $difficulty;
+
+        return $this;
+    }
+
+    public function isIsActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    /**
+     * Retourne le niveau numérique de difficulté (1=BEGINNER, 2=INTERMEDIATE, 3=ADVANCED)
+     */
+    public function getDifficultyLevel(): int
+    {
+        return self::DIFFICULTY_LEVELS[$this->difficulty] ?? 1;
     }
 
     public function __construct()

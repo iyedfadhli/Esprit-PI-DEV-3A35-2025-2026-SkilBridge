@@ -13,7 +13,8 @@
      data-quiz-title="{{ quiz.title }}"
      data-passing-score="{{ quiz.passingScore ?? 70 }}"
      data-max-attempts="{{ quiz.maxAttempts ?? 3 }}"
-     data-questions-per-attempt="{{ quiz.questionsPerAttempt ?? 20 }}">
+     data-questions-per-attempt="{{ quiz.questionsPerAttempt ?? 20 }}"
+     data-time-limit="{{ quiz.timeLimit ?? 0 }}">
 
     {# Quiz Start Screen #}
     <div id="quiz-start-screen" class="quiz-start-screen">
@@ -46,7 +47,7 @@
             </div>
             <div class="quiz-info-card">
                 <i class="fa fa-clock-o"></i>
-                <span class="value">∞</span>
+                <span class="value">{% if quiz.timeLimit is defined and quiz.timeLimit > 0 %}{{ quiz.timeLimit }} min{% else %}∞{% endif %}</span>
                 <span class="label">Temps</span>
             </div>
         </div>
