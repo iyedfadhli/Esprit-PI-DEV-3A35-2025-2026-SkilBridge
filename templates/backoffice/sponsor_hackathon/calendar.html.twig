@@ -1,0 +1,78 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Hackathon calendar{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+<style>
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+    .calendar-card { background: rgba(255,255,255,0.95); border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+    #calendar { max-width: 100%; }
+    .fc { --fc-border-color: #e0e0e0; --fc-button-bg-color: #4a7fd7; --fc-button-border-color: #4a7fd7; --fc-button-hover-bg-color: #3a6fc7; --fc-button-hover-border-color: #3a6fc7; --fc-today-bg-color: rgba(74, 127, 215, 0.08); }
+    .fc-event { cursor: pointer; }
+    .fc-toolbar-title { font-size: 1.25rem; font-weight: 600; color: #2c3e50; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="admin-header">
+    <h1>Hackathon calendar</h1>
+    <div class="admin-user">
+        <a href="{{ path('app_back_sponsor_hackathon_index') }}" class="primary-btn" style="background: #6c757d;">
+            <i class="fa fa-arrow-left"></i> Back to assignments
+        </a>
+    </div>
+</div>
+
+<div class="calendar-card">
+    <div id="calendar"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales/index.global.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const events = {{ events|json_encode|raw }};
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'en',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        buttonText: {
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day',
+            list: 'List'
+        },
+        events: events,
+        eventClick: function(info) {
+            const url = info.event.extendedProps.url;
+            if (url) {
+                info.jsEvent.preventDefault();
+                window.location.href = url;
+            }
+        },
+        eventDidMount: function(info) {
+            const theme = info.event.extendedProps.theme;
+            if (theme) {
+                info.el.title = info.event.title + ' – ' + theme;
+            }
+        },
+        height: 'auto',
+        navLinks: true,
+        editable: false,
+        selectable: true,
+        nowIndicator: true,
+        dayMaxEvents: 4,
+        moreLinkClick: 'popover'
+    });
+    calendar.render();
+});
+</script>
+{% endblock %}

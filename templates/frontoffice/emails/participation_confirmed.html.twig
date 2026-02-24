@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #2d3436; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px; }
+        .header { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { padding: 30px; }
+        .footer { text-align: center; padding: 20px; font-size: 0.8em; color: #636e72; }
+        .btn { display: inline-block; padding: 12px 25px; background: #6c5ce7; color: white !important; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Registration Confirmed! 🚀</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{ user.displayName }}</strong>,</p>
+            <p>You have successfully registered for the hackathon: <br>
+               <span style="font-size: 1.2em; color: #6c5ce7; font-weight: bold;">{{ hackathon.title }}</span></p>
+            
+            <p>We are excited to see what you'll build! Make sure to check the rules and agenda on the platform.</p>
+            
+            <p>Theme: {{ hackathon.theme }}<br>
+               Start Date: {{ hackathon.startAt|date('M d, Y') }}<br>
+               Location: {{ hackathon.location }}</p>
+
+            <a href="https://localhost:8004/hackathon" class="btn">View Hackathon Details</a>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 Skill Bridge. Empowering Talent.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -2,65 +2,116 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Sponsorship Contract</title>
+    <title>Sponsorship Agreement – {{ sponsor_hackathon.sponsor.name }}</title>
     <style>
-        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.6; }
-        .header { text-align: center; margin-bottom: 50px; border-bottom: 2px solid #4a7fd7; padding-bottom: 20px; }
-        .logo { max-width: 150px; margin-bottom: 10px; }
-        .title { font-size: 24px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #2c3e50; }
-        .content { margin-bottom: 40px; }
+        * { box-sizing: border-box; }
+        body { font-family: 'Helvetica', 'DejaVu Sans', Arial, sans-serif; color: #1a1a1a; line-height: 1.5; font-size: 11px; margin: 0; padding: 40px 50px; }
+        .contract-wrapper { max-width: 100%; }
+
+        .header { text-align: center; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid #2c3e50; }
+        .header .org-name { font-size: 14px; font-weight: bold; color: #2c3e50; letter-spacing: 1px; margin-bottom: 4px; }
+        .header .doc-title { font-size: 18px; font-weight: bold; color: #1a1a1a; margin: 8px 0 4px; }
+        .header .ref-line { font-size: 10px; color: #555; }
+        .header .ref-line strong { color: #2c3e50; }
+
+        .preamble { margin-bottom: 24px; font-style: italic; color: #444; }
+        .parties-block { margin-bottom: 28px; padding: 16px; background: #f8f9fa; border-left: 4px solid #2c3e50; }
+        .parties-block .section-title { font-size: 12px; font-weight: bold; color: #2c3e50; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .parties-block .party { margin-bottom: 8px; }
+        .parties-block .party .label { font-weight: bold; min-width: 100px; display: inline-block; color: #333; }
+        .parties-block .party .value { color: #1a1a1a; }
+
         .section { margin-bottom: 20px; }
-        .section-title { font-size: 16px; font-weight: bold; color: #4a7fd7; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 10px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .label { font-weight: bold; width: 150px; display: inline-block; }
-        .value { color: #555; }
-        .qr-section { text-align: center; margin: 40px 0; }
-        .signatures { margin-top: 60px; width: 100%; }
-        .signature-box { width: 45%; float: left; border: 1px dashed #ccc; height: 120px; margin-right: 5%; position: relative; }
-        .signature-box:last-child { margin-right: 0; }
-        .sign-label { position: absolute; bottom: 10px; left: 10px; font-size: 12px; color: #999; font-weight: bold; }
-        .footer { text-align: center; font-size: 10px; color: #aaa; margin-top: 50px; border-top: 1px solid #eee; padding-top: 10px; }
+        .section-title { font-size: 11px; font-weight: bold; color: #2c3e50; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section p { margin: 0 0 10px; text-align: justify; }
+        .section .article { margin-bottom: 14px; }
+        .section .article-num { font-weight: bold; color: #2c3e50; margin-right: 4px; }
+        .section ul { margin: 8px 0 0 18px; padding: 0; }
+        .section li { margin-bottom: 6px; }
+
+        .signatures { margin-top: 48px; padding-top: 24px; border-top: 1px solid #ddd; overflow: hidden; }
+        .signature-block { width: 48%; float: left; min-height: 130px; }
+        .signature-block.sponsor { margin-right: 4%; }
+        .signature-block .sign-line { border-bottom: 1px solid #333; height: 28px; margin-bottom: 6px; }
+        .signature-block .sign-line.sponsor-img { border: none; height: 70px; margin-bottom: 8px; display: flex; align-items: flex-end; }
+        .signature-block .sign-line.sponsor-img img { max-width: 100%; max-height: 70px; object-fit: contain; display: block; }
+        .signature-block .sign-name { font-size: 11px; font-weight: bold; color: #2c3e50; margin-bottom: 2px; }
+        .signature-block .sign-role { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .signature-block .sign-date { font-size: 9px; color: #666; margin-top: 4px; }
+        .organizer-signature { font-family: 'Times', 'DejaVu Serif', serif; font-size: 16px; font-style: italic; color: #1a1a1a; letter-spacing: 0.5px; }
+        .organizer-signature-line { border-bottom: 1px solid #333; width: 180px; height: 22px; margin-bottom: 6px; }
+
+        .footer { text-align: center; font-size: 9px; color: #888; margin-top: 36px; padding-top: 12px; border-top: 1px solid #eee; }
+        .footer .confidential { margin-top: 6px; font-style: italic; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1 class="title">Sponsorship Agreement</h1>
-        <p>Ref: SP-{{ sponsor_hackathon.id }}-{{ "now"|date("Y") }}</p>
-    </div>
+    <div class="contract-wrapper">
+        <div class="header">
+            <div class="org-name">Skill Bridge</div>
+            <div class="doc-title">Sponsorship Agreement</div>
+            <div class="ref-line">Contract reference: <strong>SP-{{ sponsor_hackathon.id }}-{{ "now"|date("Y") }}</strong> &nbsp;|&nbsp; Date: {{ "now"|date("F d, Y") }}</div>
+        </div>
 
-    <div class="content">
-        <div class="section">
-            <div class="section-title">Parties Involved</div>
-            <p><span class="label">Sponsor:</span> <span class="value">{{ sponsor_hackathon.sponsor.name }}</span></p>
-            <p><span class="label">Hackathon:</span> <span class="value">{{ sponsor_hackathon.hackathon.title }}</span></p>
-            <p><span class="label">Date:</span> <span class="value">{{ "now"|date("d F, Y") }}</span></p>
+        <div class="preamble">
+            This Sponsorship Agreement ("Agreement") is entered into as of {{ "now"|date("F d, Y") }} by and between the parties identified below, with reference to the hackathon event and sponsorship terms set forth herein.
+        </div>
+
+        <div class="parties-block">
+            <div class="section-title">1. Parties</div>
+            <div class="party"><span class="label">Sponsor:</span> <span class="value">{{ sponsor_hackathon.sponsor.name }}</span></div>
+            <div class="party"><span class="label">Event (Hackathon):</span> <span class="value">{{ sponsor_hackathon.hackathon.title }}</span></div>
+            <div class="party"><span class="label">Agreement date:</span> <span class="value">{{ "now"|date("F d, Y") }}</span></div>
         </div>
 
         <div class="section">
-            <div class="section-title">Contribution Details</div>
-            <p><span class="label">Type:</span> <span class="value">{{ sponsor_hackathon.contributionType }}</span></p>
-            <p><span class="label">Value:</span> <span class="value">{{ sponsor_hackathon.contributionValue|number_format(2) }} TND</span></p>
+            <div class="section-title">2. Sponsorship contribution</div>
+            <div class="article"><span class="article-num">2.1</span> The Sponsor agrees to provide the following contribution in connection with the above-named Hackathon:</div>
+            <ul>
+                <li><strong>Type of contribution:</strong> {{ sponsor_hackathon.contributionType }}</li>
+                <li><strong>Value:</strong> {{ sponsor_hackathon.contributionValue|number_format(2) }} TND</li>
+            </ul>
+            <div class="article"><span class="article-num">2.2</span> Payment of the contribution value has been made or shall be made in accordance with the payment terms agreed between the parties.</div>
         </div>
 
         <div class="section">
-            <div class="section-title">Terms & Conditions</div>
-            <p>This agreement confirms the sponsorship commitment described above. The Sponsor agrees to provide the specified contribution, and the Hackathon organizers agree to provide the benefits associated with this sponsorship level.</p>
+            <div class="section-title">3. Obligations of the organizer</div>
+            <p>The Organizer (Skill Bridge) shall provide the benefits and recognition associated with the agreed sponsorship level for the Hackathon, including visibility and any other benefits communicated to the Sponsor in writing.</p>
         </div>
-    </div>
 
-
-    <div class="signatures">
-        <div class="signature-box">
-            <span class="sign-label">Sponsor Signature</span>
+        <div class="section">
+            <div class="section-title">4. General provisions</div>
+            <p>This Agreement constitutes the entire understanding between the parties regarding the sponsorship. Any modification must be made in writing and signed by both parties. This Agreement is governed by the laws applicable to the Organizer's jurisdiction.</p>
         </div>
-        <div class="signature-box" style="float: right;">
-            <span class="sign-label">Organizer Signature</span>
-        </div>
-        <div style="clear: both;"></div>
-    </div>
 
-    <div class="footer">
-        Generated by Skill Bridge Admin System on {{ "now"|date("Y-m-d H:i:s") }}
+        <div class="signatures">
+            <div class="signature-block sponsor">
+                <div class="sign-line {% if signature_data is defined and signature_data %}sponsor-img{% endif %}">
+                    {% if signature_data is defined and signature_data %}
+                        <img src="{{ signature_data }}" alt="Sponsor signature" />
+                    {% endif %}
+                </div>
+                <div class="sign-name">Sponsor</div>
+                <div class="sign-role">{{ sponsor_hackathon.sponsor.name }}</div>
+                {% if signed_at is defined and signed_at %}
+                    <div class="sign-date">Signed on {{ signed_at|date("d/m/Y \\a\\t H:i") }}</div>
+                {% endif %}
+            </div>
+
+            <div class="signature-block">
+                <div class="organizer-signature-line"></div>
+                <div class="organizer-signature">Skill Bridge</div>
+                <div class="sign-name">Authorized Representative</div>
+                <div class="sign-role">Organizer – Skill Bridge</div>
+                <div class="sign-date">Date: {{ "now"|date("d/m/Y") }}</div>
+            </div>
+            <div style="clear: both;"></div>
+        </div>
+
+        <div class="footer">
+            This document was generated by Skill Bridge and constitutes a binding agreement when signed by both parties.
+            <div class="confidential">Document ref: SP-{{ sponsor_hackathon.id }}-{{ "now"|date("Ymd") }}</div>
+        </div>
     </div>
 </body>
 </html>
