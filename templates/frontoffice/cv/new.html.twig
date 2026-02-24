@@ -1,0 +1,547 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Créer un CV - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+
+    <div class="section-header">
+        <div>
+            <h1>Créer un nouveau CV</h1>
+            <p class="section-subtitle">Remplissez les informations de votre CV</p>
+        </div>
+
+        <a href="{{ path('preview_front_cv_index') }}" class="btn-secondary">
+            <i class="fa fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    {# Désactivation de HTML5 et ajout de l'id pour JS #}
+    {{ form_start(form, {'attr': {'class': 'cv-form-wrapper', 'id': 'cvForm', 'novalidate': 'novalidate'}}) }}
+    <div class="global-errors">
+        {{ form_errors(form) }}
+    </div>
+
+    {# --- Section 1: Informations générales --- #}
+    <div class="cv-form-section">
+        <h2><i class="fa fa-info-circle"></i> Informations générales</h2>
+        <p class="section-desc">Donnez un nom à votre CV et choisissez la langue</p>
+
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.nomCv) }}
+                {{ form_widget(form.nomCv, {'attr': {'class': 'form-control' ~ (not form.nomCv.vars.valid ? '
+                is-invalid' : '')}}) }}
+                {{ form_errors(form.nomCv) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.langue) }}
+                {{ form_widget(form.langue, {'attr': {'class': 'form-control' ~ (not form.langue.vars.valid ? '
+                is-invalid' : '')}}) }}
+                {{ form_errors(form.langue) }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.linkedinUrl) }}
+                {{ form_widget(form.linkedinUrl, {'attr': {'class': 'form-control' ~ (not form.linkedinUrl.vars.valid ?
+                ' is-invalid' : '')}}) }}
+                {{ form_errors(form.linkedinUrl) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.idTemplate) }}
+                {{ form_widget(form.idTemplate, {'attr': {'class': 'form-control' ~ (not form.idTemplate.vars.valid ? '
+                is-invalid' : '')}}) }}
+                {{ form_errors(form.idTemplate) }}
+            </div>
+        </div>
+
+        <div class="form-row single">
+            <div class="form-group">
+                {{ form_label(form.summary) }}
+                {{ form_widget(form.summary, {'attr': {'class': 'form-control' ~ (not form.summary.vars.valid ? '
+                is-invalid' : ''), 'rows': 4}}) }}
+                {{ form_errors(form.summary) }}
+            </div>
+        </div>
+    </div>
+
+    {# --- Section 2: Expériences --- #}
+    <div class="cv-form-section">
+        <h2><i class="fa fa-briefcase"></i> Expériences professionnelles</h2>
+
+        {% set exp_proto %}
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.experiences.vars.prototype.jobTitle) }}
+                {{ form_widget(form.experiences.vars.prototype.jobTitle, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.jobTitle) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.experiences.vars.prototype.company) }}
+                {{ form_widget(form.experiences.vars.prototype.company, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.company) }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.experiences.vars.prototype.location) }}
+                {{ form_widget(form.experiences.vars.prototype.location, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.location) }}
+            </div>
+            <div class="form-group">
+                <div style="margin-top: 2rem;">
+                    {{ form_widget(form.experiences.vars.prototype.currentlyWorking) }}
+                    {{ form_label(form.experiences.vars.prototype.currentlyWorking) }}
+                    {{ form_errors(form.experiences.vars.prototype.currentlyWorking) }}
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.experiences.vars.prototype.startDate) }}
+                {{ form_widget(form.experiences.vars.prototype.startDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.startDate) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.experiences.vars.prototype.endDate) }}
+                {{ form_widget(form.experiences.vars.prototype.endDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.endDate) }}
+            </div>
+        </div>
+        <div class="form-row single">
+            <div class="form-group">
+                {{ form_label(form.experiences.vars.prototype.description) }}
+                {{ form_widget(form.experiences.vars.prototype.description, {'attr': {'class': 'form-control', 'rows':
+                3}}) }}
+                {{ form_errors(form.experiences.vars.prototype.description) }}
+            </div>
+        </div>
+        {% endset %}
+
+        <div id="experiences-container" data-prototype="{{ exp_proto|e('html_attr') }}"
+            data-index="{{ form.experiences|length }}">
+            {% for experienceField in form.experiences %}
+            <div class="entry-block">
+                <button type="button" class="btn-remove-entry" onclick="this.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <span class="entry-number">Expérience {{ loop.index }}</span>
+                <div class="form-content-wrapper">
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(experienceField.jobTitle) }}
+                            {{ form_widget(experienceField.jobTitle, {'attr': {'class': 'form-control' ~ (not
+                            experienceField.jobTitle.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(experienceField.jobTitle) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(experienceField.company) }}
+                            {{ form_widget(experienceField.company, {'attr': {'class': 'form-control' ~ (not
+                            experienceField.company.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(experienceField.company) }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(experienceField.location) }}
+                            {{ form_widget(experienceField.location, {'attr': {'class': 'form-control' ~ (not
+                            experienceField.location.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(experienceField.location) }}
+                        </div>
+                        <div class="form-group">
+                            <div style="margin-top: 2rem;">
+                                {{ form_widget(experienceField.currentlyWorking) }}
+                                {{ form_label(experienceField.currentlyWorking) }}
+                                {{ form_errors(experienceField.currentlyWorking) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(experienceField.startDate) }}
+                            {{ form_widget(experienceField.startDate, {'attr': {'class': 'form-control' ~ (not
+                            experienceField.startDate.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(experienceField.startDate) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(experienceField.endDate) }}
+                            {{ form_widget(experienceField.endDate, {'attr': {'class': 'form-control' ~ (not
+                            experienceField.endDate.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(experienceField.endDate) }}
+                        </div>
+                    </div>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            {{ form_label(experienceField.description) }}
+                            {{ form_widget(experienceField.description, {'attr': {'class': 'form-control' ~ (not
+                            experienceField.description.vars.valid ? ' is-invalid' : ''), 'rows': 3}}) }}
+                            {{ form_errors(experienceField.description) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-entry" onclick="addCollectionItem('experiences')">
+            <i class="fa fa-plus"></i> Ajouter une expérience
+        </button>
+    </div>
+
+    {# --- Section 3: Formations --- #}
+    <div class="cv-form-section">
+        <h2><i class="fa fa-graduation-cap"></i> Formation</h2>
+
+        {% set edu_proto %}
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.educations.vars.prototype.degree) }}
+                {{ form_widget(form.educations.vars.prototype.degree, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.educations.vars.prototype.degree) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.educations.vars.prototype.fieldOfStudy) }}
+                {{ form_widget(form.educations.vars.prototype.fieldOfStudy, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.educations.vars.prototype.fieldOfStudy) }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.educations.vars.prototype.school) }}
+                {{ form_widget(form.educations.vars.prototype.school, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.educations.vars.prototype.school) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.educations.vars.prototype.city) }}
+                {{ form_widget(form.educations.vars.prototype.city, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.educations.vars.prototype.city) }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.educations.vars.prototype.startDate) }}
+                {{ form_widget(form.educations.vars.prototype.startDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.educations.vars.prototype.startDate) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.educations.vars.prototype.endDate) }}
+                {{ form_widget(form.educations.vars.prototype.endDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.educations.vars.prototype.endDate) }}
+            </div>
+        </div>
+        <div class="form-row single">
+            <div class="form-group">
+                {{ form_label(form.educations.vars.prototype.description) }}
+                {{ form_widget(form.educations.vars.prototype.description, {'attr': {'class': 'form-control', 'rows':
+                3}}) }}
+                {{ form_errors(form.educations.vars.prototype.description) }}
+            </div>
+        </div>
+        {% endset %}
+
+        <div id="educations-container" data-prototype="{{ edu_proto|e('html_attr') }}"
+            data-index="{{ form.educations|length }}">
+            {% for educationField in form.educations %}
+            <div class="entry-block">
+                <button type="button" class="btn-remove-entry" onclick="this.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <span class="entry-number">Formation {{ loop.index }}</span>
+                <div class="form-content-wrapper">
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(educationField.degree) }}
+                            {{ form_widget(educationField.degree, {'attr': {'class': 'form-control' ~ (not
+                            educationField.degree.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(educationField.degree) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(educationField.fieldOfStudy) }}
+                            {{ form_widget(educationField.fieldOfStudy, {'attr': {'class': 'form-control' ~ (not
+                            educationField.fieldOfStudy.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(educationField.fieldOfStudy) }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(educationField.school) }}
+                            {{ form_widget(educationField.school, {'attr': {'class': 'form-control' ~ (not
+                            educationField.school.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(educationField.school) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(educationField.city) }}
+                            {{ form_widget(educationField.city, {'attr': {'class': 'form-control' ~ (not
+                            educationField.city.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(educationField.city) }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(educationField.startDate) }}
+                            {{ form_widget(educationField.startDate, {'attr': {'class': 'form-control' ~ (not
+                            educationField.startDate.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(educationField.startDate) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(educationField.endDate) }}
+                            {{ form_widget(educationField.endDate, {'attr': {'class': 'form-control' ~ (not
+                            educationField.endDate.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(educationField.endDate) }}
+                        </div>
+                    </div>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            {{ form_label(educationField.description) }}
+                            {{ form_widget(educationField.description, {'attr': {'class': 'form-control' ~ (not
+                            educationField.description.vars.valid ? ' is-invalid' : ''), 'rows': 3}}) }}
+                            {{ form_errors(educationField.description) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-entry" onclick="addCollectionItem('educations')">
+            <i class="fa fa-plus"></i> Ajouter une formation
+        </button>
+    </div>
+
+    {# --- Section 4: Compétences --- #}
+    <div class="cv-form-section">
+        <h2><i class="fa fa-cogs"></i> Compétences</h2>
+
+        {% set skill_proto %}
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.skills.vars.prototype.nom) }}
+                {{ form_widget(form.skills.vars.prototype.nom, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.skills.vars.prototype.nom) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.skills.vars.prototype.type) }}
+                {{ form_widget(form.skills.vars.prototype.type, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.skills.vars.prototype.type) }}
+            </div>
+        </div>
+        <div class="form-row single">
+            <div class="form-group">
+                {{ form_label(form.skills.vars.prototype.level) }}
+                {{ form_widget(form.skills.vars.prototype.level, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.skills.vars.prototype.level) }}
+            </div>
+        </div>
+        {% endset %}
+
+        <div id="skills-container" data-prototype="{{ skill_proto|e('html_attr') }}"
+            data-index="{{ form.skills|length }}">
+            {% for skillField in form.skills %}
+            <div class="entry-block">
+                <button type="button" class="btn-remove-entry" onclick="this.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <span class="entry-number">Compétence {{ loop.index }}</span>
+                <div class="form-content-wrapper">
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(skillField.nom) }}
+                            {{ form_widget(skillField.nom, {'attr': {'class': 'form-control' ~ (not
+                            skillField.nom.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(skillField.nom) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(skillField.type) }}
+                            {{ form_widget(skillField.type, {'attr': {'class': 'form-control' ~ (not
+                            skillField.type.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(skillField.type) }}
+                        </div>
+                    </div>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            {{ form_label(skillField.level) }}
+                            {{ form_widget(skillField.level, {'attr': {'class': 'form-control' ~ (not
+                            skillField.level.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(skillField.level) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-entry" onclick="addCollectionItem('skills')">
+            <i class="fa fa-plus"></i> Ajouter une compétence
+        </button>
+    </div>
+
+    {# --- Section 5: Certifications --- #}
+    <div class="cv-form-section">
+        <h2><i class="fa fa-certificate"></i> Certifications</h2>
+
+        {% set cert_proto %}
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.certifs.vars.prototype.name) }}
+                {{ form_widget(form.certifs.vars.prototype.name, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.certifs.vars.prototype.name) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.certifs.vars.prototype.issuedBy) }}
+                {{ form_widget(form.certifs.vars.prototype.issuedBy, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.certifs.vars.prototype.issuedBy) }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.certifs.vars.prototype.issueDate) }}
+                {{ form_widget(form.certifs.vars.prototype.issueDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.certifs.vars.prototype.issueDate) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.certifs.vars.prototype.expDate) }}
+                {{ form_widget(form.certifs.vars.prototype.expDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.certifs.vars.prototype.expDate) }}
+            </div>
+        </div>
+        {% endset %}
+
+        <div id="certifs-container" data-prototype="{{ cert_proto|e('html_attr') }}"
+            data-index="{{ form.certifs|length }}">
+            {% for certifField in form.certifs %}
+            <div class="entry-block">
+                <button type="button" class="btn-remove-entry" onclick="this.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <span class="entry-number">Certification {{ loop.index }}</span>
+                <div class="form-content-wrapper">
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(certifField.name) }}
+                            {{ form_widget(certifField.name, {'attr': {'class': 'form-control' ~ (not
+                            certifField.name.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(certifField.name) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(certifField.issuedBy) }}
+                            {{ form_widget(certifField.issuedBy, {'attr': {'class': 'form-control' ~ (not
+                            certifField.issuedBy.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(certifField.issuedBy) }}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(certifField.issueDate) }}
+                            {{ form_widget(certifField.issueDate, {'attr': {'class': 'form-control' ~ (not
+                            certifField.issueDate.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(certifField.issueDate) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(certifField.expDate) }}
+                            {{ form_widget(certifField.expDate, {'attr': {'class': 'form-control' ~ (not
+                            certifField.expDate.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(certifField.expDate) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-entry" onclick="addCollectionItem('certifs')">
+            <i class="fa fa-plus"></i> Ajouter une certification
+        </button>
+    </div>
+
+    {# --- Section 6: Langues --- #}
+    <div class="cv-form-section">
+        <h2><i class="fa fa-language"></i> Langues</h2>
+
+        {% set lang_proto %}
+        <div class="form-row">
+            <div class="form-group">
+                {{ form_label(form.languages.vars.prototype.nom) }}
+                {{ form_widget(form.languages.vars.prototype.nom, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.languages.vars.prototype.nom) }}
+            </div>
+            <div class="form-group">
+                {{ form_label(form.languages.vars.prototype.niveau) }}
+                {{ form_widget(form.languages.vars.prototype.niveau, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.languages.vars.prototype.niveau) }}
+            </div>
+        </div>
+        {% endset %}
+
+        <div id="languages-container" data-prototype="{{ lang_proto|e('html_attr') }}"
+            data-index="{{ form.languages|length }}">
+            {% for languageField in form.languages %}
+            <div class="entry-block">
+                <button type="button" class="btn-remove-entry" onclick="this.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <span class="entry-number">Langue {{ loop.index }}</span>
+                <div class="form-content-wrapper">
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form_label(languageField.nom) }}
+                            {{ form_widget(languageField.nom, {'attr': {'class': 'form-control' ~ (not
+                            languageField.nom.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(languageField.nom) }}
+                        </div>
+                        <div class="form-group">
+                            {{ form_label(languageField.niveau) }}
+                            {{ form_widget(languageField.niveau, {'attr': {'class': 'form-control' ~ (not
+                            languageField.niveau.vars.valid ? ' is-invalid' : '')}}) }}
+                            {{ form_errors(languageField.niveau) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn-add-entry" onclick="addCollectionItem('languages')">
+            <i class="fa fa-plus"></i> Ajouter une langue
+        </button>
+    </div>
+
+    {# --- Submit --- #}
+    <div class="cv-form-submit">
+        <button type="submit" class="btn-primary">
+            <i class="fa fa-save"></i> Créer le CV
+        </button>
+    </div>
+
+    {{ form_end(form) }}
+
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    function addCollectionItem(collectionId) {
+        const container = document.getElementById(collectionId + '-container');
+        const prototype = container.dataset.prototype;
+        const index = parseInt(container.dataset.index);
+
+        let newForm = prototype.replace(/__name__/g, index);
+        container.dataset.index = index + 1;
+
+        const div = document.createElement('div');
+        div.classList.add('entry-block');
+        div.innerHTML = `
+                <button type="button" class="btn-remove-entry" onclick="this.parentElement.remove()">
+                    <i class="fa fa-times"></i>
+                </button>
+                <span class="entry-number">${collectionId.charAt(0).toUpperCase() + collectionId.slice(1, -1)} ${index + 1}</span>
+                <div class="form-content-wrapper">
+                    ${newForm}
+                </div>
+            `;
+
+        container.appendChild(div);
+    }
+</script>
+{% endblock %}

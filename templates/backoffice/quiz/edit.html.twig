@@ -1,0 +1,89 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Edit Quiz - {{ quiz.title }} - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-pen"></i> Edit Quiz</h1>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_quiz_index') }}">Quizzes</a>
+        <span>/</span>
+        <a href="{{ path('admin_quiz_show', {'id': quiz.id}) }}">{{ quiz.title }}</a>
+        <span>/</span>
+        <span>Edit</span>
+    </nav>
+
+    <!-- Form Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-clipboard-question"></i> Edit: {{ quiz.title }}</h2>
+            <span class="badge badge-secondary">#{{ quiz.id }}</span>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'crud-form', 'novalidate': 'novalidate'}}) }}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.title) }}
+                    {% if form.title.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.title) }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.supervisor, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.supervisor) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.course, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.course) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.chapter, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.chapter) }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.passing_score, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.passing_score) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.max_attempts, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.max_attempts) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.questions_per_attempt, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.questions_per_attempt) }}
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('admin_quiz_index') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </a>
+                <a href="{{ path('admin_quiz_show', {'id': quiz.id}) }}" class="btn btn-outline">
+                    <i class="fa-solid fa-eye"></i> View
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> Save Changes
+                </button>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

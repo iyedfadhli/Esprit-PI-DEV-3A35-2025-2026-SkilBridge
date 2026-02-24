@@ -1,3 +1,35 @@
-body {
-    background-color: skyblue;
+/* Global header/footer and base styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root{
+    --bg: #f7fafc;
+    --header-bg: #ffffff;
+    --header-border: #e6eef0;
+    --footer-bg: #0f1724;
+    --footer-text: #cbd5e1;
+    --accent: #0ea5a4;
 }
+
+body{font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:#0f172a;margin:0}
+
+header{background:var(--header-bg);border-bottom:1px solid var(--header-border);display:flex;align-items:center;justify-content:space-between;padding:12px 28px;position:sticky;top:0;z-index:50}
+.header-logo-img{height:44px}
+nav{display:flex;gap:18px;align-items:center}
+nav a{color:#0f172a;text-decoration:none;padding:8px 10px;border-radius:8px}
+nav a:hover{background:#f1f5f9}
+.header-profile .profile-img{width:36px;height:36px;border-radius:999px;object-fit:cover}
+
+main{min-height:60vh;padding:20px 28px}
+
+footer.footer{background:var(--footer-bg);color:var(--footer-text);padding:40px 28px;margin-top:32px}
+.footer-top{display:flex;justify-content:space-between;gap:24px}
+.footer-col h2, .footer-col h3{color:#fff}
+.footer-col p, .footer-col a{color:var(--footer-text);text-decoration:none}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.06);padding-top:16px;margin-top:24px;text-align:center;color:rgba(255,255,255,0.6)}
+
+/* small screens */
+@media (max-width:800px){
+    .footer-top{flex-direction:column}
+    nav{display:none}
+}
+

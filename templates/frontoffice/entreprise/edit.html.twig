@@ -1,0 +1,195 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Modifier l'offre - Back Office{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/cv/cv.css') }}">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .input-error {
+            border: 1px solid red;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+<div class="page-header">
+    <h1><i class="fa fa-pencil-square-o"></i> Modifier l'offre</h1>
+    <a href="{{ path('preview_back_offer_index') }}" class="btn-secondary">
+        <i class="fa fa-arrow-left"></i> Retour a la liste
+    </a>
+</div>
+
+<form id="offerForm" method="post" action="{{ path('preview_back_offer_edit', {id: offer.id}) }}">
+
+    <div class="bo-form-card">
+        <h2><i class="fa fa-info-circle"></i> Informations de l'offre</h2>
+
+        <div class="bo-form-group">
+            <label for="title">Titre de l'offre *</label>
+            <input type="text" id="title" name="title" value="{{ offer.title }}">
+            <div class="error-message" id="titleError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="offer_type">Type d'offre *</label>
+            <select id="offer_type" name="offer_type">
+                <option value="">-- Choisir --</option>
+                <option value="internship" {{ offer.offerType == 'internship' ? 'selected' : '' }}>Stage</option>
+                <option value="job" {{ offer.offerType == 'job' ? 'selected' : '' }}>Emploi</option>
+            </select>
+            <div class="error-message" id="typeError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="field">Domaine *</label>
+            <input type="text" id="field" name="field" value="{{ offer.field }}">
+            <div class="error-message" id="fieldError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="requiredLevel">Niveau requis *</label>
+            <select id="requiredLevel" name="requiredLevel">
+                <option value="">-- Choisir --</option>
+                <option value="Bac" {{ offer.requiredLevel == 'Bac' ? 'selected' : '' }}>Bac</option>
+                <option value="Bac+2" {{ offer.requiredLevel == 'Bac+2' ? 'selected' : '' }}>Bac+2</option>
+                <option value="Bac+3" {{ offer.requiredLevel == 'Bac+3' ? 'selected' : '' }}>Bac+3</option>
+                <option value="Bac+5" {{ offer.requiredLevel == 'Bac+5' ? 'selected' : '' }}>Bac+5</option>
+                <option value="Doctorat" {{ offer.requiredLevel == 'Doctorat' ? 'selected' : '' }}>Doctorat</option>
+            </select>
+            <div class="error-message" id="levelError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="location">Localisation *</label>
+            <input type="text" id="location" name="location" value="{{ offer.location }}">
+            <div class="error-message" id="locationError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="contractType">Type de contrat *</label>
+            <select id="contractType" name="contractType">
+                <option value="">-- Choisir --</option>
+                
+                <option value="Stage" {{ offer.contractType == 'Stage' ? 'selected' : '' }}>Stage</option>
+                <option value="Freelance" {{ offer.contractType == 'Freelance' ? 'selected' : '' }}>Freelance</option>
+                <option value="Alternance" {{ offer.contractType == 'Alternance' ? 'selected' : '' }}>Alternance</option>
+            </select>
+            <div class="error-message" id="contractError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="duration">Duree</label>
+            <input type="number" id="duration" name="duration" value="{{ offer.duration }}">
+            <div class="error-message" id="durationError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="enterprise_id">Entreprise *</label>
+            <select id="enterprise_id" name="enterprise_id">
+                <option value="">-- Choisir --</option>
+                {% for entreprise in enterprises %}
+                    <option value="{{ entreprise.id }}" {{ offer.entreprise.id == entreprise.id ? 'selected' : '' }}>
+                        {{ entreprise.domaine ?: 'Entreprise #' ~ entreprise.id }}
+                    </option>
+                {% endfor %}
+            </select>
+            <div class="error-message" id="enterpriseError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="description">Description *</label>
+            <textarea id="description" name="description" rows="5">{{ offer.description }}</textarea>
+            <div class="error-message" id="descriptionError"></div>
+        </div>
+
+        <div class="bo-form-group">
+            <label for="requiredSkills">Competences requises</label>
+            <textarea id="requiredSkills" name="requiredSkills" rows="3">{{ offer.requiredSkills }}</textarea>
+        </div>
+
+        <div class="bo-form-actions">
+            <button type="submit" class="btn-primary">
+                <i class="fa fa-save"></i> Enregistrer les modifications
+            </button>
+        </div>
+
+    </div>
+
+</form>
+
+<script>
+document.getElementById("offerForm").addEventListener("submit", function(event) {
+
+    let isValid = true;
+
+    function setError(id, message) {
+        document.getElementById(id).innerText = message;
+        if (message !== "") isValid = false;
+    }
+
+    function clearErrors() {
+        document.querySelectorAll(".error-message").forEach(el => el.innerText = "");
+    }
+
+    clearErrors();
+
+    let title = document.getElementById("title").value.trim();
+    let type = document.getElementById("offer_type").value;
+    let field = document.getElementById("field").value.trim();
+    let level = document.getElementById("requiredLevel").value;
+    let location = document.getElementById("location").value.trim();
+    let contract = document.getElementById("contractType").value;
+    let duration = document.getElementById("duration").value;
+    let enterprise = document.getElementById("enterprise_id").value;
+    let description = document.getElementById("description").value.trim();
+
+    if (title.length < 5) {
+        setError("titleError", "Le titre doit contenir au moins 5 caracteres.");
+    }
+
+    if (type === "") {
+        setError("typeError", "Veuillez choisir un type d'offre.");
+    }
+
+    if (field.length < 3) {
+        setError("fieldError", "Le domaine doit contenir au moins 3 caracteres.");
+    }
+
+    if (level === "") {
+        setError("levelError", "Veuillez choisir un niveau.");
+    }
+
+    if (location.length < 2) {
+        setError("locationError", "Localisation invalide.");
+    }
+
+    if (contract === "") {
+        setError("contractError", "Veuillez choisir un type de contrat.");
+    }
+
+    if (duration !== "" && duration <= 0) {
+        setError("durationError", "La duree doit etre positive.");
+    }
+
+    if (enterprise === "") {
+        setError("enterpriseError", "Veuillez choisir une entreprise.");
+    }
+
+    if (description.length < 10) {
+        setError("descriptionError", "La description doit contenir au moins 10 caracteres.");
+    }
+
+    if (!isValid) {
+        event.preventDefault();
+    }
+
+});
+</script>
+
+{% endblock %}

@@ -9,10 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\User;
 class HomeController extends AbstractController
 {
-    #[Route(path: '/', name: 'home')]
-   public function home(Request $request, EntityManagerInterface $em): Response
-{
-    
-    return $this->render('frontoffice/home.html.twig');
-}
+    #[Route('/', name: 'home')]
+    public function index(): Response
+    {
+        return $this->render('frontoffice/home.html.twig');
+    }
 }

@@ -1,0 +1,138 @@
+{# ============================================================
+   File: templates/backoffice/cv/index.html.twig
+   Description: Admin view - list all CVs with stats & table
+   ============================================================ #}
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Gestion des CVs - Back Office{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message {{ type }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    {# Page header #}
+    <div class="page-header">
+        <h1><i class="fa fa-file-text"></i> Gestion des CVs</h1>
+    </div>
+
+    {# Stats #}
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ cvs is defined ? cvs|length : 0 }}</div>
+            <div class="stat-label">Total CVs</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ cvs is defined ? cvs|filter(cv => cv.langue == 'Francais')|length : 0 }}</div>
+            <div class="stat-label">En Francais</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ cvs is defined ? cvs|filter(cv => cv.langue == 'Anglais')|length : 0 }}</div>
+            <div class="stat-label">En Anglais</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ cvs is defined ? cvs|filter(cv => cv.progression == 100)|length : 0 }}</div>
+            <div class="stat-label">Complets (100%)</div>
+        </div>
+    </div>
+
+    {# Table #}
+    <div class="data-table-wrapper">
+        <div class="table-header">
+            <h2>Liste des CVs</h2>
+            <input type="text" class="table-search" id="cv-table-search" placeholder="Rechercher..." onkeyup="searchTable()">
+        </div>
+
+        {% if cvs is defined and cvs|length > 0 %}
+            <table class="data-table" id="cv-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom du CV</th>
+                        <th>Utilisateur</th>
+                        <th>Langue</th>
+                        <th>Progression</th>
+                        <th>Date de creation</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cv in cvs %}
+                        <tr>
+                            <td>#{{ cv.id }}</td>
+                            <td><strong>{{ cv.nomCv }}</strong></td>
+                            <td>{{ cv.user.email|default('N/A') }}</td>
+                            <td>
+                                <span class="badge badge-info">{{ cv.langue }}</span>
+                            </td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div style="flex:1;background:#eee;border-radius:10px;height:6px;overflow:hidden;">
+                                        <div style="width:{{ cv.progression }}%;background:linear-gradient(90deg,#4568dc,#b06ab3);height:100%;border-radius:10px;"></div>
+                                    </div>
+                                    <span style="font-size:12px;color:#888;">{{ cv.progression }}%</span>
+                                </div>
+                            </td>
+                            <td>{{ cv.creationDate|date('d/m/Y') }}</td>
+                            <td>
+                                <div class="action-btns">
+                                    <a href="{{ path('preview_back_cv_show', {id: cv.id}) }}" class="action-btn view" title="Voir">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                        <div class="action-btns">
+
+        
+
+        <!-- Supprimer -->
+<form method="post"
+      action="{{ path('preview_back_cv_delete', {id: cv.id}) }}"
+      class="action-btn delete"
+      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce CV ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete_cv_' ~ cv.id) }}">
+    <button type="submit" class="action-btn delete" title="Supprimer">
+        <i class="fa fa-trash"></i>
+    </button>
+</form>
+
+
+    </div>
+</td>
+                                   
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fa fa-file-text-o"></i>
+                <p>Aucun CV enregistre.</p>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function searchTable() {
+            const input = document.getElementById('cv-table-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#cv-table tbody tr');
+            rows.forEach(function(row) {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
+{% endblock %}

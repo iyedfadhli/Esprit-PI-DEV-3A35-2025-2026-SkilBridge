@@ -1,0 +1,124 @@
+{# ============================================================
+File: templates/frontoffice/entreprise/index.html.twig
+Description: Tableau de bord Enterprise - List all offers
+============================================================ #}
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Tableau de bord Entreprise - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+    <div class="flash-messages">
+        {% for message in messages %}
+        <div class="flash-message {{ type }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    {# Section header #}
+    <div class="section-header">
+        <div>
+            <h1>Tableau de bord Entreprise</h1>
+            <p class="section-subtitle">Gérez vos offres et consultez les candidatures</p>
+        </div>
+        <a href="{{ path('entreprise_offer_new') }}" class="btn-primary">
+            <i class="fa fa-plus"></i> Nouvelle Offre
+        </a>
+    </div>
+
+    {# Filter bar #}
+    <div class="filter-bar">
+        <input type="text" id="offer-search" placeholder="Rechercher une offre..." onkeyup="filterOffers()">
+        <select id="offer-status-filter" onchange="filterOffers()">
+            <option value="">Tous les statuts</option>
+            <option value="active">Actif</option>
+            <option value="inactive">Inactif</option>
+            <option value="closed">Clôturé</option>
+        </select>
+    </div>
+
+    {# Offer Grid #}
+    {% if offers is defined and offers|length > 0 %}
+    <div class="cv-grid" id="offer-grid">
+        {% for offer in offers %}
+        <div class="cv-card offer-card" data-title="{{ offer.title|lower }}" data-status="{{ offer.status }}">
+            <div class="cv-card-header">
+                <h3>{{ offer.title }}</h3>
+                <span class="cv-card-badge status-{{ offer.status }}">{{ offer.status|capitalize }}</span>
+            </div>
+
+            <div class="cv-card-meta">
+                <span><i class="fa fa-briefcase"></i> {{ offer.field }}</span>
+                <span><i class="fa fa-map-marker"></i> {{ offer.location }}</span>
+                <span><i class="fa fa-clock-o"></i> {{ offer.duration ? offer.duration ~ ' mois' : '-' }}</span>
+                <span><i class="fa fa-money"></i> {{ offer.salaryRange ? offer.salaryRange ~ ' DT' : '-' }}</span>
+                <span><i class="fa fa-calendar"></i> {{ offer.createdAt|date('d/m/Y') }}</span>
+            </div>
+
+            <div class="cv-card-description">
+                <p>{{ offer.description|length > 100 ? offer.description[:100] ~ '...' : offer.description }}</p>
+            </div>
+
+            <div class="cv-card-actions">
+                <a href="{{ path('entreprise_offer_applications', {'id': offer.id}) }}" class="btn-view"
+                    style="flex: 1.5;">
+                    <i class="fa fa-users"></i> Candidatures
+                </a>
+                <a href="{{ path('entreprise_offer_edit', {'id': offer.id}) }}" class="btn-edit">
+                    <i class="fa fa-pencil"></i> Modifier
+                </a>
+                <a href="#" class="btn-delete" onclick="deleteOffer('{{ offer.id }}'); return false;">
+                    <i class="fa fa-trash"></i>
+                </a>
+
+                <form id="delete-form-{{ offer.id }}" method="post"
+                    action="{{ path('entreprise_offer_delete', {'id': offer.id}) }}" style="display:none;">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offer.id) }}">
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa fa-briefcase"></i>
+        <p>Vous n'avez pas encore publié d'offres.</p>
+        <a href="{{ path('entreprise_offer_new') }}" class="btn-primary">
+            <i class="fa fa-plus"></i> Créer ma première offre
+        </a>
+    </div>
+    {% endif %}
+
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    function filterOffers() {
+        const search = document.getElementById('offer-search').value.toLowerCase();
+        const status = document.getElementById('offer-status-filter').value.toLowerCase();
+        const cards = document.querySelectorAll('.offer-card');
+        cards.forEach(function (card) {
+            const title = card.getAttribute('data-title');
+            const cardStatus = card.getAttribute('data-status').toLowerCase();
+            const matchTitle = title.includes(search);
+            const matchStatus = !status || cardStatus === status;
+            card.style.display = (matchTitle && matchStatus) ? '' : 'none';
+        });
+    }
+
+    function deleteOffer(offerId) {
+        if (confirm('Voulez-vous vraiment supprimer cette offre ?')) {
+            document.getElementById('delete-form-' + offerId).submit();
+        }
+    }
+</script>
+{% endblock %}

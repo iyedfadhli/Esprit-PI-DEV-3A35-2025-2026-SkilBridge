@@ -14,12 +14,12 @@ class CvApplication
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?cv $cv = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Cv $cv = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?offer $offer = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Offer $offer = null;
 
     #[ORM\Column(length: 30)]
     private ?string $status = null;
@@ -32,24 +32,24 @@ class CvApplication
         return $this->id;
     }
 
-    public function getCv(): ?cv
+    public function getCv(): ?Cv
     {
         return $this->cv;
     }
 
-    public function setCv(?cv $cv): static
+    public function setCv(?Cv $cv): static
     {
         $this->cv = $cv;
 
         return $this;
     }
 
-    public function getOffer(): ?offer
+    public function getOffer(): ?Offer
     {
         return $this->offer;
     }
 
-    public function setOffer(?offer $offer): static
+    public function setOffer(?Offer $offer): static
     {
         $this->offer = $offer;
 

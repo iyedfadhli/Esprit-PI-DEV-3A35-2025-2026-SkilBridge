@@ -31,4 +31,18 @@ class SponsorHackathonRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function getSearchQuery(?string $query = null)
+    {
+        $qb = $this->createQueryBuilder('s')
+            ->leftJoin('s.sponsor', 'sp')
+            ->leftJoin('s.hackathon', 'h');
+
+        if ($query) {
+            $qb->andWhere('sp.name LIKE :query OR h.title LIKE :query')
+                ->setParameter('query', '%' . $query . '%');
+        }
+
+        return $qb->orderBy('s.id', 'DESC')->getQuery();
+    }
 }

@@ -32,13 +32,22 @@
     .btn-edit { background: #fff3e0; color: #f57c00; }
     .btn-delete { background: #ffebee; color: #d32f2f; border: none; cursor: pointer; }
     .btn-action:hover { transform: translateY(-3px); }
+    .pagination-wrapper nav { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px; }
+    .pagination-wrapper .pagination { display: flex; list-style: none; padding: 0; margin: 0; gap: 4px; }
+    .pagination-wrapper .pagination li a, .pagination-wrapper .pagination li span { display: inline-block; padding: 8px 14px; border-radius: 8px; text-decoration: none; color: #4a7fd7; font-weight: 500; border: 1px solid #e0e0e0; background: #fff; transition: 0.2s; }
+    .pagination-wrapper .pagination li a:hover { background: #4a7fd7; color: #fff; border-color: #4a7fd7; }
+    .pagination-wrapper .pagination li.active span { background: #4a7fd7; color: #fff; border-color: #4a7fd7; }
+    .pagination-wrapper .pagination li.disabled span { color: #999; cursor: not-allowed; }
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="admin-header">
     <h1>Sponsor Assignments</h1>
-    <div class="admin-user">
+    <div class="admin-user" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="{{ path('app_back_sponsor_hackathon_calendar') }}" class="primary-btn" style="background: #2c3e50;">
+            <i class="fa fa-calendar"></i> Calendar
+        </a>
         <a href="{{ path('app_back_sponsor_hackathon_new') }}" class="primary-btn">
             <i class="fa fa-link"></i> Assign Sponsor
         </a>
@@ -74,10 +83,15 @@
                 </tr>
             </thead>
             <tbody id="table-body">
-                {% include 'backoffice/sponsor_hackathon/_table_body.html.twig' %}
+                {% include 'backoffice/sponsor_hackathon/_table_body.html.twig' with { sponsor_hackathons: pagination.getItems } %}
             </tbody>
         </table>
     </div>
+    {% if pagination is defined and pagination.pageCount > 1 %}
+    <div class="pagination-wrapper" style="margin-top: 24px; display: flex; justify-content: center;">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+    {% endif %}
 </div>
 
 {% block javascripts %}

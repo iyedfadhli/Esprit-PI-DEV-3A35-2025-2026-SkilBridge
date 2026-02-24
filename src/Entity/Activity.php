@@ -14,18 +14,21 @@ class Activity
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Challenge $idChallenge = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?Group $group_id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255,nullable: true)]
     private ?string $submission_file = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?\DateTime $submission_date = null;
+
+    #[ORM\Column(type: 'string', length: 30, nullable: true)]
+    private ?string $status = null;
 
     public function getId(): ?int
     {
@@ -76,6 +79,18 @@ class Activity
     public function setSubmissionDate(\DateTime $submission_date): static
     {
         $this->submission_date = $submission_date;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
 
         return $this;
     }

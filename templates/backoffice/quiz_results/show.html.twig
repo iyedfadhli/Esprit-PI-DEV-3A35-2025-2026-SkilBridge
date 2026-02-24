@@ -1,0 +1,167 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Résultats - {{ quiz.title }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/crud.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="crud-container">
+    <div class="crud-header">
+        <div class="crud-header-content">
+            <nav class="breadcrumb" style="margin-bottom: 0.5rem;">
+                <a href="{{ path('admin_quiz_results_index') }}" style="color: #667eea; text-decoration: none;">
+                    <i class="fas fa-chart-bar"></i> Résultats
+                </a>
+                <span style="margin: 0 0.5rem; color: #94a3b8;">›</span>
+                <span style="color: #64748b;">{{ quiz.title }}</span>
+            </nav>
+            <h1><i class="fas fa-poll"></i> {{ quiz.title }}</h1>
+            <p class="crud-subtitle">
+                {% if quiz.course %}Cours: {{ quiz.course.title }}{% endif %}
+                {% if quiz.chapter %} • Chapitre: {{ quiz.chapter.title }}{% endif %}
+            </p>
+        </div>
+        <div class="crud-actions">
+            <a href="{{ path('admin_quiz_show', {id: quiz.id}) }}" class="btn btn-secondary">
+                <i class="fas fa-cog"></i> Gérer le quiz
+            </a>
+        </div>
+    </div>
+
+    {# Stats Cards #}
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.25rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.totalAttempts }}</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Tentatives totales</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white; padding: 1.25rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.uniqueStudents }}</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Étudiants uniques</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.25rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.passedCount }}</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Réussites</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 1.25rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.failedCount }}</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Échecs</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 1.25rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.averageScore }}%</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Score moyen</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 1.25rem; border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700;">{{ stats.passRate }}%</div>
+            <div style="font-size: 0.85rem; opacity: 0.9;">Taux de réussite</div>
+        </div>
+    </div>
+
+    {# Search and Filter #}
+    <div class="crud-toolbar">
+        <form method="get" class="search-form" style="display: flex; gap: 1rem; flex-wrap: wrap; width: 100%;">
+            <div class="search-box" style="flex: 1; min-width: 200px;">
+                <i class="fas fa-search"></i>
+                <input type="text" name="search" value="{{ search }}" placeholder="Rechercher un étudiant...">
+            </div>
+            <select name="status" class="form-select" style="min-width: 180px; padding: 0.75rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px;" onchange="this.form.submit()">
+                <option value="">Tous les statuts</option>
+                <option value="passed" {{ statusFilter == 'passed' ? 'selected' : '' }}>✅ Réussis</option>
+                <option value="failed" {{ statusFilter == 'failed' ? 'selected' : '' }}>❌ Échoués</option>
+            </select>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-filter"></i> Filtrer
+            </button>
+            {% if search or statusFilter %}
+                <a href="{{ path('admin_quiz_results_show', {quizId: quiz.id}) }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Réinitialiser
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    {# Results Table #}
+    {% if attempts|length > 0 %}
+        <div class="table-container">
+            <table class="crud-table">
+                <thead>
+                    <tr>
+                        <th>Étudiant</th>
+                        <th>Tentative</th>
+                        <th>Score</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th class="actions-column">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.9rem;">
+                                        {{ attempt.student.prenom|default('?')|slice(0,1)|upper }}{{ attempt.student.nom|default('?')|slice(0,1)|upper }}
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: 600; color: #333;">
+                                            {{ attempt.student.prenom|default('') }} {{ attempt.student.nom|default('Inconnu') }}
+                                        </div>
+                                        <div style="font-size: 0.8rem; color: #64748b;">
+                                            {{ attempt.student.email|default('-') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">#{{ attempt.attemptNbr }}</span>
+                            </td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <div style="width: 60px; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                                        <div style="height: 100%; width: {{ attempt.score }}%; background: {{ attempt.score >= (quiz.passingScore ?? 70) ? '#10b981' : '#ef4444' }};"></div>
+                                    </div>
+                                    <span style="font-weight: 600; color: {{ attempt.score >= (quiz.passingScore ?? 70) ? '#10b981' : '#ef4444' }};">
+                                        {{ attempt.score|round(1) }}%
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                {% if attempt.score >= (quiz.passingScore ?? 70) %}
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check-circle"></i> Réussi
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-danger">
+                                        <i class="fas fa-times-circle"></i> Échoué
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span style="color: #64748b;">
+                                    {{ attempt.submittedAt|date('d/m/Y') }}<br>
+                                    <small>{{ attempt.submittedAt|date('H:i') }}</small>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="actions-wrapper">
+                                    <a href="{{ path('admin_quiz_results_attempt', {attemptId: attempt.id}) }}" class="btn btn-icon btn-view" title="Voir les détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>Aucune tentative trouvée</h3>
+            <p>{% if search or statusFilter %}Aucun résultat ne correspond à vos critères.{% else %}Aucun étudiant n'a encore passé ce quiz.{% endif %}</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

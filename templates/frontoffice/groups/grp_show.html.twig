@@ -1,0 +1,308 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}{{ group.name }} - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .group-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .group-header-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            border: none;
+        }
+        .sidebar-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .post-card {
+            background: #fff;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: none;
+            overflow: hidden;
+        }
+        .post-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .author-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .post-content {
+            padding: 0 20px 20px;
+        }
+        .post-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .post-footer {
+            padding: 15px 20px;
+            background: #fafbfc;
+            border-top: 1px solid #f1f1f1;
+            display: flex;
+            gap: 20px;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-skill {
+            background: #4a7fd7;
+            color: #fff;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-skill:hover {
+            background: #3a6bb8;
+            color: #fff;
+        }
+        .member-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        .search-results-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #e9ecef;
+        }
+        .user-search-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid #eee;
+        }
+        .user-search-item:last-child { border-bottom: none; }
+        .btn-add-member {
+            background: #28a745;
+            color: white;
+            border-radius: 15px;
+            font-size: 11px;
+            padding: 2px 10px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        .btn-add-member:hover { background: #218838; color: white; }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="group-container">
+    {# Display Flash Messages #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mb-4 rounded-3" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <!-- Group Header -->
+    <div class="group-header-card d-flex justify-content-between align-items-center">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item"><a href="{{ path('groups_index') }}" class="text-decoration-none">Groups</a></li>
+                    <li class="breadcrumb-item active">{{ group.name }}</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold mb-1 text-primary">{{ group.name }}</h2>
+            <p class="text-muted mb-0"><i class="fa fa-globe me-1"></i> {{ group.type|capitalize }} Group • {{ memberships|length }} Members</p>
+        </div>
+        
+        <div class="d-flex gap-2">
+            {% if not currentUserMembership %}
+                <a href="{{ path('group_join', {id: group.id}) }}" class="btn btn-skill">Join Group</a>
+            {% else %}
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Joined ({{ currentUserMembership.role }})
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item text-danger" href="{{ path('group_leave', {id: group.id}) }}">Leave Group</a></li>
+                    </ul>
+                </div>
+            {% endif %}
+            
+            {% if currentUserMembership and currentUserMembership.role == 'leader' %}
+                <a href="{{ path('group_edit', {id: group.id}) }}" class="btn btn-outline-primary rounded-pill"><i class="fa fa-edit"></i> Edit</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Feed (Left) -->
+        <div class="col-md-8">
+            {% if currentUserMembership %}
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="fw-800 text-dark mb-0">Discussion</h4>
+                    {# Moved from sidebar to here #}
+                    <a href="{{ path('group_post_new', {id: group.id}) }}" class="btn btn-skill shadow-sm">
+                        <i class="fa fa-pencil-square-o me-2"></i>Create Post
+                    </a>
+                </div>
+
+                {% if posts is defined and posts|length > 0 %}
+                    {% for post in posts %}
+                        <div class="post-card">
+                            <div class="post-header">
+                                <img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" alt="User" class="author-img">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">{{ post.AuthorId.prenom }} {{ post.AuthorId.nom }}</h6>
+                                    <small class="text-muted">{{ post.createdAt|date('M d, Y H:i') }} • {{ post.visibility|capitalize }}</small>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <h5 class="post-title">{{ post.titre }}</h5>
+                                <p class="post-text">{{ post.description }}</p>
+                                {% if post.attachedFile %}
+                                    <div class="mt-3">
+                                        <img src="{{ asset(post.attachedFile) }}" alt="Post photo" class="img-fluid rounded">
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="post-footer">
+                                <a href="{{ path('post_like', {id: post.id}) }}" class="action-btn"><i class="fa fa-thumbs-o-up"></i> Like ({{ post.likesCounter }})</a>
+                                <span class="action-btn"><i class="fa fa-comment-o"></i> Comment</span>
+                            </div>
+                            <div class="px-4 pb-3">
+                                {% set comments = commentsByPost[post.id] ?? [] %}
+                                {% if comments %}
+                                    <div class="mt-2">
+                                        {% for c in comments %}
+                                            <div class="mb-2">
+                                                <strong>{{ c.authorId.prenom }} {{ c.authorId.nom }}</strong>
+                                                <small class="text-muted">• {{ c.createdAt|date('M d, Y H:i') }}</small>
+                                                <div>{{ c.content }}</div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <form method="post" action="{{ path('post_comment', {id: post.id}) }}" class="mt-2">
+                                    <div class="input-group">
+                                        <input type="text" name="content" class="form-control form-control-sm" placeholder="Write a comment...">
+                                        <button class="btn btn-primary btn-sm" type="submit">Post</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+                        <i class="fa fa-comments-o fa-3x text-light mb-3"></i>
+                        <p class="text-muted">No posts yet. Start the conversation!</p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5 bg-white rounded-4 shadow-sm border">
+                    <i class="fa fa-lock fa-3x text-light mb-3"></i>
+                    <h5 class="fw-bold">Private Community</h5>
+                    <p class="text-muted px-5">Join this group to see posts and participate in the discussion with other members.</p>
+                    <a href="{{ path('group_join', {id: group.id}) }}" class="btn btn-skill mt-2">Join Now</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-md-4">
+            <!-- Members Card -->
+            <div class="sidebar-card">
+                <h5 class="fw-bold mb-3">Members <span class="badge bg-light text-primary rounded-pill">{{ memberships|length }}</span></h5>
+                <div class="list-group list-group-flush mb-3">
+                    {% for membership in memberships %}
+                        <div class="list-group-item border-0 px-0 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" width="30" height="30" class="rounded-circle">
+                                <div>
+                                    <span class="small fw-bold">{{ membership.userId.prenom }} {{ membership.userId.nom }}</span>
+                                    <span class="member-badge bg-{{ membership.role == 'leader' ? 'danger' : (membership.role == 'moderator' ? 'warning' : 'info') }} text-white">
+                                        {{ membership.role }}
+                                    </span>
+                                </div>
+                            </div>
+                            {% if currentUserMembership and currentUserMembership.role in ['leader', 'moderator'] and membership.userId.id != currentUserMembership.userId.id %}
+                                <a href="{{ path('group_kick_member', {groupId: group.id, membershipId: membership.id}) }}" 
+                                   class="text-danger small" title="Kick Member"><i class="fa fa-times-circle"></i></a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if currentUserMembership and currentUserMembership.role in ['leader', 'moderator'] %}
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="fw-bold text-dark mb-3"><i class="fa fa-user-plus me-2 text-success"></i>Invite New Members</h6>
+                        <form method="get" action="{{ path('group_show', {id: group.id}) }}" class="mb-3">
+                            <div class="input-group">
+                                <input type="text" name="q" placeholder="Search by name..." class="form-control form-control-sm border-0 bg-light shadow-none" value="{{ app.request.query.get('q') }}">
+                                <button type="submit" class="btn btn-sm btn-primary px-3">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        {% if users is defined and users|length > 0 %}
+                            <div class="search-results-box">
+                                {% for user in users %}
+                                    <div class="user-search-item">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:24px; height:24px; font-size:10px;">
+                                                {{ user.prenom|first }}{{ user.nom|first }}
+                                            </div>
+                                            <span class="small fw-600">{{ user.prenom }} {{ user.nom }}</span>
+                                        </div>
+                                        <a href="{{ path('group_add_member_confirm', {groupId: group.id, userId: user.id}) }}"
+                                           class="btn-add-member">Add</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% elseif users is defined and app.request.query.get('q') is not empty %}
+                            <p class="text-muted small text-center mt-2">No users found for "{{ app.request.query.get('q') }}"</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Group Info Card -->
+            <div class="sidebar-card">
+                <h5 class="fw-bold mb-3">About Group</h5>
+                <p class="small text-muted mb-0">
+                    This is a {{ group.type }} group for members of the Skill Bridge community. 
+                    Please follow the community guidelines and be respectful to others.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

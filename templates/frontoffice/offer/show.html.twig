@@ -1,0 +1,151 @@
+{# ============================================================
+File: templates/frontoffice/offer/show.html.twig
+Description: Detailed view of a single offer + apply form
+============================================================ #}
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}{{ offer.title }} - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+    <div class="flash-messages">
+        {% for message in messages %}
+        <div class="flash-message {{ type }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <div class="section-header">
+        <a href="{{ path('preview_front_offer_index') }}" class="btn-secondary">
+            <i class="fa fa-arrow-left"></i> Toutes les offres
+        </a>
+    </div>
+
+    <div class="offer-detail">
+        <div class="offer-detail-card">
+
+            {# Header #}
+            <div class="offer-detail-header">
+                <div class="offer-detail-tags">
+                    <span class="tag">{{ offer.offerType == 'internship' ? 'Stage' : 'Emploi' }}</span>
+                    {% if offer.contractType %}
+                    <span class="tag">{{ offer.contractType }}</span>
+                    {% endif %}
+                    {% if offer.status %}
+                    <span class="tag">{{ offer.status }}</span>
+                    {% endif %}
+                </div>
+                <h1>{{ offer.title }}</h1>
+                <div class="offer-detail-meta">
+                    <span><i class="fa fa-building"></i> {{ offer.enterprise.name|default('Entreprise') }}</span>
+                    <span><i class="fa fa-map-marker"></i> {{ offer.location }}</span>
+                    <span><i class="fa fa-calendar"></i> Publiee le {{ offer.createdAt|date('d/m/Y') }}</span>
+                </div>
+            </div>
+
+            {# Body #}
+            <div class="offer-detail-body">
+
+                {# Info grid #}
+                <div class="offer-info-grid">
+                    <div class="offer-info-item">
+                        <label>Domaine</label>
+                        <span>{{ offer.field }}</span>
+                    </div>
+                    <div class="offer-info-item">
+                        <label>Niveau requis</label>
+                        <span>{{ offer.requiredLevel }}</span>
+                    </div>
+                    <div class="offer-info-item">
+                        <label>Type de contrat</label>
+                        <span>{{ offer.contractType }}</span>
+                    </div>
+                    <div class="offer-info-item">
+                        <label>Duree</label>
+                        <span>{{ offer.duration|default('Non precisee') }}</span>
+                    </div>
+                    {% if offer.salaryRange %}
+                    <div class="offer-info-item">
+                        <label>Salaire</label>
+                        <span>{{ offer.salaryRange }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {# Description #}
+                <div class="offer-description">
+                    <h2>Description du poste</h2>
+                    <p>{{ offer.description|nl2br }}</p>
+                </div>
+
+                {# Required skills #}
+                {% if offer.requiredSkills %}
+                <div class="offer-description">
+                    <h2>Competences requises</h2>
+                    <p>{{ offer.requiredSkills|nl2br }}</p>
+                </div>
+                {% endif %}
+
+                {# Apply box #}
+                <div class="offer-apply-box">
+                    <h3>Postuler à cette offre</h3>
+
+                    {% if user %}
+                    {% if user_cvs is defined and user_cvs|length > 0 %}
+                    <p>Sélectionnez le CV que vous souhaitez envoyer avec votre candidature</p>
+                    <form method="post" action="{{ path('preview_front_offer_apply', {id: offer.id}) }}">
+                        <div style="margin-bottom: 16px;">
+                            <select name="cv_id" required
+                                style="padding:10px 14px; border:1px solid #ddd; border-radius:8px; font-size:14px; min-width:240px;">
+                                <option value="">-- Choisir un CV --</option>
+                                {% for cv in user_cvs %}
+                                <option value="{{ cv.id }}">{{ cv.nomCv }} ({{ cv.langue }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <input type="hidden" name="_token" value="{{ csrf_token('apply' ~ offer.id) }}">
+
+                        <button type="submit" class="btn-primary">
+                            <i class="fa fa-paper-plane"></i> Envoyer ma candidature
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="empty-selection"
+                        style="text-align: center; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+                        <i class="fa fa-file-text-o"
+                            style="font-size: 24px; color: #888; margin-bottom: 10px; display: block;"></i>
+                        <p style="color: #666; margin-bottom: 15px;">Vous n'avez pas encore créé de CV.</p>
+                        <a href="{{ path('preview_front_cv_new') }}" class="btn-primary" style="display: inline-block;">
+                            <i class="fa fa-plus"></i> Créer mon premier CV
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="login-alert"
+                        style="text-align: center; padding: 20px; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px;">
+                        <p style="color: #c53030; margin-bottom: 15px;">Vous devez être connecté pour postuler à cette
+                            offre.</p>
+                        <a href="{{ path('sign') }}" class="btn-primary">Se connecter</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+
+
+
+            </div>
+
+        </div>
+    </div>
+    </div>
+
+</section>
+{% endblock %}

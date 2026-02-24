@@ -15,7 +15,7 @@ class ProblemSolution
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Activity $activityId = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -24,7 +24,7 @@ class ProblemSolution
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $groupSolution = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $supervisorSolution = null;
 
     public function getId(): ?int

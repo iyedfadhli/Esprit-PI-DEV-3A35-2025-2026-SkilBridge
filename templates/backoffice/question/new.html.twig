@@ -1,0 +1,72 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}New Question - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-plus"></i> Create New Question</h1>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_question_index') }}">Questions</a>
+        <span>/</span>
+        <span>New</span>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-circle-question"></i> Question Information</h2>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'crud-form', 'novalidate': 'novalidate'}}) }}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.quiz, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.quiz) }}
+                    {% if form.quiz.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.quiz) }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.type, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.type) }}
+                    {% if form.type.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.type) }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.content, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.content) }}
+                {% if form.content.vars.errors|length > 0 %}
+                    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.content) }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.point, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.point) }}
+                {% if form.point.vars.errors|length > 0 %}
+                    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.point) }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('admin_question_index') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> Create Question
+                </button>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

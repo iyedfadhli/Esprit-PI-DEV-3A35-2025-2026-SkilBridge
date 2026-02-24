@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\GroupRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: GroupRepository::class)]
 #[ORM\Table(name: '`group`')]
@@ -16,9 +17,13 @@ class Group
     private ?int $id = null;
 
     #[ORM\Column(length: 40)]
+    #[Assert\NotBlank(message: "The group name cannot be empty")]
+    #[Assert\Length(min: 3, max: 40, minMessage: "Name must be at least 3 characters")]
     private ?string $name = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "Please provide a description")]
+    #[Assert\Length(min: 10, minMessage: "Description must be at least 10 characters")]
     private ?string $description = null;
 
     #[ORM\Column]
@@ -31,10 +36,13 @@ class Group
     private ?string $level = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $leaderId = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: "Max members is required")]
+    #[Assert\Positive(message: "Must be a positive number")]
+    #[Assert\LessThan(101, message: "Maximum 100 members allowed")]
     private ?int $max_members = null;
 
     #[ORM\Column]
