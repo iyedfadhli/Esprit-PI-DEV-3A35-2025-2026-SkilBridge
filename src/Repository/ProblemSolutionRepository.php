@@ -16,28 +16,22 @@ class ProblemSolutionRepository extends ServiceEntityRepository
         parent::__construct($registry, ProblemSolution::class);
     }
 
-    //    /**
-    //     * @return ProblemSolution[] Returns an array of ProblemSolution objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('p.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findByActivity(\App\Entity\Activity $activity): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.activityId = :activity')
+            ->setParameter('activity', $activity)
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?ProblemSolution
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findUnsolvedByActivity(\App\Entity\Activity $activity): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.activityId = :activity')
+            ->andWhere('p.groupSolution IS NULL')
+            ->setParameter('activity', $activity)
+            ->getQuery()
+            ->getResult();
+    }
 }

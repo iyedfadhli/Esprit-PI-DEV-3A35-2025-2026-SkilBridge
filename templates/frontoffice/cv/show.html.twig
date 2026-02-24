@@ -1,0 +1,198 @@
+{# ============================================================
+   File: templates/frontoffice/cv/show.html.twig
+   Description: Full CV display (read-only, beautiful layout)
+   ============================================================ #}
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}{{ cv.nomCv }} - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+
+    <div class="section-header">
+        
+        <a href="{{ path('preview_front_cv_index') }}" class="btn-secondary">
+            <i class="fa fa-arrow-left"></i> Mes CVs
+        </a>
+        <a href="{{ path('preview_front_cv_edit', {id: cv.id}) }}" class="btn-primary">
+            <i class="fa fa-pencil"></i> Modifier
+        </a>
+    </div>
+
+    <div class="cv-display">
+
+        {# -- Header -- #}
+        <div class="cv-display-header">
+            <p class="cv-name-label">Curriculum Vitae</p>
+            <h1>{{ cv.nomCv }}</h1>
+
+            <div class="cv-display-meta">
+                <span><i class="fa fa-globe"></i> {{ cv.langue }}</span>
+                <span><i class="fa fa-calendar"></i> Cree le {{ cv.creationDate|date('d/m/Y') }}</span>
+                {% if cv.linkedinUrl %}
+                    <span><i class="fa fa-linkedin"></i> <a href="{{ cv.linkedinUrl }}" target="_blank">LinkedIn</a></span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="cv-display-body">
+
+            {# -- Summary -- #}
+            {% if cv.summary %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-user"></i> Profil</h2>
+                    <p class="cv-summary-text">{{ cv.summary|nl2br }}</p>
+                </div>
+            {% endif %}
+
+
+
+            
+            {# -- Informations personnelles -- #}
+{% if cv.user %}
+    <div class="cv-display-section">
+        <h2><i class="fa fa-id-card"></i> Informations personnelles</h2>
+
+        <div class="cv-entry">
+            <div class="cv-entry-title">
+                {{ cv.user.prenom }} {{ cv.user.nom }}
+            </div>
+
+            <div class="cv-entry-sub">
+                <i class="fa fa-envelope"></i> {{ cv.user.email }}
+            </div>
+
+            {% if cv.user.dateNaissance %}
+                <div class="cv-entry-date">
+                    <i class="fa fa-calendar"></i>
+                    Né(e) le {{ cv.user.dateNaissance|date('d/m/Y') }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+
+            {# -- Experiences -- #}
+            {% if experiences is defined and experiences|length > 0 %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-briefcase"></i> Experiences professionnelles</h2>
+                    {% for exp in experiences %}
+                        <div class="cv-entry">
+                            <div class="cv-entry-title">{{ exp.jobTitle }}</div>
+                            <div class="cv-entry-sub">{{ exp.company }}{% if exp.location %} - {{ exp.location }}{% endif %}</div>
+                            <div class="cv-entry-date">
+                                {{ exp.startDate|date('m/Y') }}
+                                -
+                                {% if exp.currentlyWorking %}
+                                    Present
+                                {% elseif exp.endDate %}
+                                    {{ exp.endDate|date('m/Y') }}
+                                {% endif %}
+                            </div>
+                            {% if exp.description %}
+                                <div class="cv-entry-desc">{{ exp.description|nl2br }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# -- Education -- #}
+            {% if educations is defined and educations|length > 0 %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-graduation-cap"></i> Formation</h2>
+                    {% for edu in educations %}
+                        <div class="cv-entry">
+                            <div class="cv-entry-title">{{ edu.degree }}</div>
+                            <div class="cv-entry-sub">{{ edu.school }}{% if edu.city %} - {{ edu.city }}{% endif %}</div>
+                            {% if edu.fieldOfStudy %}
+                                <div class="cv-entry-date">{{ edu.fieldOfStudy }}</div>
+                            {% endif %}
+                            <div class="cv-entry-date">
+                                {% if edu.startDate %}{{ edu.startDate|date('Y') }}{% endif %}
+                                {% if edu.endDate %} - {{ edu.endDate|date('Y') }}{% endif %}
+                            </div>
+                            {% if edu.description %}
+                                <div class="cv-entry-desc">{{ edu.description|nl2br }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# -- Skills -- #}
+            {% if skills is defined and skills|length > 0 %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-cogs"></i> Competences</h2>
+                    <div class="cv-skills-list">
+                        {% for skill in skills %}
+                            <span class="cv-skill-tag {{ skill.type }}">
+                                {{ skill.nom }}
+                                {% if skill.level %}
+                                    <span class="cv-skill-level">{{ skill.level }}</span>
+                                {% endif %}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# -- Certifications -- #}
+            {% if certifs is defined and certifs|length > 0 %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-certificate"></i> Certifications</h2>
+                    {% for certif in certifs %}
+                        <div class="cv-entry">
+                            <div class="cv-entry-title">{{ certif.name }}</div>
+                            {% if certif.issuedBy %}
+                                <div class="cv-entry-sub">{{ certif.issuedBy }}</div>
+                            {% endif %}
+                            <div class="cv-entry-date">
+                                {% if certif.issueDate %}Obtenu le {{ certif.issueDate|date('d/m/Y') }}{% endif %}
+                                {% if certif.expDate %} - Expire le {{ certif.expDate|date('d/m/Y') }}{% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {# -- Languages -- #}
+            {% if languages is defined and languages|length > 0 %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-language"></i> Langues</h2>
+                    <div class="cv-lang-list">
+                        {% for lang in languages %}
+                            <div class="cv-lang-item">
+                                {{ lang.nom }} <span>{{ lang.niveau }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+
+        {# -- Actions -- #}
+        <div class="cv-display-actions">
+            <a href="{{ path('preview_front_cv_edit', {id: cv.id}) }}" class="btn-primary">
+                <i class="fa fa-pencil"></i> Modifier ce CV
+            </a>
+            <a href="{{ path('preview_front_cv_index') }}" class="btn-secondary">
+                <i class="fa fa-list"></i> Tous mes CVs
+            </a>
+             <a href="{{ path('user_cv_pdf', {id: cv.id}) }}" class="btn btn-primary" target="_blank">
+    <i class="fa fa-file-pdf-o"></i> Télécharger en PDF
+</a>
+
+        </div>
+       
+
+    </div>
+
+</section>
+{% endblock %}

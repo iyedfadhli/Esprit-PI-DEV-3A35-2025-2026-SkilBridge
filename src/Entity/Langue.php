@@ -14,8 +14,8 @@ class Langue
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?cv $cv = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Cv $cv = null;
 
     #[ORM\Column(length: 30)]
     private ?string $nom = null;
@@ -28,12 +28,12 @@ class Langue
         return $this->id;
     }
 
-    public function getCv(): ?cv
+    public function getCv(): ?Cv
     {
         return $this->cv;
     }
 
-    public function setCv(?cv $cv): static
+    public function setCv(?Cv $cv): static
     {
         $this->cv = $cv;
 
@@ -45,7 +45,7 @@ class Langue
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(?string $nom): static
     {
         $this->nom = $nom;
 
@@ -57,7 +57,7 @@ class Langue
         return $this->niveau;
     }
 
-    public function setNiveau(string $niveau): static
+    public function setNiveau(?string $niveau): static
     {
         $this->niveau = $niveau;
 

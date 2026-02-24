@@ -6,10 +6,17 @@
     <title>{% block title %}Skill Bridge Back Office{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ asset('assets/css/backoffice/dashboard/backoffice.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/crud.css') }}">
 
     <link rel="shortcut icon" href="{{ asset('assets/images/frontoffice/logo.png') }}" type="image/x-icon">
 
@@ -22,38 +29,111 @@
 
 <div class="admin-layout">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <img src="{{ asset('assets/images/frontoffice/logo.png') }}" alt="Skill Bridge Logo" class="sidebar-logo-img">
-        </div>
+        <!-- Mobile Toggle -->
+        <button class="mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+            <i class="fa-solid fa-bars"></i>
+        </button>
 
-        <nav class="sidebar-menu">
-            <a class="{{ app.request.attributes.get('_route') == 'dashboard' ? 'active' : '' }}" href="{{ path('dashboard') }}"><i class="fa fa-dashboard"></i> Dashboard</a>
-            <a class="{{ app.request.attributes.get('_route') starts with 'dashboard_user' ? 'active' : '' }}" href="{{path('dashboard_user')}}"><i class="fa fa-user"></i> Users</a>
-            <a href="#"><i class="fa fa-book"></i> Courses</a>
-            <a href="#"><i class="fa fa-users"></i> Groups</a>
-            <a href="#"><i class="fa fa-trophy"></i> Challenges</a>
-            <a href="#"><i class="fa fa-file-text"></i> CV & Internship</a>
-            <a class="{{ app.request.attributes.get('_route') starts with 'app_back_hackathon_index' ? 'active' : '' }}" href="{{ path('app_back_hackathon_index') }}"><i class="fa fa-lightbulb-o"></i> Hackathons</a>
-            <a class="{{ app.request.attributes.get('_route') starts with 'app_back_sponsor' and not (app.request.attributes.get('_route') starts with 'app_back_sponsor_hackathon') ? 'active' : '' }}" href="{{ path('app_back_sponsor_index') }}"><i class="fa fa-handshake-o"></i> Sponsors</a>
-            <a class="{{ app.request.attributes.get('_route') starts with 'app_back_sponsor_hackathon' ? 'active' : '' }}" href="{{ path('app_back_sponsor_hackathon_index') }}"><i class="fa fa-link"></i> Assignments</a>
-            <a class="{{ app.request.attributes.get('_route') == 'app_back_stats' ? 'active' : '' }}" href="{{ path('app_back_stats') }}"><i class="fa fa-bar-chart"></i> Analytics</a>
-            <a href="{{path('home')}}"><i class="fa fa-home"></i> FrontOffice</a>
-        </nav>
-    </aside>
-    {% else %}
-        <script>
-            window.location.href = "{{ path('home') }}";
-        </script>
-    {% endif %}
-    <!-- Main Content -->
-    <main class="admin-content">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <img src="{{ asset('assets/images/frontoffice/logo.png') }}" alt="Skill Bridge Logo" class="sidebar-logo-img">
+            </div>
 
-        {% block body %}{% endblock %}
-    </main>
+            <nav class="sidebar-menu">
+                <span class="menu-section">Main</span>
+                <a class="{{ app.request.get('_route') == 'dashboard' ? 'active' : '' }}" href="{{ path('dashboard') }}">
+                    <i class="fa-solid fa-gauge-high"></i> Dashboard
+                </a>
+
+                <span class="menu-section">User Management</span>
+                <a class="{{ app.request.get('_route') starts with 'dashboard_user' ? 'active' : '' }}" href="{{path('dashboard_user')}}">
+                    <i class="fa-solid fa-user"></i> Users
+                </a>
+                
+                <span class="menu-section">Pedagogical Management</span>
+                <a class="{{ app.request.get('_route') starts with 'admin_course' ? 'active' : '' }}" href="{{ path('admin_course_index') }}">
+                    <i class="fa-solid fa-book"></i> Courses
+                </a>
+                <a class="{{ app.request.get('_route') starts with 'admin_chapter' ? 'active' : '' }}" href="{{ path('admin_chapter_index') }}">
+                    <i class="fa-solid fa-bookmark"></i> Chapters
+                </a>
+                <a class="{{ app.request.get('_route') starts with 'admin_quiz' and not (app.request.get('_route') starts with 'admin_quiz_results') ? 'active' : '' }}" href="{{ path('admin_quiz_index') }}">
+                    <i class="fa-solid fa-clipboard-question"></i> Quizzes
+                </a>
+                <a class="{{ app.request.get('_route') starts with 'admin_question' ? 'active' : '' }}" href="{{ path('admin_question_index') }}">
+                    <i class="fa-solid fa-circle-question"></i> Questions
+                </a>
+                <a class="{{ app.request.get('_route') starts with 'admin_answer' ? 'active' : '' }}" href="{{ path('admin_answer_index') }}">
+                    <i class="fa-solid fa-check-double"></i> Answers
+                </a>
+                
+                <span class="menu-section">Student Results</span>
+                <a class="{{ app.request.get('_route') starts with 'admin_quiz_results' ? 'active' : '' }}" href="{{ path('admin_quiz_results_index') }}">
+                    <i class="fa-solid fa-chart-bar"></i> Quiz Results
+                </a>
+
+                <span class="menu-section">Community</span>
+                <a class="{{ app.request.get('_route') starts with 'admin_groups' ? 'active' : '' }}" href="{{ path('admin_groups_index') }}">
+                    <i class="fa-solid fa-users"></i> Groups
+                </a>
+                <a class="{{ app.request.get('_route') starts with 'admin_posts' ? 'active' : '' }}" href="{{ path('admin_posts_index') }}">
+                    <i class="fa-solid fa-comments"></i> Posts
+                </a>
+
+                <span class="menu-section">Other Modules</span>
+                <a href="{{path('challengeback')}}"><i class="fa-solid fa-trophy"></i> Challenges</a>
+                <a href="{{ path('preview_back_cv_index') }}"><i class="fa-solid fa-file-lines"></i> CV </a>
+                <a href="{{ path('preview_back_offer_index') }}"><i class="fa-solid fa-file-lines"></i> Internship</a>
+<a href="{{ path('preview_back_application_index') }}"><i class="fa-solid fa-list"></i> Applications</a>
+
+                <span class="menu-section">Hackathon</span>
+                <a class="{{ app.request.get('_route') starts with 'app_back_hackathon' ? 'active' : '' }}" href="{{ path('app_back_hackathon_index') }}">
+                    <i class="fa-solid fa-lightbulb"></i> Hackathons
+                </a>
+                <a class="{{ app.request.get('_route') starts with 'app_back_sponsor' and not (app.request.get('_route') starts with 'app_back_sponsor_hackathon') ? 'active' : '' }}" href="{{ path('app_back_sponsor_index') }}">
+                    <i class="fa-solid fa-handshake"></i> Sponsors
+                </a>
+                <a class="{{ app.request.get('_route') starts with 'app_back_sponsor_hackathon' ? 'active' : '' }}" href="{{ path('app_back_sponsor_hackathon_index') }}">
+                    <i class="fa-solid fa-link"></i> Assignments
+                </a>
+                <a class="{{ app.request.get('_route') == 'app_back_stats' ? 'active' : '' }}" href="{{ path('app_back_stats') }}">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics
+                </a>
+                
+                <span class="menu-section">Quick Links</span>
+                <a href="{{ path('home') }}"><i class="fa-solid fa-house"></i> FrontOffice</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} fade-in">
+                        {% if label == 'success' %}
+                            <i class="fa-solid fa-circle-check"></i>
+                        {% elseif label == 'danger' or label == 'error' %}
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                        {% elseif label == 'warning' %}
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        {% else %}
+                            <i class="fa-solid fa-circle-info"></i>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </main>
 
 </div>
+
+{% else %}
+    <script>
+        window.location.href = "{{ path('home') }}";
+    </script>
+{% endif %}
 
 {% block javascripts %}{% endblock %}
 

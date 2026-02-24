@@ -4,6 +4,12 @@ namespace App\Entity;
 
 use App\Repository\QuizRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Course;
+use App\Entity\Chapter;
+use App\Entity\Question;
+use App\Entity\QuizAttempts;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
 class Quiz
@@ -13,13 +19,13 @@ class Quiz
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?course $course = null;
+    #[ORM\ManyToOne(inversedBy: 'quizzes')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Course $course = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?chapter $chapter = null;
+    #[ORM\OneToOne(inversedBy: 'quiz')]
+    #[ORM\JoinColumn(nullable: true, unique: true, onDelete: 'SET NULL')]
+    private ?Chapter $chapter = null;
 
     #[ORM\Column(length: 30)]
     private ?string $title = null;
@@ -30,33 +36,48 @@ class Quiz
     #[ORM\Column]
     private ?int $max_attempts = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $questions_per_attempt = null;
+
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $supervisor = null;
+
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $questions;
+
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: QuizAttempts::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $quizAttempts;
+
+    public function __construct()
+    {
+        $this->questions = new ArrayCollection();
+        $this->quizAttempts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCourse(): ?course
+    public function getCourse(): ?Course
     {
         return $this->course;
     }
 
-    public function setCourse(course $course): static
+    public function setCourse(Course $course): static
     {
         $this->course = $course;
 
         return $this;
     }
 
-    public function getChapter(): ?chapter
+    public function getChapter(): ?Chapter
     {
         return $this->chapter;
     }
 
-    public function setChapter(chapter $chapter): static
+    public function setChapter(?Chapter $chapter): static
     {
         $this->chapter = $chapter;
 
@@ -99,6 +120,18 @@ class Quiz
         return $this;
     }
 
+    public function getQuestionsPerAttempt(): ?int
+    {
+        return $this->questions_per_attempt;
+    }
+
+    public function setQuestionsPerAttempt(?int $questions_per_attempt): static
+    {
+        $this->questions_per_attempt = $questions_per_attempt;
+
+        return $this;
+    }
+
     public function getSupervisor(): ?User
     {
         return $this->supervisor;
@@ -109,5 +142,32 @@ class Quiz
         $this->supervisor = $supervisor;
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Question>
+     */
+    public function getQuestions(): Collection
+    {
+        return $this->questions;
+    }
+
+    /**
+     * @return Collection<int, QuizAttempts>
+     */
+    public function getQuizAttempts(): Collection
+    {
+        return $this->quizAttempts;
+    }
+
+    public function __toString(): string
+    {
+        $chapterTitle = $this->chapter?->getTitle() ?? '';
+        $title = $this->title ?? '';
+        if ($chapterTitle !== '') {
+            return $chapterTitle.' - '.($title !== '' ? $title : 'Quiz #'.$this->id);
+        }
+
+        return $title !== '' ? $title : 'Quiz #'.$this->id;
     }
 }

@@ -1,0 +1,171 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Quiz: {{ quiz.title }} - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/student.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="quiz-container" id="quiz-app" 
+     data-quiz-id="{{ quiz.id }}" 
+     data-attempt-id="{{ attempt.id }}"
+     data-quiz-title="{{ quiz.title }}"
+     data-passing-score="{{ quiz.passingScore ?? 70 }}"
+     data-max-attempts="{{ quiz.maxAttempts ?? 3 }}"
+     data-questions-per-attempt="{{ quiz.questionsPerAttempt ?? 20 }}">
+
+    {# Quiz Start Screen #}
+    <div id="quiz-start-screen" class="quiz-start-screen">
+        <div class="quiz-start-header">
+            <h1>{{ quiz.title }}</h1>
+            <p class="quiz-subtitle">
+                {% if quiz.chapter %}
+                    {{ quiz.chapter.title }} • {{ quiz.course.title }}
+                {% elseif quiz.course %}
+                    {{ quiz.course.title }}
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="quiz-info-cards">
+            <div class="quiz-info-card">
+                <i class="fa fa-question-circle"></i>
+                <span class="value">{{ quiz.questionsPerAttempt ?? '20' }}</span>
+                <span class="label">Questions</span>
+            </div>
+            <div class="quiz-info-card">
+                <i class="fa fa-repeat"></i>
+                <span class="value">{{ attempt.attemptNbr }}/{{ quiz.maxAttempts ?? 3 }}</span>
+                <span class="label">Tentative</span>
+            </div>
+            <div class="quiz-info-card">
+                <i class="fa fa-check-circle"></i>
+                <span class="value">{{ quiz.passingScore ?? 70 }}%</span>
+                <span class="label">Score requis</span>
+            </div>
+            <div class="quiz-info-card">
+                <i class="fa fa-clock-o"></i>
+                <span class="value">∞</span>
+                <span class="label">Temps</span>
+            </div>
+        </div>
+        
+        <div class="quiz-start-body">
+            <div class="quiz-instructions">
+                <h3><i class="fa fa-info-circle"></i> Instructions</h3>
+                <ul>
+                    <li>Lisez attentivement chaque question avant de répondre</li>
+                    <li>Vous pouvez naviguer entre les questions à tout moment</li>
+                    <li>Une seule réponse est correcte par question</li>
+                    <li>Vous pouvez modifier vos réponses avant de soumettre</li>
+                    <li>Un score de <strong>{{ quiz.passingScore ?? 70 }}%</strong> minimum est requis pour réussir</li>
+                </ul>
+            </div>
+            
+            <button id="start-quiz" class="btn-start-quiz">
+                <i class="fa fa-play"></i>
+                Commencer le quiz
+            </button>
+        </div>
+    </div>
+
+    {# Quiz Loading #}
+    <div id="quiz-loading" class="quiz-loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Chargement des questions...</p>
+    </div>
+
+    {# Quiz Progress Screen #}
+    <div id="quiz-progress-screen" class="quiz-progress-screen">
+        {# Header Bar #}
+        <div class="quiz-header-bar">
+            <div class="quiz-progress-info">
+                <span class="quiz-progress-text" id="progress-text">Question 1 sur 20</span>
+                <div class="quiz-progress-bar">
+                    <div class="quiz-progress-fill" id="progress-fill" style="width: 5%;"></div>
+                </div>
+            </div>
+            <div class="quiz-timer" id="quiz-timer" style="display: none;">
+                <i class="fa fa-clock-o"></i>
+                <span id="timer-display">∞</span>
+            </div>
+        </div>
+
+        {# Question Card #}
+        <div class="question-card">
+            <div class="question-header">
+                <div class="question-badge" id="question-badge">
+                    <i class="fa fa-question"></i>
+                    Question <span id="question-number">1</span>
+                </div>
+                <p class="question-text" id="question-text">Chargement de la question...</p>
+            </div>
+            <div class="question-body">
+                <div class="answers-grid" id="answers-container">
+                    {# Answers will be populated by JavaScript #}
+                </div>
+            </div>
+        </div>
+
+        {# Navigation #}
+        <div class="quiz-navigation">
+            <button id="prev-question" class="btn-quiz-nav prev" disabled>
+                <i class="fa fa-arrow-left"></i>
+                Précédent
+            </button>
+            
+            <button id="next-question" class="btn-quiz-nav next">
+                Suivant
+                <i class="fa fa-arrow-right"></i>
+            </button>
+            
+            <button id="finish-quiz" class="btn-quiz-nav finish" style="display: none;">
+                <i class="fa fa-check"></i>
+                Terminer le quiz
+            </button>
+        </div>
+
+        {# Question Navigator #}
+        <div class="question-navigator">
+            <h4><i class="fa fa-th"></i> Navigation rapide</h4>
+            <div class="question-dots" id="question-dots">
+                {# Dots will be populated by JavaScript #}
+            </div>
+        </div>
+    </div>
+
+    {# Submit Confirmation Modal #}
+    <div id="submit-modal" class="quiz-submit-modal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fa fa-paper-plane"></i>
+            </div>
+            <h2>Soumettre le quiz ?</h2>
+            <p>Êtes-vous sûr de vouloir terminer et soumettre vos réponses ?</p>
+            
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <span class="value" id="answered-count">0</span>
+                    <span class="label">Répondues</span>
+                </div>
+                <div class="modal-stat">
+                    <span class="value" id="unanswered-count">0</span>
+                    <span class="label">Non répondues</span>
+                </div>
+            </div>
+            
+            <div class="modal-buttons">
+                <button id="cancel-submit" class="btn-cancel">
+                    <i class="fa fa-arrow-left"></i> Revenir
+                </button>
+                <button id="confirm-submit" class="btn-confirm">
+                    <i class="fa fa-check"></i> Confirmer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ asset('assets/js/quiz.js') }}"></script>
+{% endblock %}

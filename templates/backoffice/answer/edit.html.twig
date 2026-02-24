@@ -1,0 +1,62 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Edit Answer - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-pen"></i> Edit Answer</h1>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_answer_index') }}">Answers</a>
+        <span>/</span>
+        <a href="{{ path('admin_answer_show', {'id': answer.id}) }}">Answer #{{ answer.id }}</a>
+        <span>/</span>
+        <span>Edit</span>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-check-double"></i> Edit Answer</h2>
+            <span class="badge badge-secondary">#{{ answer.id }}</span>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'crud-form', 'novalidate': 'novalidate'}}) }}
+            
+            <div class="form-group">
+                {{ form_label(form.question, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.question) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.content, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.content) }}
+            </div>
+
+            <div class="form-group">
+                <div class="form-check">
+                    {{ form_widget(form.is_correct) }}
+                    {{ form_label(form.is_correct, 'Mark as correct answer', {'label_attr': {'class': 'form-check-label'}}) }}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('admin_answer_index') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </a>
+                <a href="{{ path('admin_answer_show', {'id': answer.id}) }}" class="btn btn-outline">
+                    <i class="fa-solid fa-eye"></i> View
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> Save Changes
+                </button>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

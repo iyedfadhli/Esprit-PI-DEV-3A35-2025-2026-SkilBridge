@@ -27,7 +27,7 @@ class Challenge
     private ?string $difficulty = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $creator = null;
 
     #[ORM\Column]
@@ -43,13 +43,17 @@ class Challenge
     private ?\DateTime $createdAt = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Course $course = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $content = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
+    
 
     public function getTitle(): ?string
     {
@@ -167,6 +171,18 @@ class Challenge
     public function setCourse(?Course $course): static
     {
         $this->course = $course;
+
+        return $this;
+    }
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(?string $content): static
+    {
+        $this->content = $content;
 
         return $this;
     }

@@ -1,0 +1,140 @@
+{# ============================================================
+   File: templates/backoffice/offer/index.html.twig
+   Description: Admin view - list all offers with stats & table
+   ============================================================ #}
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Gestion des Offres - Back Office{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/backoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message {{ type }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    {# Page header #}
+    <div class="page-header">
+        <h1><i class="fa fa-briefcase"></i> Gestion des Offres</h1>
+    </div>
+
+    {# Stats #}
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">{{ offers is defined ? offers|length : 0 }}</div>
+            <div class="stat-label">Total Offres</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ offers is defined ? offers|filter(o => o.offerType == 'internship')|length : 0 }}</div>
+            <div class="stat-label">Stages</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ offers is defined ? offers|filter(o => o.offerType == 'job')|length : 0 }}</div>
+            <div class="stat-label">Emplois</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ offers is defined ? offers|filter(o => o.status == 'active')|length : 0 }}</div>
+            <div class="stat-label">Actives</div>
+        </div>
+    </div>
+
+    {# Table #}
+    <div class="data-table-wrapper">
+        <div class="table-header">
+            <h2>Liste des Offres</h2>
+            <input type="text" class="table-search" id="offer-table-search" placeholder="Rechercher..." onkeyup="searchOfferTable()">
+        </div>
+
+        {% if offers is defined and offers|length > 0 %}
+            <table class="data-table" id="offer-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Type</th>
+                        <th>Domaine</th>
+                        <th>Localisation</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for offer in offers %}
+                        <tr>
+                            <td>#{{ offer.id }}</td>
+                            <td><strong>{{ offer.title }}</strong></td>
+                            <td>
+                                <span class="badge {{ offer.offerType == 'internship' ? 'badge-success' : 'badge-info' }}">
+                                    {{ offer.offerType == 'internship' ? 'Stage' : 'Emploi' }}
+                                </span>
+                            </td>
+                            <td>{{ offer.field }}</td>
+                            <td><i class="fa fa-map-marker" style="color:#999;margin-right:4px;"></i>{{ offer.location }}</td>
+                            <td>
+                                {% if offer.status == 'active' %}
+                                    <span class="badge badge-success">Active</span>
+                                {% elseif offer.status == 'closed' %}
+                                    <span class="badge badge-danger">Fermee</span>
+                                {% else %}
+                                    <span class="badge badge-warning">{{ offer.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ offer.createdAt|date('d/m/Y') }}</td>
+                            <td>
+                                <div class="action-btns">
+                        <a href="{{ path('preview_back_offer_show', {id: offer.id}) }}" class="action-btn view" title="Voir">
+            <i class="fa fa-eye"></i>
+        </a>
+        
+                                    
+<form method="post"
+      action="{{ path('preview_back_offer_delete', { id: offer.id }) }}"
+      style="display:inline;"
+      onsubmit="return confirm('Supprimer cette offre ?');">
+
+    <button type="submit"
+            class="action-btn delete"
+            title="Supprimer"
+            style="background:none; border:none; padding:0; cursor:pointer;">
+        <i class="fa fa-trash"></i>
+    </button>
+</form>
+
+                                
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">
+                <i class="fa fa-briefcase"></i>
+                <p>Aucune offre enregistree.</p>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function searchOfferTable() {
+            const input = document.getElementById('offer-table-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#offer-table tbody tr');
+            rows.forEach(function(row) {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(input) ? '' : 'none';
+            });
+        }
+    </script>
+{% endblock %}

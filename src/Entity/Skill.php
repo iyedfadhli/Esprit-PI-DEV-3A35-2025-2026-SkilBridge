@@ -14,8 +14,8 @@ class Skill
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?cv $cv = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Cv $cv = null;
 
     #[ORM\Column(length: 35)]
     private ?string $nom = null;
@@ -31,12 +31,12 @@ class Skill
         return $this->id;
     }
 
-    public function getCv(): ?cv
+    public function getCv(): ?Cv
     {
         return $this->cv;
     }
 
-    public function setCv(?cv $cv): static
+    public function setCv(?Cv $cv): static
     {
         $this->cv = $cv;
 
@@ -48,7 +48,7 @@ class Skill
         return $this->nom;
     }
 
-    public function setNom(string $nom): static
+    public function setNom(?string $nom): static
     {
         $this->nom = $nom;
 
@@ -60,7 +60,7 @@ class Skill
         return $this->type;
     }
 
-    public function setType(string $type): static
+    public function setType(?string $type): static
     {
         $this->type = $type;
 
@@ -72,7 +72,7 @@ class Skill
         return $this->level;
     }
 
-    public function setLevel(string $level): static
+    public function setLevel(?string $level): static
     {
         $this->level = $level;
 

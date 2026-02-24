@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\ChapterRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Course;
+use App\Entity\Quiz;
 
 #[ORM\Entity(repositoryClass: ChapterRepository::class)]
 class Chapter
@@ -14,8 +16,8 @@ class Chapter
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?course $course = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Course $course = null;
 
     #[ORM\Column]
     private ?int $chapter_order = null;
@@ -32,17 +34,20 @@ class Chapter
     #[ORM\Column(length: 30)]
     private ?string $title = null;
 
+    #[ORM\OneToOne(mappedBy: 'chapter', targetEntity: Quiz::class, cascade: ['persist', 'remove'])]
+    private ?Quiz $quiz = null;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCourse(): ?course
+    public function getCourse(): ?Course
     {
         return $this->course;
     }
 
-    public function setCourse(?course $course): static
+    public function setCourse(?Course $course): static
     {
         $this->course = $course;
 
@@ -105,6 +110,28 @@ class Chapter
     public function setTitle(string $title): static
     {
         $this->title = $title;
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->title ?? ('Chapter #'.($this->id ?? 'n/a'));
+    }
+
+    public function getQuiz(): ?Quiz
+    {
+        return $this->quiz;
+    }
+
+    public function setQuiz(?Quiz $quiz): static
+    {
+        // set the owning side of the relation if necessary
+        if ($quiz !== null && $quiz->getChapter() !== $this) {
+            $quiz->setChapter($this);
+        }
+
+        $this->quiz = $quiz;
 
         return $this;
     }

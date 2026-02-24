@@ -1,163 +1,51 @@
 {% extends 'backoffice/base_back.html.twig' %}
 
-{% block stylesheets %}
-	{{parent()}}
-	<link rel="stylesheet" href="{{ asset('assets/css/backoffice/dashboard/user/dashboard_user.css') }}">
+{% block title %}Users{% endblock %}
 
-{% endblock %}
 {% block body %}
-	<div class="admin-user-page">
-		<h2 class="page-title">Users Management</h2>
+<div style="padding:30px">
 
-		<div class="table-controls" style="display:flex; justify-content:space-between; margin-bottom:15px;">
-			<div class="search-box" style="display:flex; gap:5px; flex-wrap:wrap; margin-bottom:15px; align-items:center;">
-				<form
-					method="GET" action="{{ path('dashboard_user') }}" style="display:flex; gap:10px; flex-wrap:wrap; flex:1;">
-					<!-- Search Input -->
-					<input
-					type="text" name="search" placeholder="Search by name..." value="{{ app.request.get('search') }}" style="padding:6px 10px; border-radius:5px; border:1px solid #ccc; flex:1; min-width:200px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0;">Users Management</h2>
 
-					<!-- Sort Dropdown -->
-					<select name="sort" style="padding:6px 10px; border-radius:5px; border:1px solid #ccc;">
-						<option value="">Sort by...</option>
-						<option value="id" {% if app.request.get('sort') == 'id' %} selected {% endif %}>ID</option>
-						<option value="nom" {% if app.request.get('sort') == 'nom' %} selected {% endif %}>Nom</option>
-						<option value="prenom" {% if app.request.get('sort') == 'prenom' %} selected {% endif %}>Prénom</option>
-						<option value="email" {% if app.request.get('sort') == 'email' %} selected {% endif %}>Email</option>
-					</select>
+        <div style="display:flex; gap:10px;">
+            <a href="{{ path('admin_users_export_pdf') }}"
+               style="background:#10b981; color:white; padding:10px 18px; border-radius:8px; text-decoration:none;">
+                <i class="fa fa-file-pdf"></i> Export PDF
+            </a>
 
-					<!-- Submit Button -->
-					<button type="submit" style="padding:6px 12px; border-radius:5px; border:none; background:#4a7fd7; color:#fff; cursor:pointer;">
-						🔍 Search
-					</button>
-				</form>
-			</div>
+            <a href="{{ path('admin_user_new') }}"
+               style="background:#5a7bd8; color:white; padding:10px 18px; border-radius:8px; text-decoration:none;">
+                <i class="fa fa-plus"></i> Add User
+            </a>
+        </div>
+    </div>
 
+    <br>
 
-		</div>
+    <div style="margin-bottom: 20px;">
+        <input type="text" id="userSearch" placeholder="Search users by name, email..." 
+               style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+    </div>
 
-		<div class="user-table-wrapper">
-			<table class="user-table">
-				<thead>
-					<tr>
-						<th>ID</th>
-						<th>Nom</th>
-						<th>Prénom</th>
-						<th>Date de Naissance</th>
-						<th>Email</th>
-						<th>Ban</th>
-						<th>Photo</th>
-						<th>Mot de Passe</th>
-						<th>Date Inscrit</th>
-						<th>Type</th>
-						<th>Education</th>
-						<th>Skills</th>
-						<th>Score Générale</th>
-						<th>Expérience</th>
-						<th>Domaine</th>
-						<th>Actif</th>
-						<th>Report Nbr</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{% for user in users %}
-						{% set type = user.mainRoleLabel %}
-						<tr>
-							<td>#{{ user.id }}</td>
-							<td>
-								<strong>{{ user.nom ?? '—' }}</strong>
-							</td>
-							<td>
-								<small>{{ user.prenom ?? '—' }}</small>
-							</td>
-							<td>{{ user.dateNaissance ? user.dateNaissance|date('Y-m-d') : '—' }}</td>
-							<td>{{ user.email }}</td>
+    <div id="usersTable">
+        {% include 'backoffice/user/_users_table.html.twig' %}
+    </div>
 
-							<td class="center">
-								{% if user.ban %}
-									<span class="badge badge-danger">Banned</span>
-								{% else %}
-									<span class="badge badge-success">OK</span>
-								{% endif %}
-							</td>
+    <script>
+        document.getElementById('userSearch').addEventListener('keyup', function() {
+            let query = this.value;
+            fetch("{{ path('dashboard_user') }}?search=" + query, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('usersTable').innerHTML = html;
+            });
+        });
+    </script>
 
-							<td class="center">
-								{% if user.photo %}
-									<img src="{{ asset(user.photo | default('assets/images/frontoffice/user_pic/profile_pic.png')) }}" class="user-avatar">
-								{% else %}
-									<img src="{{ asset('assets/images/frontoffice/user_pic/profile_pic.png') }}" class="user-avatar">
-								{% endif %}
-							</td>
-
-							<td class="center">••••••••</td>
-							<td>{{ user.dateInscrit|date('Y-m-d') }}</td>
-							<td class="center">
-								<span class="role-badge role-{{ type|lower }}">{{ type }}</span>
-							</td>
-							<td>{{ user.education ?? '—' }}</td>
-							<td>{{ user.skills ?? '—' }}</td>
-
-							<td class="center">
-								{% if type == 'Student' %}
-									<span class="badge badge-info">{{ user.scoreGenerale }}</span>
-								{% else %}
-									—
-								{% endif %}
-							</td>
-
-							<td class="center">
-								{% if type == 'Supervisor' %}
-									{{ user.experience }}
-								{% else %}
-									—
-								{% endif %}
-							</td>
-
-							<td class="center">
-								{% if type == 'Entreprise'%}
-									{{ user.domaine }}
-								{% else %}
-									—
-								{% endif %}
-							</td>
-
-							<td class="center">
-								{% if user.isActive %}
-									<span class="badge badge-success">Active</span>
-								{% else %}
-									<span class="badge badge-secondary">Inactive</span>
-								{% endif %}
-							</td>
-
-							<td class="center">{{ user.reportNbr }}</td>
-
-							<td class="actions">
-								{% if user.ban %}
-									<a href="{{ path('user_unban', {'id': user.id}) }}" class="icon-btn delete" title="Unban User">🔓 Unban</a>
-								{% else %}
-									<a href="{{ path('user_ban', {'id': user.id}) }}" class="icon-btn delete" title="Ban User">🔒 Ban</a>
-								{% endif %}
-								{% if user.getMainRoleLabel() != 'Admin' %}
-									<a href="{{ path('user_promote_admin', {'id': user.id}) }}" class="icon-btn promote" title="Promote to Admin">🛡️</a>
-								{% else %}
-									<a href="{{ path('user_demote_admin', {'id': user.id}) }}" class="icon-btn demote" title="Remove Admin">⚡</a>
-								{% endif %}
-								<a href="{{ path('user_delete', {'id': user.id}) }}" class="icon-btn delete" title="Delete User" onclick="return confirm('Are you sure you want to delete this user?');">
-									🗑️ Delete
-								</a>
-							</td>
-
-						</tr>
-					{% else %}
-						<tr>
-							<td colspan="18" class="empty">No users found</td>
-						</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	</div>
-
-
+</div>
 {% endblock %}

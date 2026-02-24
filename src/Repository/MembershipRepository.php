@@ -16,28 +16,24 @@ class MembershipRepository extends ServiceEntityRepository
         parent::__construct($registry, Membership::class);
     }
 
-    //    /**
-    //     * @return Membership[] Returns an array of Membership objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('m.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findAdminMembershipsByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('IDENTITY(m.user_id) = :uid')
+            ->andWhere('m.role IN (:roles)')
+            ->setParameter('uid', $userId)
+            ->setParameter('roles', ['admin', 'leader'])
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?Membership
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function countMembersInGroup(\App\Entity\Group $group): int
+    {
+        return (int) $this->createQueryBuilder('m')
+            ->select('COUNT(m.id)')
+            ->andWhere('m.group_id = :group')
+            ->setParameter('group', $group)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

@@ -1,0 +1,126 @@
+{# ============================================================
+   File: templates/frontoffice/cv/index.html.twig
+   Description: Lists all CVs belonging to the current user
+   ============================================================ #}
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Mes CVs - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+
+    {# Flash messages #}
+    {% for type, messages in app.flashes %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message {{ type }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    {# Section header #}
+    <div class="section-header">
+        <div>
+            <h1>Mes CVs</h1>
+            <p class="section-subtitle">Gerez et creez vos curriculum vitae</p>
+        </div>
+        <a href="{{ path('preview_front_cv_new') }}" class="btn-primary">
+            <i class="fa fa-plus"></i> Nouveau CV
+        </a>
+    </div>
+
+    {# Filter bar #}
+    <div class="filter-bar">
+        <input type="text" id="cv-search" placeholder="Rechercher un CV..." onkeyup="filterCVs()">
+        <select id="cv-lang-filter" onchange="filterCVs()">
+            <option value="">Toutes les langues</option>
+            <option value="Francais">Francais</option>
+            <option value="Anglais">Anglais</option>
+            <option value="Arabe">Arabe</option>
+        </select>
+    </div>
+
+    {# CV Grid #}
+    {% if cvs is defined and cvs|length > 0 %}
+        <div class="cv-grid" id="cv-grid">
+            {% for cv in cvs %}
+                <div class="cv-card" data-name="{{ cv.nomCv|lower }}" data-lang="{{ cv.langue|lower }}">
+                    <div class="cv-card-header">
+                        <h3>{{ cv.nomCv }}</h3>
+                        <span class="cv-card-badge">{{ cv.langue }}</span>
+                    </div>
+
+                    <div class="cv-card-meta">
+                        <span><i class="fa fa-calendar"></i> {{ cv.creationDate|date('d/m/Y') }}</span>
+                        <span><i class="fa fa-refresh"></i> {{ cv.updatedAt|date('d/m/Y') }}</span>
+                        
+                    </div>
+
+                    <div class="cv-progress-bar">
+                        <div class="cv-progress-bar-fill" style="width: {{ cv.progression }}%"></div>
+                    </div>
+                    <span style="font-size:12px;color:#888;">Progression : {{ cv.progression }}%</span>
+
+                    <div class="cv-card-actions">
+                        
+                        <a href="{{ path('preview_front_cv_show', {id: cv.id}) }}" class="btn-view">
+                            <i class="fa fa-eye"></i> Voir
+                        </a>
+                       
+                        <a href="{{ path('preview_front_cv_edit', {id: cv.id}) }}" class="btn-edit">
+                            <i class="fa fa-pencil"></i> Modifier
+                        </a>
+                        <a href="#" class="btn-delete" onclick="deleteCv({{ cv.id }}); return false;">
+    <i class="fa fa-trash"></i> Supprimer
+</a>
+
+<form id="delete-form-{{ cv.id }}" method="post" action="{{ path('preview_front_cv_delete', {id: cv.id}) }}" style="display:none;">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ cv.id) }}">
+</form>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fa fa-file-text-o"></i>
+            <p>Vous n'avez pas encore de CV.</p>
+            
+            <a href="{{ path('preview_front_cv_new') }}" class="btn-primary">
+                <i class="fa fa-plus"></i> Creer mon premier CV
+            </a>
+        </div>
+    {% endif %}
+
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function filterCVs() {
+            const search = document.getElementById('cv-search').value.toLowerCase();
+            const lang = document.getElementById('cv-lang-filter').value.toLowerCase();
+            const cards = document.querySelectorAll('.cv-card');
+            cards.forEach(function(card) {
+                const name = card.getAttribute('data-name');
+                const cardLang = card.getAttribute('data-lang');
+                const matchName = name.includes(search);
+                const matchLang = !lang || cardLang === lang;
+                card.style.display = (matchName && matchLang) ? '' : 'none';
+            });
+        }
+    </script>
+    <script>
+function deleteCv(cvId) {
+    if (confirm('Voulez-vous vraiment supprimer ce CV ?')) {
+        document.getElementById('delete-form-' + cvId).submit();
+    }
+}
+</script>
+{% endblock %}

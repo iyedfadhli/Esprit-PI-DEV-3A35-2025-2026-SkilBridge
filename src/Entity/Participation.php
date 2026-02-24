@@ -14,12 +14,12 @@ class Participation
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?hackathon $hackathon = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Hackathon $hackathon = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?group $group_id = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Group $group_id = null;
 
     #[ORM\Column(length: 30)]
     private ?string $status = null;
@@ -38,24 +38,24 @@ class Participation
         return $this->id;
     }
 
-    public function getHackathon(): ?hackathon
+    public function getHackathon(): ?Hackathon
     {
         return $this->hackathon;
     }
 
-    public function setHackathon(?hackathon $hackathon): static
+    public function setHackathon(?Hackathon $hackathon): static
     {
         $this->hackathon = $hackathon;
 
         return $this;
     }
 
-    public function getGroupId(): ?group
+    public function getGroupId(): ?Group
     {
         return $this->group_id;
     }
 
-    public function setGroupId(?group $group_id): static
+    public function setGroupId(?Group $group_id): static
     {
         $this->group_id = $group_id;
 

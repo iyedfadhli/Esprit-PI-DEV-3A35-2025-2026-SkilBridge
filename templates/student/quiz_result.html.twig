@@ -1,0 +1,368 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Résultat du Quiz{% endblock %}
+
+{% block stylesheets %}
+<style>
+.quiz-result-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+}
+
+.result-header {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.result-header h1 {
+    margin: 0 0 1rem 0;
+    font-size: 1.8rem;
+}
+
+.score-display {
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 1rem 0;
+}
+
+.score-details {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.score-stat {
+    background: rgba(255,255,255,0.2);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+}
+
+.score-stat span {
+    display: block;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.score-stat strong {
+    font-size: 1.2rem;
+}
+
+.result-badge {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.result-badge.success {
+    background: #10b981;
+    color: white;
+}
+
+.result-badge.failed {
+    background: #ef4444;
+    color: white;
+}
+
+.responses-section {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.responses-section h2 {
+    margin: 0 0 1.5rem 0;
+    color: #333;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.75rem;
+}
+
+.response-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.response-item:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.response-item.correct {
+    border-left: 4px solid #10b981;
+    background: linear-gradient(90deg, #ecfdf5 0%, #fff 100%);
+}
+
+.response-item.incorrect {
+    border-left: 4px solid #ef4444;
+    background: linear-gradient(90deg, #fef2f2 0%, #fff 100%);
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.question-number {
+    background: #667eea;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.points-badge {
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.points-badge.earned {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.points-badge.lost {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.answer-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
+.answer-row .label {
+    font-weight: 600;
+    min-width: 140px;
+    color: #666;
+}
+
+.answer-row .value {
+    flex: 1;
+}
+
+.answer-row .value.your-answer {
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    border-radius: 6px;
+}
+
+.answer-row .value.correct-answer {
+    padding: 0.5rem 1rem;
+    background: #d1fae5;
+    border-radius: 6px;
+    color: #059669;
+}
+
+.answer-icon {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+.result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-action.primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-action.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-action.secondary {
+    background: #f3f4f6;
+    color: #333;
+}
+
+.btn-action.secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-action.success {
+    background: #10b981;
+    color: white;
+}
+
+.btn-action.success:hover {
+    background: #059669;
+}
+
+@media (max-width: 768px) {
+    .quiz-result-container {
+        padding: 1rem;
+    }
+    
+    .score-display {
+        font-size: 3rem;
+    }
+    
+    .score-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .result-actions {
+        flex-direction: column;
+    }
+    
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="quiz-result-container">
+    <div class="result-header">
+        <h1>{{ attempt.quiz.title }}</h1>
+        <div class="score-display">{{ attempt.score|round }}%</div>
+        
+        {% set passingScore = attempt.quiz.passingScore ?? 70 %}
+        {% if attempt.score >= passingScore %}
+            <div class="result-badge success">✅ Félicitations, vous avez réussi !</div>
+        {% else %}
+            <div class="result-badge failed">❌ Score insuffisant</div>
+        {% endif %}
+        
+        <div class="score-details">
+            <div class="score-stat">
+                <span>Tentative</span>
+                <strong>#{{ attempt.attemptNbr }}</strong>
+            </div>
+            <div class="score-stat">
+                <span>Score requis</span>
+                <strong>{{ passingScore }}%</strong>
+            </div>
+            <div class="score-stat">
+                <span>Date</span>
+                <strong>{{ attempt.submittedAt|date('d/m/Y H:i') }}</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="responses-section">
+        <h2>📝 Détail de vos réponses</h2>
+        
+        {% set responses = studentResponses ?? [] %}
+        {% if responses|length > 0 %}
+            {% for response in responses %}
+                <div class="response-item {{ response.isCorrect ? 'correct' : 'incorrect' }}">
+                    <div class="question-header">
+                        <span class="question-number">Question {{ loop.index }}</span>
+                        <span class="points-badge {{ response.isCorrect ? 'earned' : 'lost' }}">
+                            {% if response.isCorrect %}
+                                +{{ response.pointsEarned }} pts
+                            {% else %}
+                                0 / {{ response.question.point }} pts
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    <div class="question-text">{{ response.question.content }}</div>
+                    
+                    <div class="answer-row">
+                        <span class="label">
+                            <span class="answer-icon">{{ response.isCorrect ? '✅' : '❌' }}</span>
+                            Votre réponse:
+                        </span>
+                        <span class="value your-answer">{{ response.selectedAnswer.content }}</span>
+                    </div>
+                    
+                    {% if not response.isCorrect %}
+                        {% for answer in response.question.answers %}
+                            {% if answer.isCorrect %}
+                                <div class="answer-row">
+                                    <span class="label">
+                                        <span class="answer-icon">💡</span>
+                                        Bonne réponse:
+                                    </span>
+                                    <span class="value correct-answer">{{ answer.content }}</span>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align: center; color: #666; padding: 2rem;">
+                Aucune réponse détaillée disponible pour cette tentative.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="result-actions">
+        {% if attempt.score >= passingScore %}
+            <a href="{{ path('student_course', {id: attempt.quiz.course.id}) }}" class="btn-action success">
+                ✅ Continuer le cours
+            </a>
+        {% else %}
+            {% set maxAttempts = attempt.quiz.maxAttempts ?? 3 %}
+            {% if attempt.attemptNbr < maxAttempts %}
+                <a href="{{ path('student_quiz_attempt', {quizId: attempt.quiz.id}) }}" class="btn-action primary">
+                    🔄 Réessayer ({{ maxAttempts - attempt.attemptNbr }} tentative(s) restante(s))
+                </a>
+            {% else %}
+                <span class="btn-action secondary" style="cursor: not-allowed; opacity: 0.6;">
+                    Nombre maximum de tentatives atteint
+                </span>
+            {% endif %}
+        {% endif %}
+        
+        <a href="{{ path('student_dashboard') }}" class="btn-action secondary">
+            ← Retour au tableau de bord
+        </a>
+    </div>
+</div>
+{% endblock %}

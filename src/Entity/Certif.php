@@ -15,8 +15,8 @@ class Certif
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?cv $cv = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Cv $cv = null;
 
     #[ORM\Column(length: 30)]
     private ?string $name = null;
@@ -35,12 +35,12 @@ class Certif
         return $this->id;
     }
 
-    public function getCv(): ?cv
+    public function getCv(): ?Cv
     {
         return $this->cv;
     }
 
-    public function setCv(?cv $cv): static
+    public function setCv(?Cv $cv): static
     {
         $this->cv = $cv;
 
@@ -52,7 +52,7 @@ class Certif
         return $this->name;
     }
 
-    public function setName(string $name): static
+    public function setName(?string $name): static
     {
         $this->name = $name;
 
@@ -64,7 +64,7 @@ class Certif
         return $this->issued_by;
     }
 
-    public function setIssuedBy(string $issued_by): static
+    public function setIssuedBy(?string $issued_by): static
     {
         $this->issued_by = $issued_by;
 

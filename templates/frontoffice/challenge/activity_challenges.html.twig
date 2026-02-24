@@ -1,0 +1,125 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/activity_challenge.css') }}">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.start-work-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const card = btn.closest('.challenge-card');
+                    card.querySelector('.group-selection').classList.toggle('hidden');
+                });
+            });
+            const pdfModal = document.createElement('div');
+            pdfModal.id = 'pdf-modal';
+            pdfModal.className = 'modal';
+            pdfModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;';
+            pdfModal.innerHTML = '<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);"><span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span><iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe></div>';
+            document.body.appendChild(pdfModal);
+            const pdfClose = pdfModal.querySelector('.close');
+            const pdfFrame = document.getElementById('pdf-frame');
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.open-pdf');
+                if (btn) {
+                    pdfFrame.src = btn.dataset.src;
+                    pdfModal.style.display = 'block';
+                }
+            });
+            pdfClose.addEventListener('click', () => {
+                pdfFrame.src = '';
+                pdfModal.style.display = 'none';
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+<section class="activity-page">
+    <div class="container">
+        <div class="challenge-list">
+
+            {% for challenge in challenges %}
+                <div class="challenge-card" data-challenge-id="{{ challenge.id }}">
+
+                    <div class="challenge-header">
+                        <h3>{{ challenge.title }}</h3>
+                        <button class="outline-btn start-work-btn">
+                            Commencer le travail
+                        </button>
+                    </div>
+
+                    <p class="challenge-desc">{{ challenge.description }}</p>
+
+                    {% if challenge.content %}
+                        {% set extension = challenge.content|split('.')|last|lower %}
+                        {% if extension in ['pdf', 'doc', 'docx'] %}
+                            <p class="challenge-desc">
+                                {% if extension == 'pdf' %}
+                                    <button class="outline-btn open-pdf" data-src="{{ asset(challenge.content) }}">
+                                        📎 {{ challenge.content|split('/')|last }}
+                                    </button>
+                                {% else %}
+                                    <a href="{{ asset(challenge.content) }}" target="_blank">
+                                        📎 {{ challenge.content|split('/')|last }}
+                                    </a>
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="challenge-info">
+                        <div class="challenge-info-row">
+                            <span>📌 Difficulty:
+                                <strong>{{ challenge.difficulty }}</strong>
+                            </span>
+                            <span>👥 Min / Max Group:
+                                <strong>{{ challenge.minGroupNbr }} / {{ challenge.maxGroupNbr }}</strong>
+                            </span>
+                            <span>⏱ Deadline:
+                                <strong>{{ challenge.deadline|date('d-m-Y H:i') }}</strong>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="group-selection hidden">
+                        <div class="challenge-header">
+                            <h4>Choisissez un groupe (Leader)</h4>
+                        </div>
+
+                        <div class="group-list">
+                            {% for group in groups %}
+                                {% set already = participatedGroups[challenge.id][group.group.getId()] ?? false %}
+                                {% set busy = groupMemberBusy[group.group.getId()] ?? false %}
+                                <div class="group-card {{ (already or busy) ? 'unavailable' : 'available' }}" data-members="{{ group.memberCount }}">
+                                    <div class="group-info">
+                                        <span class="group-name">
+                                            👥 {{ group.group.getName() }}
+                                        </span>
+                                        <span class="group-members">
+                                            {{ group.memberCount }} membres
+                                        </span>
+                                    </div>
+                                    <form method="post" action="{{ path('activity_start') }}">
+                                        <input type="hidden" name="challenge_id" value="{{ challenge.id }}">
+                                        <input type="hidden" name="group_id" value="{{ group.group.getId() }}">
+                                        <button type="submit" class="outline-btn select-group-btn" {% if already or busy %} disabled {% endif %}>
+                                            {% if already %}Déjà participant{% elseif busy %}Membre occupé{% else %}Choisir{% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+{% endblock %}

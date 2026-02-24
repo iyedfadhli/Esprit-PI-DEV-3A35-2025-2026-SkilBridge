@@ -1,0 +1,132 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}{{ quiz.title }} - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-clipboard-question"></i> {{ quiz.title }}</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_question_new') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Add Question
+            </a>
+            <a href="{{ path('admin_quiz_edit', {'id': quiz.id}) }}" class="btn btn-warning">
+                <i class="fa-solid fa-pen"></i> Edit
+            </a>
+            <form method="post" action="{{ path('admin_quiz_delete', {'id': quiz.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz.id) }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_quiz_index') }}">Quizzes</a>
+        <span>/</span>
+        <span>{{ quiz.title }}</span>
+    </nav>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Passing Score</h3>
+            <p class="stat-number">{{ quiz.passingScore }}%</p>
+        </div>
+        <div class="stat-card">
+            <h3>Max Attempts</h3>
+            <p class="stat-number">{{ quiz.maxAttempts }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Questions/Attempt</h3>
+            <p class="stat-number">{{ quiz.questionsPerAttempt ?: 'All' }}</p>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Quiz Information Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-info-circle"></i> Quiz Information</h2>
+                <span class="badge badge-secondary">#{{ quiz.id }}</span>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <div class="detail-label">Title</div>
+                    <div class="detail-value">{{ quiz.title }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Course</div>
+                    <div class="detail-value">
+                        <a href="{{ path('admin_course_show', {'id': quiz.course.id}) }}">
+                            {{ quiz.course.title }} <i class="fa-solid fa-external-link"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Chapter</div>
+                    <div class="detail-value">
+                        {% if quiz.chapter %}
+                            <a href="{{ path('admin_chapter_show', {'id': quiz.chapter.id}) }}">
+                                {{ quiz.chapter.title }} <i class="fa-solid fa-external-link"></i>
+                            </a>
+                        {% else %}
+                            <span class="badge badge-secondary">Course-level quiz</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Supervisor</div>
+                    <div class="detail-value">{{ quiz.supervisor ? quiz.supervisor.email : 'N/A' }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Passing Score</div>
+                    <div class="detail-value">
+                        <span class="badge badge-success">{{ quiz.passingScore }}%</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Maximum Attempts</div>
+                    <div class="detail-value">{{ quiz.maxAttempts }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Questions per Attempt</div>
+                    <div class="detail-value">{{ quiz.questionsPerAttempt ?: 'All questions' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-bolt"></i> Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-2">
+                    <a href="{{ path('admin_question_new') }}" class="btn btn-primary">
+                        <i class="fa-solid fa-plus"></i> Add New Question
+                    </a>
+                    <a href="{{ path('admin_question_index', {'quiz': quiz.id}) }}" class="btn btn-outline">
+                        <i class="fa-solid fa-list"></i> View All Questions
+                    </a>
+                    <a href="{{ path('admin_course_show', {'id': quiz.course.id}) }}" class="btn btn-secondary">
+                        <i class="fa-solid fa-book"></i> Back to Course
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-3">
+        <a href="{{ path('admin_quiz_index') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Quizzes
+        </a>
+    </div>
+</div>
+{% endblock %}

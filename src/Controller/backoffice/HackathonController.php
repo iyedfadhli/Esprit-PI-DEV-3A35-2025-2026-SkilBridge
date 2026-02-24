@@ -50,7 +50,12 @@ class HackathonController extends AbstractController
             $coverFile = $form->get('cover_url')->getData();
 
             if ($coverFile instanceof UploadedFile) {
-                $newFilename = uniqid().'.'.$coverFile->guessExtension();
+                $ext = strtolower($coverFile->getClientOriginalExtension() ?? '');
+                $allowed = ['jpg','jpeg','png','gif','webp'];
+                if (!in_array($ext, $allowed, true)) {
+                    $ext = 'dat';
+                }
+                $newFilename = uniqid().'.'.$ext;
 
                 try {
                     $coverFile->move(
@@ -101,8 +106,6 @@ class HackathonController extends AbstractController
             'constraints' => [
                 new Assert\File([
                     'maxSize' => '2M',
-                    'mimeTypes' => ['image/jpeg', 'image/png', 'image/webp'],
-                    'mimeTypesMessage' => 'Please upload a valid image file (JPEG, PNG, WEBP)',
                 ])
             ],
             'attr' => ['class' => 'form-control'],
@@ -114,7 +117,12 @@ class HackathonController extends AbstractController
             $coverFile = $form->get('cover_url')->getData();
 
             if ($coverFile instanceof UploadedFile) {
-                $newFilename = uniqid().'.'.$coverFile->guessExtension();
+                $ext = strtolower($coverFile->getClientOriginalExtension() ?? '');
+                $allowed = ['jpg','jpeg','png','gif','webp'];
+                if (!in_array($ext, $allowed, true)) {
+                    $ext = 'dat';
+                }
+                $newFilename = uniqid().'.'.$ext;
 
                 try {
                     $coverFile->move(

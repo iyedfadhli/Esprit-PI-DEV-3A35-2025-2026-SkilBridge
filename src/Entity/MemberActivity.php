@@ -15,17 +15,17 @@ class MemberActivity
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Activity $id_activity = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $user_id = null;
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $activityDescription = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?float $indivScore = null;
 
     public function getId(): ?int

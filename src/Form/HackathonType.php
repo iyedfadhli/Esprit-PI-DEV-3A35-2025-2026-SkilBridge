@@ -87,12 +87,6 @@ class HackathonType extends AbstractType
                 new Assert\NotBlank(['message' => 'Please upload a cover image']),
                 new Assert\File([
                     'maxSize' => '2M',
-                    'mimeTypes' => [
-                        'image/jpeg',
-                        'image/png',
-                        'image/webp',
-                    ],
-                    'mimeTypesMessage' => 'Please upload a valid image file (JPEG, PNG, WEBP)',
                 ])
             ],
             'attr' => ['class' => 'form-control'],
