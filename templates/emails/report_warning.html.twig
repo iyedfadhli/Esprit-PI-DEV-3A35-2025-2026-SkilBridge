@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #ff6b35, #f7c948); padding: 30px; text-align: center; }
+        .header h1 { color: #fff; margin: 0; font-size: 24px; }
+        .header .icon { font-size: 48px; margin-bottom: 10px; }
+        .content { padding: 30px; }
+        .content h2 { color: #333; font-size: 20px; margin-top: 0; }
+        .content p { color: #555; line-height: 1.6; font-size: 15px; }
+        .warning-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 15px; margin: 20px 0; }
+        .warning-box p { color: #856404; margin: 0; font-weight: 600; }
+        .report-count { background: #f8d7da; color: #721c24; padding: 8px 16px; border-radius: 20px; display: inline-block; font-weight: 700; font-size: 14px; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee; }
+        .footer p { color: #999; font-size: 12px; margin: 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">⚠️</div>
+            <h1>Account Warning</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {{ user.prenom ?? user.nom }},</h2>
+            <p>We are writing to inform you that your account on <strong>Skill Bridge</strong> has received multiple reports from the community.</p>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <span class="report-count">{{ reportCount }} Reports Received</span>
+            </div>
+
+            <div class="warning-box">
+                <p>⚠️ This is a warning. If you receive one more report, your account will be <strong>temporarily banned for 2 days</strong>.</p>
+            </div>
+
+            <p>Please review the <strong>Community Guidelines</strong> and ensure your comments are respectful and appropriate. Repeated violations may result in longer bans or permanent suspension.</p>
+            
+            <p>If you believe these reports were made in error, please contact our support team.</p>
+            
+            <p>Best regards,<br><strong>Skill Bridge Admin Team</strong></p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from Skill Bridge. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

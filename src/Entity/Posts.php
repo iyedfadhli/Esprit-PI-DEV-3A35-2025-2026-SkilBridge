@@ -44,7 +44,7 @@ class Posts
     private ?int $likes_counter = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Group $group_id = null;
 
     #[ORM\ManyToOne]

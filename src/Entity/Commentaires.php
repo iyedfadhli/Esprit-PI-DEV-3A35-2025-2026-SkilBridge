@@ -29,7 +29,7 @@ class Commentaires
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    private ?posts $post = null;
+    private ?Posts $post = null;
 
     public function getId(): ?int
     {
@@ -84,12 +84,12 @@ class Commentaires
         return $this;
     }
 
-    public function getPost(): ?posts
+    public function getPost(): ?Posts
     {
         return $this->post;
     }
 
-    public function setPost(?posts $post): static
+    public function setPost(?Posts $post): static
     {
         $this->post = $post;
 

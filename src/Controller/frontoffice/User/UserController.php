@@ -7,6 +7,7 @@ use App\Entity\Student;
 use App\Entity\Supervisor;
 use App\Entity\Entreprise;
 use App\Form\LoginType;
+use App\Service\OtpService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +22,8 @@ final class UserController extends AbstractController
     public function signUpIn(
         Request $request,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        OtpService $otpService
     ): Response {
 
         $loginForm = $this->createForm(LoginType::class);
@@ -98,6 +100,110 @@ final class UserController extends AbstractController
                 ]);
             }
 
+            // ✅ Store registration data in session and send OTP
+            $session = $request->getSession();
+            $session->set('pending_registration', [
+                'type' => $type,
+                'nom' => $nom,
+                'prenom' => $prenom,
+                'email' => $email,
+                'date_naissance' => $dateNaissance,
+                'domaine' => $domaine,
+                'passwd' => $passwd,
+            ]);
+
+            $code = $otpService->sendOtp($email);
+
+            if ($otpService->wasEmailSent()) {
+                $this->addFlash('success', 'A verification code has been sent to your email.');
+            } else {
+                // Email failed — store code in session so we can show it on the page
+                $session->set('otp_fallback_code', $code);
+                $this->addFlash('warning', 'Email could not be sent. Your code is displayed below.');
+            }
+            return $this->redirectToRoute('verify_otp');
+        }
+
+        // ================= LOGIN =================
+        if ($loginForm->isSubmitted() && $loginForm->isValid()) {
+
+            $formData = $loginForm->getData();
+            $email = strtolower(trim((string) $formData['email']));
+            $password = (string) $formData['password'];
+
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+
+            if (!$user || !$passwordHasher->isPasswordValid($user, $password)) {
+                $this->addFlash('error', 'Invalid email or password');
+            } else {
+                // Check timed ban (bannedUntil)
+                if ($user->isBannedNow()) {
+                    $this->addFlash('error', 'Your account is banned until ' . $user->getBannedUntil()->format('d/m/Y H:i'));
+                    return $this->redirectToRoute('sign');
+                }
+
+                // Auto-unban if ban has expired
+                if ($user->getBannedUntil() !== null && $user->getBannedUntil() <= new \DateTime()) {
+                    $user->setBan(false);
+                    $user->setBannedUntil(null);
+                    $em->flush();
+                }
+
+                if ($user->isBan()) {
+                    $this->addFlash('error', 'Your account is banned');
+                    return $this->redirectToRoute('sign');
+                }
+
+                $request->getSession()->set('user_id', $user->getId());
+                $this->addFlash('success', 'Logged in successfully!');
+                return $this->redirectToRoute('home');
+            }
+        }
+
+        return $this->render('frontoffice/user/sign.html.twig', [
+            'form' => $loginForm->createView(),
+        ]);
+    }
+
+    // ================= VERIFY OTP =================
+    #[Route('/verify-otp', name: 'verify_otp', methods: ['GET', 'POST'])]
+    public function verifyOtp(
+        Request $request,
+        EntityManagerInterface $em,
+        UserPasswordHasherInterface $passwordHasher,
+        OtpService $otpService
+    ): Response {
+        $session = $request->getSession();
+        $pendingData = $session->get('pending_registration');
+
+        if (!$pendingData) {
+            $this->addFlash('error', 'No pending registration. Please fill the form first.');
+            return $this->redirectToRoute('sign');
+        }
+
+        $email = $pendingData['email'];
+
+        if ($request->isMethod('POST')) {
+            $code = trim((string) $request->request->get('otp_code'));
+
+            if (strlen($code) !== 6) {
+                $this->addFlash('error', 'Please enter the complete 6-digit code.');
+                return $this->render('frontoffice/user/verify_otp.html.twig', ['email' => $email, 'fallback_code' => $session->get('otp_fallback_code')]);
+            }
+
+            if (!$otpService->verifyOtp($email, $code)) {
+                $this->addFlash('error', 'Invalid or expired code. Please try again or resend.');
+                return $this->render('frontoffice/user/verify_otp.html.twig', ['email' => $email, 'fallback_code' => $session->get('otp_fallback_code')]);
+            }
+
+            // ✅ OTP verified — create the account
+            $type = $pendingData['type'];
+            $nom = $pendingData['nom'];
+            $prenom = $pendingData['prenom'];
+            $dateNaissance = $pendingData['date_naissance'];
+            $domaine = $pendingData['domaine'];
+            $passwd = $pendingData['passwd'];
+
             if ($type === 'student') {
                 $user = new Student();
                 $user->setPrenom($prenom);
@@ -114,7 +220,8 @@ final class UserController extends AbstractController
                 $user = new Entreprise();
                 $user->setDomaine($domaine);
             } else {
-                $this->addFlash('error', 'Invalid account type');
+                $this->addFlash('error', 'Invalid account type.');
+                $session->remove('pending_registration');
                 return $this->redirectToRoute('sign');
             }
 
@@ -128,36 +235,186 @@ final class UserController extends AbstractController
             $em->persist($user);
             $em->flush();
 
-            $this->addFlash('success', 'Account created successfully!');
+            // Clean up session
+            $session->remove('pending_registration');
+            $session->remove('otp_fallback_code');
+
+            $this->addFlash('success', 'Account created successfully! You can now log in.');
             return $this->redirectToRoute('sign');
         }
 
-        // ================= LOGIN =================
-        if ($loginForm->isSubmitted() && $loginForm->isValid()) {
+        return $this->render('frontoffice/user/verify_otp.html.twig', ['email' => $email, 'fallback_code' => $session->get('otp_fallback_code')]);
+    }
 
-            $formData = $loginForm->getData();
-            $email = strtolower(trim((string) $formData['email']));
-            $password = (string) $formData['password'];
+    // ================= RESEND OTP =================
+    #[Route('/resend-otp', name: 'resend_otp', methods: ['POST'])]
+    public function resendOtp(Request $request, OtpService $otpService): RedirectResponse
+    {
+        $session = $request->getSession();
+        $pendingData = $session->get('pending_registration');
 
-            $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
-
-            if (!$user || !$passwordHasher->isPasswordValid($user, $password)) {
-                $this->addFlash('error', 'Invalid email or password');
-            } else {
-                if ($user->isBan()) {
-                    $this->addFlash('error', 'Your account is banned');
-                    return $this->redirectToRoute('sign');
-                }
-
-                $request->getSession()->set('user_id', $user->getId());
-                $this->addFlash('success', 'Logged in successfully!');
-                return $this->redirectToRoute('home');
-            }
+        if (!$pendingData) {
+            $this->addFlash('error', 'No pending registration.');
+            return $this->redirectToRoute('sign');
         }
 
-        return $this->render('frontoffice/user/sign.html.twig', [
-            'form' => $loginForm->createView(),
+        $code = $otpService->sendOtp($pendingData['email']);
+        if ($otpService->wasEmailSent()) {
+            $session->remove('otp_fallback_code');
+            $this->addFlash('success', 'A new verification code has been sent!');
+        } else {
+            $session->set('otp_fallback_code', $code);
+            $this->addFlash('warning', 'Email could not be sent. Your code is displayed below.');
+        }
+        return $this->redirectToRoute('verify_otp');
+    }
+
+    // ================= FORGOT PASSWORD =================
+    #[Route('/forgot-password', name: 'forgot_password', methods: ['GET', 'POST'])]
+    public function forgotPassword(Request $request, EntityManagerInterface $em, OtpService $otpService): Response
+    {
+        if ($request->isMethod('POST')) {
+            $email = strtolower(trim((string) $request->request->get('email')));
+
+            if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $this->addFlash('error', 'Please enter a valid email address.');
+                return $this->render('frontoffice/user/forgot_password.html.twig', ['email' => $email]);
+            }
+
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+            if (!$user) {
+                $this->addFlash('error', 'No account found with this email address.');
+                return $this->render('frontoffice/user/forgot_password.html.twig', ['email' => $email]);
+            }
+
+            $session = $request->getSession();
+            $session->set('forgot_password_email', $email);
+
+            $code = $otpService->sendOtp($email);
+
+            if ($otpService->wasEmailSent()) {
+                $this->addFlash('success', 'A verification code has been sent to your email.');
+            } else {
+                $session->set('forgot_fallback_code', $code);
+                $this->addFlash('warning', 'Email could not be sent. Your code is displayed below.');
+            }
+
+            return $this->redirectToRoute('forgot_password_verify');
+        }
+
+        return $this->render('frontoffice/user/forgot_password.html.twig');
+    }
+
+    #[Route('/forgot-password/verify', name: 'forgot_password_verify', methods: ['GET', 'POST'])]
+    public function forgotPasswordVerify(Request $request, OtpService $otpService): Response
+    {
+        $session = $request->getSession();
+        $email = $session->get('forgot_password_email');
+
+        if (!$email) {
+            $this->addFlash('error', 'Please enter your email first.');
+            return $this->redirectToRoute('forgot_password');
+        }
+
+        if ($request->isMethod('POST')) {
+            $code = trim((string) $request->request->get('otp_code'));
+
+            if (strlen($code) !== 6) {
+                $this->addFlash('error', 'Please enter the complete 6-digit code.');
+                return $this->render('frontoffice/user/forgot_verify.html.twig', [
+                    'email' => $email,
+                    'fallback_code' => $session->get('forgot_fallback_code'),
+                ]);
+            }
+
+            if (!$otpService->verifyOtp($email, $code)) {
+                $this->addFlash('error', 'Invalid or expired code. Please try again.');
+                return $this->render('frontoffice/user/forgot_verify.html.twig', [
+                    'email' => $email,
+                    'fallback_code' => $session->get('forgot_fallback_code'),
+                ]);
+            }
+
+            // Code verified — allow password reset
+            $session->set('forgot_password_verified', true);
+            $session->remove('forgot_fallback_code');
+
+            return $this->redirectToRoute('forgot_password_reset');
+        }
+
+        return $this->render('frontoffice/user/forgot_verify.html.twig', [
+            'email' => $email,
+            'fallback_code' => $session->get('forgot_fallback_code'),
         ]);
+    }
+
+    #[Route('/forgot-password/resend', name: 'forgot_password_resend', methods: ['POST'])]
+    public function forgotPasswordResend(Request $request, OtpService $otpService): RedirectResponse
+    {
+        $session = $request->getSession();
+        $email = $session->get('forgot_password_email');
+
+        if (!$email) {
+            $this->addFlash('error', 'Please enter your email first.');
+            return $this->redirectToRoute('forgot_password');
+        }
+
+        $code = $otpService->sendOtp($email);
+        if ($otpService->wasEmailSent()) {
+            $session->remove('forgot_fallback_code');
+            $this->addFlash('success', 'A new verification code has been sent!');
+        } else {
+            $session->set('forgot_fallback_code', $code);
+            $this->addFlash('warning', 'Email could not be sent. Your code is displayed below.');
+        }
+
+        return $this->redirectToRoute('forgot_password_verify');
+    }
+
+    #[Route('/forgot-password/reset', name: 'forgot_password_reset', methods: ['GET', 'POST'])]
+    public function forgotPasswordReset(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $session = $request->getSession();
+        $email = $session->get('forgot_password_email');
+        $verified = $session->get('forgot_password_verified');
+
+        if (!$email || !$verified) {
+            $this->addFlash('error', 'Please verify your email first.');
+            return $this->redirectToRoute('forgot_password');
+        }
+
+        if ($request->isMethod('POST')) {
+            $password = (string) $request->request->get('password');
+            $confirmPassword = (string) $request->request->get('confirm_password');
+
+            if (strlen($password) < 6) {
+                $this->addFlash('error', 'Password must be at least 6 characters long.');
+                return $this->render('frontoffice/user/forgot_reset.html.twig');
+            }
+
+            if ($password !== $confirmPassword) {
+                $this->addFlash('error', 'Passwords do not match.');
+                return $this->render('frontoffice/user/forgot_reset.html.twig');
+            }
+
+            $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
+            if (!$user) {
+                $this->addFlash('error', 'Account not found.');
+                return $this->redirectToRoute('forgot_password');
+            }
+
+            $user->setPassword($passwordHasher->hashPassword($user, $password));
+            $em->flush();
+
+            // Clean up session
+            $session->remove('forgot_password_email');
+            $session->remove('forgot_password_verified');
+
+            $this->addFlash('success', 'Password reset successfully! You can now log in with your new password.');
+            return $this->redirectToRoute('sign');
+        }
+
+        return $this->render('frontoffice/user/forgot_reset.html.twig');
     }
 
     #[Route('/logout', name: 'logout')]

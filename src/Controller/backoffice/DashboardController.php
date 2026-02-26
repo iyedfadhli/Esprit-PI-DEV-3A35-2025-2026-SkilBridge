@@ -48,11 +48,20 @@ class DashboardController extends AbstractController
             'comments' => $commentRepo->count([]),
         ];
 
+        // Fetch counts for the User Roles pie chart
+        $roleCounts = [
+            'Student' => $em->getRepository(Student::class)->count([]),
+            'Supervisor' => $em->getRepository(Supervisor::class)->count([]),
+            'Entreprise' => $em->getRepository(Entreprise::class)->count([]),
+            'Admin' => $em->getRepository(Admin::class)->count([]),
+        ];
+
         return $this->render('backoffice/dashboard.html.twig', [
             'stats' => $stats,
             'groups' => $groups,
             'posts' => $posts,
             'user' => $currentUser, // Added for compatibility if template needs it
+            'roleCounts' => json_encode($roleCounts),
         ]);
     }
     
@@ -75,11 +84,14 @@ class DashboardController extends AbstractController
 
         $qb = $em->getRepository(User::class)->createQueryBuilder('u');
 
+        // Filter out archived users
+        $qb->andWhere('u.archived = false');
+
         if ($search !== '') {
             if (ctype_digit($search)) {
-                $qb->where('u.id = :id')->setParameter('id', (int) $search);
+                $qb->andWhere('u.id = :id')->setParameter('id', (int) $search);
             } else {
-                $qb->where('LOWER(u.nom) LIKE :q OR LOWER(u.prenom) LIKE :q OR LOWER(u.email) LIKE :q')
+                $qb->andWhere('LOWER(u.nom) LIKE :q OR LOWER(u.prenom) LIKE :q OR LOWER(u.email) LIKE :q')
                    ->setParameter('q', '%' . mb_strtolower($search) . '%');
             }
         }
@@ -173,9 +185,9 @@ class DashboardController extends AbstractController
         ]);
     }
 
-    // ✅ DELETE USER
-    #[Route('/admin/users/{id}/delete', name: 'admin_user_delete', methods: ['POST'])]
-    public function deleteUser(int $id, EntityManagerInterface $em, Request $request): Response
+    // ✅ ARCHIVE USER (soft delete)
+    #[Route('/admin/users/{id}/archive', name: 'admin_user_archive', methods: ['POST'])]
+    public function archiveUser(int $id, EntityManagerInterface $em, Request $request): Response
     {
         $adminId = $request->getSession()->get('user_id');
         $admin = $adminId ? $em->getRepository(User::class)->find($adminId) : null;
@@ -187,21 +199,78 @@ class DashboardController extends AbstractController
             throw $this->createAccessDeniedException('Access denied');
         }
 
-        $userToDelete = $em->getRepository(User::class)->find($id);
-        if (!$userToDelete) {
+        $userToArchive = $em->getRepository(User::class)->find($id);
+        if (!$userToArchive) {
             throw $this->createNotFoundException('User not found');
         }
 
-        if (!$this->isCsrfTokenValid('delete_user_' . $id, (string) $request->request->get('_token'))) {
+        if (!$this->isCsrfTokenValid('archive_user_' . $id, (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Invalid CSRF token');
         }
 
-        $em->remove($userToDelete);
+        $userToArchive->setArchived(true);
         $em->flush();
 
-        $this->addFlash('success', 'User deleted successfully.');
+        $this->addFlash('success', 'User archived successfully.');
 
         return $this->redirectToRoute('dashboard_user');
+    }
+
+    // ✅ LIST ARCHIVED USERS
+    #[Route('/admin/users/archived', name: 'admin_users_archived')]
+    public function archivedUsers(EntityManagerInterface $em, Request $request): Response
+    {
+        $adminId = $request->getSession()->get('user_id');
+        $admin = $adminId ? $em->getRepository(User::class)->find($adminId) : null;
+
+        if (!$admin) {
+            return $this->redirectToRoute('sign');
+        }
+        if ($admin->getMainRoleLabel() !== 'Admin') {
+            throw $this->createAccessDeniedException('Access denied');
+        }
+
+        $archivedUsers = $em->getRepository(User::class)->createQueryBuilder('u')
+            ->where('u.archived = true')
+            ->orderBy('u.nom', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('backoffice/user/archived_users.html.twig', [
+            'archivedUsers' => $archivedUsers,
+            'user' => $admin,
+        ]);
+    }
+
+    // ✅ UNARCHIVE USER (restore)
+    #[Route('/admin/users/{id}/unarchive', name: 'admin_user_unarchive', methods: ['POST'])]
+    public function unarchiveUser(int $id, EntityManagerInterface $em, Request $request): Response
+    {
+        $adminId = $request->getSession()->get('user_id');
+        $admin = $adminId ? $em->getRepository(User::class)->find($adminId) : null;
+
+        if (!$admin) {
+            return $this->redirectToRoute('sign');
+        }
+        if ($admin->getMainRoleLabel() !== 'Admin') {
+            throw $this->createAccessDeniedException('Access denied');
+        }
+
+        $userToRestore = $em->getRepository(User::class)->find($id);
+        if (!$userToRestore) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        if (!$this->isCsrfTokenValid('unarchive_user_' . $id, (string) $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token');
+        }
+
+        $userToRestore->setArchived(false);
+        $em->flush();
+
+        $this->addFlash('success', 'User restored successfully.');
+
+        return $this->redirectToRoute('admin_users_archived');
     }
 
     // ✅ EDIT USER (WITHOUT PASSWORD)
@@ -281,6 +350,7 @@ class DashboardController extends AbstractController
                     }
 
                     $em->remove($userToEdit);
+                    $em->flush(); // Flush DELETE first to avoid unique email constraint violation
                     $em->persist($newUser);
                 } else {
                     // Same type, just update fields

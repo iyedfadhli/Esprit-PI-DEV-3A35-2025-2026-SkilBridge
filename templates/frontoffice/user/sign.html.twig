@@ -57,12 +57,253 @@
 					<input type="checkbox" name="remember">
 					<span>Keep me signed in</span>
 				</label>
-				<a href="#" class="forgot-link">Forgot password?</a>
+				<a href="{{ path('forgot_password') }}" class="forgot-link">Forgot password?</a>
 			</div>
 
 			<button type="submit" class="primary-btn">Login</button>
+            <br>
+            <div style="text-align: center; margin: 15px 0; color: #666;">or</div>
+            <button type="button" id="biometric-login-btn" class="primary-btn" style="background-color: #f39c12; margin-top: 5px;">
+                <i class="fa fa-fingerprint"></i> Login with Biometrics
+            </button>
+            <button type="button" id="faceid-login-btn" class="primary-btn" style="background-color: #8e44ad; margin-top: 5px;">
+                <i class="fa fa-camera"></i> Login with Face ID
+            </button>
+            <div id="biometric-login-msg" style="margin-top: 10px; font-size: 14px; display: none; text-align: center;"></div>
+            
+            <div id="faceid-login-container" style="display: none; margin-top: 15px; text-align: center;">
+                <div style="position: relative; display: inline-block; border: 3px solid #8e44ad; border-radius: 12px; overflow: hidden;">
+                    <video id="faceid-login-video" width="360" height="270" autoplay muted style="display: block;"></video>
+                    <canvas id="faceid-login-overlay" width="360" height="270" style="position: absolute; top: 0; left: 0;"></canvas>
+                </div>
+                <br>
+                <button type="button" id="faceid-login-capture-btn" class="primary-btn" style="background-color: #27ae60; margin-top: 10px;" disabled>
+                    <i class="fa fa-check"></i> Verify & Login
+                </button>
+                <button type="button" id="faceid-login-cancel-btn" class="primary-btn" style="background-color: #e74c3c; margin-top: 5px;">
+                    <i class="fa fa-times"></i> Cancel
+                </button>
+            </div>
 
 			{{ form_end(form) }}
+            
+            <script src="{{ asset('assets/js/face-api.min.js') }}"></script>
+            <script>
+            // ===== Fingerprint Biometric Login =====
+            document.getElementById('biometric-login-btn').addEventListener('click', async () => {
+                const msgDiv = document.getElementById('biometric-login-msg');
+                msgDiv.style.display = 'block';
+                msgDiv.style.color = '#333';
+                
+                const emailInput = document.getElementById('login_email');
+                if (!emailInput || !emailInput.value) {
+                    msgDiv.style.color = 'red';
+                    msgDiv.innerText = 'Please enter your email first to use biometrics.';
+                    return;
+                }
+                
+                msgDiv.innerText = 'Verifying... Please use your biometric sensor.';
+                
+                try {
+                    const optRes = await fetch("{{ path('webauthn_login_options') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: emailInput.value })
+                    });
+                    
+                    const optData = await optRes.json();
+                    
+                    if (!optRes.ok) throw new Error(optData.error || 'Failed to get login options');
+                    
+                    const base64urlToBuffer = base64url => {
+                        const padding = '='.repeat((4 - base64url.length % 4) % 4);
+                        const base64 = (base64url + padding).replace(/\-/g, '+').replace(/_/g, '/');
+                        const rawData = window.atob(base64);
+                        const outputArray = new Uint8Array(rawData.length);
+                        for (let i = 0; i < rawData.length; ++i) {
+                            outputArray[i] = rawData.charCodeAt(i);
+                        }
+                        return outputArray;
+                    };
+
+                    optData.challenge = base64urlToBuffer(optData.challenge);
+                    optData.allowCredentials.forEach(cred => {
+                        cred.id = base64urlToBuffer(cred.id);
+                    });
+                    optData.rpId = 'localhost';
+                    
+                    const assertion = await navigator.credentials.get({ publicKey: optData });
+                    
+                    const bufferToBase64url = buffer => {
+                        const bytes = new Uint8Array(buffer);
+                        let str = '';
+                        for (let charCode of bytes) {
+                            str += String.fromCharCode(charCode);
+                        }
+                        const base64String = btoa(str);
+                        return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+                    };
+
+                    const verifyData = {
+                        id: assertion.id,
+                        rawId: bufferToBase64url(assertion.rawId),
+                        response: {
+                            clientDataJSON: bufferToBase64url(assertion.response.clientDataJSON),
+                            authenticatorData: bufferToBase64url(assertion.response.authenticatorData),
+                            signature: bufferToBase64url(assertion.response.signature),
+                            userHandle: assertion.response.userHandle ? bufferToBase64url(assertion.response.userHandle) : null
+                        },
+                        type: assertion.type
+                    };
+                    
+                    const verifyRes = await fetch("{{ path('webauthn_login_verify') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(verifyData)
+                    });
+                    
+                    const result = await verifyRes.json();
+                    
+                    if (verifyRes.ok) {
+                        msgDiv.style.color = 'green';
+                        msgDiv.innerText = 'Success! Logging in...';
+                        window.location.href = result.redirect;
+                    } else {
+                        throw new Error(result.error || 'Login failed');
+                    }
+                    
+                } catch (err) {
+                    console.error(err);
+                    msgDiv.style.color = 'red';
+                    msgDiv.innerText = 'Error: ' + err.message;
+                }
+            });
+            
+            // ===== Face ID Login =====
+            (function() {
+                const faceidBtn = document.getElementById('faceid-login-btn');
+                const container = document.getElementById('faceid-login-container');
+                const video = document.getElementById('faceid-login-video');
+                const overlay = document.getElementById('faceid-login-overlay');
+                const captureBtn = document.getElementById('faceid-login-capture-btn');
+                const cancelBtn = document.getElementById('faceid-login-cancel-btn');
+                const msgDiv = document.getElementById('biometric-login-msg');
+                let stream = null;
+                let detectionInterval = null;
+                let currentDescriptor = null;
+                
+                function showMsg(text, color) {
+                    msgDiv.style.display = 'block';
+                    msgDiv.style.color = color;
+                    msgDiv.innerText = text;
+                }
+                
+                function stopCamera() {
+                    if (detectionInterval) { clearInterval(detectionInterval); detectionInterval = null; }
+                    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+                    container.style.display = 'none';
+                }
+                
+                faceidBtn.addEventListener('click', async () => {
+                    const emailInput = document.getElementById('login_email');
+                    if (!emailInput || !emailInput.value) {
+                        showMsg('Please enter your email first to use Face ID.', 'red');
+                        return;
+                    }
+                    
+                    showMsg('Loading face detection models...', '#333');
+                    
+                    try {
+                        const MODEL_URL = '{{ asset("assets/js/models") }}';
+                        await Promise.all([
+                            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+                            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+                            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+                        ]);
+                        
+                        showMsg('Models loaded. Starting camera...', '#333');
+                        
+                        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 360, height: 270, facingMode: 'user' } });
+                        video.srcObject = stream;
+                        container.style.display = 'block';
+                        captureBtn.disabled = true;
+                        
+                        video.addEventListener('playing', () => {
+                            const ctx = overlay.getContext('2d');
+                            
+                            detectionInterval = setInterval(async () => {
+                                const detection = await faceapi
+                                    .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+                                    .withFaceLandmarks()
+                                    .withFaceDescriptor();
+                                
+                                ctx.clearRect(0, 0, overlay.width, overlay.height);
+                                
+                                if (detection) {
+                                    const box = detection.detection.box;
+                                    ctx.strokeStyle = '#8e44ad';
+                                    ctx.lineWidth = 3;
+                                    ctx.strokeRect(box.x, box.y, box.width, box.height);
+                                    ctx.fillStyle = '#8e44ad';
+                                    ctx.font = '14px Arial';
+                                    ctx.fillText('Face Detected ✓', box.x, box.y - 8);
+                                    
+                                    currentDescriptor = Array.from(detection.descriptor);
+                                    captureBtn.disabled = false;
+                                    showMsg('Face detected! Click "Verify & Login" to proceed.', '#27ae60');
+                                } else {
+                                    currentDescriptor = null;
+                                    captureBtn.disabled = true;
+                                    showMsg('No face detected. Please look at the camera.', '#e67e22');
+                                }
+                            }, 500);
+                        }, { once: true });
+                        
+                    } catch (err) {
+                        console.error(err);
+                        showMsg('Error: ' + err.message, 'red');
+                    }
+                });
+                
+                captureBtn.addEventListener('click', async () => {
+                    if (!currentDescriptor) return;
+                    
+                    const emailInput = document.getElementById('login_email');
+                    showMsg('Verifying your face...', '#333');
+                    captureBtn.disabled = true;
+                    
+                    try {
+                        const res = await fetch("{{ path('faceid_login') }}", {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                email: emailInput.value,
+                                descriptor: currentDescriptor 
+                            })
+                        });
+                        
+                        const result = await res.json();
+                        
+                        if (res.ok) {
+                            showMsg('Face recognized! Logging in...', '#27ae60');
+                            stopCamera();
+                            window.location.href = result.redirect;
+                        } else {
+                            throw new Error(result.error || 'Face not recognized');
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        showMsg('Error: ' + err.message, 'red');
+                        captureBtn.disabled = false;
+                    }
+                });
+                
+                cancelBtn.addEventListener('click', () => {
+                    stopCamera();
+                    msgDiv.style.display = 'none';
+                });
+            })();
+            </script>
 
 			<form class="auth-form" id="registerForm" method="POST">
 				<h2>Create Account 🚀</h2>

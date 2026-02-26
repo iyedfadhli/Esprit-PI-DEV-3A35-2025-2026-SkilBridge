@@ -196,6 +196,13 @@
                             <div class="post-footer">
                                 <a href="{{ path('post_like', {id: post.id}) }}" class="action-btn"><i class="fa fa-thumbs-o-up"></i> Like ({{ post.likesCounter }})</a>
                                 <span class="action-btn"><i class="fa fa-comment-o"></i> Comment</span>
+                                {% if app.session.get('user_id') and post.AuthorId.id != app.session.get('user_id') %}
+                                    <form action="{{ path('post_report', {id: post.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to report this post?');">
+                                        <button type="submit" class="action-btn text-danger" style="font-size: 13px;">
+                                            🚩 Signaler
+                                        </button>
+                                    </form>
+                                {% endif %}
                             </div>
                             <div class="px-4 pb-3">
                                 {% set comments = commentsByPost[post.id] ?? [] %}
@@ -203,8 +210,19 @@
                                     <div class="mt-2">
                                         {% for c in comments %}
                                             <div class="mb-2">
-                                                <strong>{{ c.authorId.prenom }} {{ c.authorId.nom }}</strong>
-                                                <small class="text-muted">• {{ c.createdAt|date('M d, Y H:i') }}</small>
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div>
+                                                        <strong>{{ c.authorId.prenom }} {{ c.authorId.nom }}</strong>
+                                                        <small class="text-muted">• {{ c.createdAt|date('M d, Y H:i') }}</small>
+                                                    </div>
+                                                    {% if app.session.get('user_id') and c.authorId.id != app.session.get('user_id') %}
+                                                        <form action="{{ path('comment_report', {id: c.id}) }}" method="post" class="d-inline ms-2" onsubmit="return confirm('Are you sure you want to report this comment?');">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 11px;" title="Report this comment">
+                                                                🚩 Signaler
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
                                                 <div>{{ c.content }}</div>
                                             </div>
                                         {% endfor %}
