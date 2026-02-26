@@ -39,6 +39,13 @@ class Quiz
     #[ORM\Column(nullable: true)]
     private ?int $questions_per_attempt = null;
 
+    /**
+     * Durée limite du quiz en minutes.
+     * 0 = pas de limite de temps (quiz sans chrono).
+     */
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $time_limit = 0;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $supervisor = null;
@@ -158,6 +165,31 @@ class Quiz
     public function getQuizAttempts(): Collection
     {
         return $this->quizAttempts;
+    }
+
+    /**
+     * @return int Durée limite en minutes (0 = illimité)
+     */
+    public function getTimeLimit(): int
+    {
+        return $this->time_limit;
+    }
+
+    /**
+     * @param int $timeLimit Durée en minutes (0 = désactivé)
+     */
+    public function setTimeLimit(int $timeLimit): static
+    {
+        $this->time_limit = $timeLimit;
+        return $this;
+    }
+
+    /**
+     * @return int Durée limite convertie en secondes (0 = illimité)
+     */
+    public function getTimeLimitSeconds(): int
+    {
+        return $this->time_limit * 60;
     }
 
     public function __toString(): string

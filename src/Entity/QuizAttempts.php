@@ -29,6 +29,28 @@ class QuizAttempts
     #[ORM\Column]
     private ?\DateTimeImmutable $submitted_at = null;
 
+    /**
+     * Heure de début de la tentative — enregistrée UNIQUEMENT par le serveur.
+     * NE JAMAIS accepter cette valeur depuis le frontend.
+     */
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $started_at = null;
+
+    /**
+     * Statut de la tentative :
+     * - IN_PROGRESS : quiz en cours
+     * - SUBMITTED   : soumis dans les temps
+     * - EXPIRED     : temps dépassé (réponses sauvegardées pour audit)
+     */
+    #[ORM\Column(length: 20, options: ['default' => 'IN_PROGRESS'])]
+    private string $status = 'IN_PROGRESS';
+
+    /**
+     * Sauvegarde JSON brute des réponses (pour audit, même en cas d'expiration).
+     */
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $answers_json = null;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $student = null;
@@ -108,6 +130,76 @@ class QuizAttempts
         $this->quiz = $quiz;
 
         return $this;
+    }
+
+    // ── startedAt ──
+
+    public function getStartedAt(): ?\DateTimeImmutable
+    {
+        return $this->started_at;
+    }
+
+    /**
+     * Enregistre l'heure de début — appelé UNIQUEMENT côté serveur.
+     */
+    public function setStartedAt(?\DateTimeImmutable $started_at): static
+    {
+        $this->started_at = $started_at;
+        return $this;
+    }
+
+    // ── status ──
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    // ── answersJson ──
+
+    public function getAnswersJson(): ?array
+    {
+        return $this->answers_json;
+    }
+
+    public function setAnswersJson(?array $answers_json): static
+    {
+        $this->answers_json = $answers_json;
+        return $this;
+    }
+
+    /**
+     * Calcule les secondes écoulées depuis le début de la tentative.
+     */
+    public function getElapsedSeconds(): ?int
+    {
+        if ($this->started_at === null) {
+            return null;
+        }
+        return (new \DateTimeImmutable())->getTimestamp() - $this->started_at->getTimestamp();
+    }
+
+    /**
+     * Calcule les secondes restantes pour cette tentative.
+     * Retourne null si pas de limite de temps ou pas démarré.
+     */
+    public function getRemainingSeconds(): ?int
+    {
+        if ($this->started_at === null || $this->quiz === null) {
+            return null;
+        }
+        $timeLimit = $this->quiz->getTimeLimitSeconds();
+        if ($timeLimit === 0) {
+            return null; // Pas de limite
+        }
+        $elapsed = $this->getElapsedSeconds();
+        return max(0, $timeLimit - $elapsed);
     }
 
     // helper for admin display: Student name + email

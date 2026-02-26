@@ -8,6 +8,9 @@
     <header class="admin-header">
         <h1><i class="fa-solid fa-clipboard-question"></i> {{ quiz.title }}</h1>
         <div class="header-actions">
+            <button id="btn-translate" class="btn btn-info" onclick="translateQuiz()" style="background:#3b82f6;color:#fff;border:none;cursor:pointer;">
+                <i class="fa-solid fa-language"></i> Translate to English
+            </button>
             <a href="{{ path('admin_question_new') }}" class="btn btn-primary">
                 <i class="fa-solid fa-plus"></i> Add Question
             </a>
@@ -122,6 +125,28 @@
         </div>
     </div>
 
+    <!-- Translation Result Section (hidden by default) -->
+    <div id="translation-section" style="display:none;" class="mt-3">
+        <div class="card">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                <h2><i class="fa-solid fa-language"></i> English Translation</h2>
+                <button class="btn btn-sm btn-secondary" onclick="closeTranslation()" style="cursor:pointer;">
+                    <i class="fa-solid fa-xmark"></i> Close
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Translated Title -->
+                <div class="detail-item" style="margin-bottom:1rem;">
+                    <div class="detail-label" style="font-weight:700;">Title (EN)</div>
+                    <div class="detail-value" id="translated-title" style="font-size:1.15rem;"></div>
+                </div>
+
+                <!-- Translated Questions -->
+                <div id="translated-questions"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Back Button -->
     <div class="mt-3">
         <a href="{{ path('admin_quiz_index') }}" class="btn btn-secondary">
@@ -129,4 +154,77 @@
         </a>
     </div>
 </div>
+
+<script>
+const QUIZ_ID = {{ quiz.id }};
+
+async function translateQuiz() {
+    const btn = document.getElementById('btn-translate');
+    const section = document.getElementById('translation-section');
+
+    // Show loading state
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating…';
+
+    try {
+        const resp = await fetch(`/api/quizzes/${QUIZ_ID}/translate?target_lang=en&source_lang=fr`);
+        if (!resp.ok) throw new Error('Translation API error: ' + resp.status);
+        const data = await resp.json();
+
+        // Populate title
+        document.getElementById('translated-title').textContent = data.translated.title;
+
+        // Populate questions
+        const container = document.getElementById('translated-questions');
+        container.innerHTML = '';
+
+        if (data.translated.questions.length === 0) {
+            container.innerHTML = '<p style="color:#6b7280;">No questions found for this quiz.</p>';
+        } else {
+            data.translated.questions.forEach((q, idx) => {
+                const qDiv = document.createElement('div');
+                qDiv.style.cssText = 'border:1px solid #e5e7eb;border-radius:10px;padding:1rem;margin-bottom:1rem;background:#f9fafb;';
+
+                let answersHtml = '';
+                q.answers.forEach(a => {
+                    const icon = a.is_correct
+                        ? '<i class="fa-solid fa-circle-check" style="color:#16a34a;"></i>'
+                        : '<i class="fa-regular fa-circle" style="color:#9ca3af;"></i>';
+                    answersHtml += `<li style="padding:4px 0;">${icon} ${escapeHtml(a.content)}</li>`;
+                });
+
+                qDiv.innerHTML = `
+                    <h4 style="margin:0 0 .5rem;"><span class="badge badge-secondary">#${q.id}</span> Question ${idx + 1}</h4>
+                    <p style="font-size:1.05rem;margin:0 0 .5rem;">${escapeHtml(q.content)}</p>
+                    <ul style="list-style:none;padding:0;margin:0;">${answersHtml}</ul>
+                `;
+                container.appendChild(qDiv);
+            });
+        }
+
+        section.style.display = 'block';
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Update button to allow re-translate
+        btn.innerHTML = '<i class="fa-solid fa-language"></i> Refresh Translation';
+    } catch (err) {
+        alert('Translation failed: ' + err.message);
+        btn.innerHTML = '<i class="fa-solid fa-language"></i> Translate to English';
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+function closeTranslation() {
+    document.getElementById('translation-section').style.display = 'none';
+    const btn = document.getElementById('btn-translate');
+    btn.innerHTML = '<i class="fa-solid fa-language"></i> Translate to English';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
 {% endblock %}

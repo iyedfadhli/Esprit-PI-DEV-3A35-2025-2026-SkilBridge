@@ -260,6 +260,183 @@
         justify-content: center;
     }
 }
+
+/* ====== AI FEEDBACK STYLES ====== */
+.ai-feedback-section {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(102, 126, 234, 0.12);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border: 2px solid #e8ecf8;
+}
+
+.ai-feedback-header {
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9ff 0%, #eef1ff 100%);
+    border-bottom: 1px solid #e8ecf8;
+}
+
+.ai-feedback-header h2 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.ai-subtitle {
+    color: #888;
+    font-size: 0.9rem;
+    margin: 0 0 1.25rem 0;
+}
+
+.btn-generate-feedback {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-generate-feedback:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+}
+
+.ai-feedback-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem;
+    gap: 1rem;
+}
+
+.ai-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #e8ecf8;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: ai-spin 1s linear infinite;
+}
+
+@keyframes ai-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.ai-feedback-loading p {
+    margin: 0;
+    color: #555;
+    font-weight: 600;
+}
+
+.ai-loading-sub {
+    color: #999 !important;
+    font-size: 0.85rem;
+    font-weight: 400 !important;
+}
+
+.ai-feedback-content {
+    padding: 2rem;
+}
+
+.ai-result-summary {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.ai-score-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.ai-score-badge.passed {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.ai-score-badge.failed {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.ai-feedback-text {
+    color: #444;
+    font-size: 1rem;
+    line-height: 1.7;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.ai-card {
+    background: #fafbff;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #667eea;
+}
+
+.ai-card.strengths { border-left-color: #10b981; background: #f0fdf4; }
+.ai-card.weaknesses { border-left-color: #f59e0b; background: #fffbeb; }
+.ai-card.sections { border-left-color: #3b82f6; background: #eff6ff; }
+.ai-card.action-plan { border-left-color: #8b5cf6; background: #f5f3ff; }
+
+.ai-card h3 {
+    margin: 0 0 0.75rem 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.ai-card ul, .ai-card ol {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.ai-card li {
+    margin-bottom: 0.5rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+.ai-encouragement {
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+.ai-encouragement p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #555;
+    font-style: italic;
+}
+
+.ai-error {
+    text-align: center;
+    padding: 2rem;
+    color: #dc2626;
+}
+
+@media (max-width: 768px) {
+    .ai-feedback-content { padding: 1rem; }
+    .ai-card { padding: 1rem; }
+}
 </style>
 {% endblock %}
 
@@ -342,6 +519,24 @@
         {% endif %}
     </div>
 
+    <!-- ====== SECTION FEEDBACK IA ====== -->
+    <div class="ai-feedback-section" id="ai-feedback-section">
+        <div class="ai-feedback-header" id="ai-feedback-header">
+            <h2>🤖 Feedback IA Personnalisé</h2>
+            <p class="ai-subtitle">Analyse intelligente de vos réponses par Gemini AI</p>
+            <button class="btn-generate-feedback" id="btn-generate-feedback" onclick="generateAiFeedback({{ attempt.id }})">
+                <span class="btn-icon">✨</span>
+                <span class="btn-text">Générer mon feedback personnalisé</span>
+            </button>
+        </div>
+        <div class="ai-feedback-content" id="ai-feedback-content" style="display:none;"></div>
+        <div class="ai-feedback-loading" id="ai-feedback-loading" style="display:none;">
+            <div class="ai-spinner"></div>
+            <p>Gemini AI analyse vos réponses...</p>
+            <p class="ai-loading-sub">Cela peut prendre quelques secondes</p>
+        </div>
+    </div>
+
     <div class="result-actions">
         {% if attempt.score >= passingScore %}
             <a href="{{ path('student_course', {id: attempt.quiz.course.id}) }}" class="btn-action success">
@@ -365,4 +560,105 @@
         </a>
     </div>
 </div>
+
+<script>
+async function generateAiFeedback(attemptId) {
+    const btn = document.getElementById('btn-generate-feedback');
+    const header = document.getElementById('ai-feedback-header');
+    const loading = document.getElementById('ai-feedback-loading');
+    const content = document.getElementById('ai-feedback-content');
+
+    // Masquer le bouton, afficher le loading
+    btn.style.display = 'none';
+    loading.style.display = 'flex';
+
+    try {
+        const response = await fetch(`/api/quiz/attempts/${attemptId}/ai-feedback`);
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Erreur lors de la génération du feedback');
+        }
+
+        // Construire le HTML du feedback
+        let html = `
+            <div class="ai-result-summary">
+                <div class="ai-score-badge ${data.passed ? 'passed' : 'failed'}">
+                    ${data.passed ? '🎉 Quiz Réussi' : '📚 À Retravailler'}
+                </div>
+                <p class="ai-feedback-text">${escapeHtml(data.feedback)}</p>
+            </div>
+        `;
+
+        // Points forts
+        if (data.strengths && data.strengths.length > 0) {
+            html += `<div class="ai-card strengths">
+                <h3>💪 Vos Points Forts</h3>
+                <ul>${data.strengths.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+            </div>`;
+        }
+
+        // Lacunes
+        if (data.weaknesses && data.weaknesses.length > 0) {
+            html += `<div class="ai-card weaknesses">
+                <h3>🔍 Points à Améliorer</h3>
+                <ul>${data.weaknesses.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
+            </div>`;
+        }
+
+        // Sections à revoir
+        if (data.sectionsToReview && data.sectionsToReview.length > 0) {
+            html += `<div class="ai-card sections">
+                <h3>📖 Sections à Revoir</h3>
+                <ul>${data.sectionsToReview.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+            </div>`;
+        }
+
+        // Plan d'action
+        if (data.actionPlan && data.actionPlan.length > 0) {
+            html += `<div class="ai-card action-plan">
+                <h3>🎯 Plan d'Action Recommandé</h3>
+                <ol>${data.actionPlan.map(a => `<li>${escapeHtml(a)}</li>`).join('')}</ol>
+            </div>`;
+        }
+
+        // Encouragement
+        if (data.encouragement) {
+            html += `<div class="ai-encouragement">
+                <p>${escapeHtml(data.encouragement)}</p>
+            </div>`;
+        }
+
+        loading.style.display = 'none';
+        content.innerHTML = html;
+        content.style.display = 'block';
+
+        // Animation d'apparition
+        content.style.opacity = '0';
+        content.style.transform = 'translateY(20px)';
+        requestAnimationFrame(() => {
+            content.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            content.style.opacity = '1';
+            content.style.transform = 'translateY(0)';
+        });
+
+    } catch (error) {
+        loading.style.display = 'none';
+        content.innerHTML = `
+            <div class="ai-error">
+                <p>❌ ${escapeHtml(error.message)}</p>
+                <button class="btn-action secondary" onclick="generateAiFeedback(${attemptId})" style="margin-top:1rem">
+                    🔄 Réessayer
+                </button>
+            </div>`;
+        content.style.display = 'block';
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
 {% endblock %}

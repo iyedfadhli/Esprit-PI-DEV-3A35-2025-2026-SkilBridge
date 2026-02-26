@@ -31,13 +31,23 @@ class CourseRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    //    public function findOneBySomeField($value): ?Course
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Récupère tous les cours actifs avec leur quiz prérequis en une seule requête.
+     * Utilise un LEFT JOIN pour éviter les requêtes N+1.
+     *
+     * @return Course[]
+     */
+    public function findActiveCoursesWithPrerequisites(): array
+    {
+        return $this->createQueryBuilder('c')
+            ->leftJoin('c.prerequisite_quiz', 'pq')
+            ->addSelect('pq')
+            ->leftJoin('pq.course', 'pc')
+            ->addSelect('pc')
+            ->where('c.isActive = :active')
+            ->setParameter('active', true)
+            ->orderBy('c.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

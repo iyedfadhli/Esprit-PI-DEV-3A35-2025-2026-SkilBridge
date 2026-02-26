@@ -122,6 +122,22 @@ class QuizType extends AbstractType
                     'min' => 1,
                 ],
             ])
+            ->add('time_limit', IntegerType::class, [
+                'label' => 'Durée limite (min)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => '0 = illimité',
+                    'min' => 0,
+                ],
+                'help' => '0 = illimité. Durée maximum en minutes pour compléter le quiz.',
+                'constraints' => [
+                    new Range([
+                        'min' => 0,
+                        'minMessage' => 'La durée ne peut pas être négative',
+                    ]),
+                ],
+            ])
             ->add('supervisor', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'email',

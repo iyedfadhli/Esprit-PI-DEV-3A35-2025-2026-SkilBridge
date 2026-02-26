@@ -13,7 +13,8 @@
      data-quiz-title="{{ quiz.title }}"
      data-passing-score="{{ quiz.passingScore ?? 70 }}"
      data-max-attempts="{{ quiz.maxAttempts ?? 3 }}"
-     data-questions-per-attempt="{{ quiz.questionsPerAttempt ?? 20 }}">
+     data-questions-per-attempt="{{ quiz.questionsPerAttempt ?? 20 }}"
+     data-time-limit="{{ quiz.timeLimit ?? 0 }}">
 
     {# Quiz Start Screen #}
     <div id="quiz-start-screen" class="quiz-start-screen">
@@ -46,7 +47,7 @@
             </div>
             <div class="quiz-info-card">
                 <i class="fa fa-clock-o"></i>
-                <span class="value">∞</span>
+                <span class="value">{% if quiz.timeLimit is defined and quiz.timeLimit > 0 %}{{ quiz.timeLimit }} min{% else %}∞{% endif %}</span>
                 <span class="label">Temps</span>
             </div>
         </div>
@@ -86,6 +87,23 @@
                     <div class="quiz-progress-fill" id="progress-fill" style="width: 5%;"></div>
                 </div>
             </div>
+            <button id="btn-translate-quiz" title="Translate to English" style="
+                display:none;
+                align-items:center;gap:6px;
+                padding:6px 14px;
+                border-radius:8px;
+                border:1px solid #3b82f6;
+                background:#3b82f6;
+                color:#fff;
+                font-size:.85rem;
+                font-weight:600;
+                cursor:pointer;
+                white-space:nowrap;
+                transition:background .2s;
+            ">
+                <i class="fa fa-language"></i>
+                <span id="btn-translate-label">EN</span>
+            </button>
             <div class="quiz-timer" id="quiz-timer" style="display: none;">
                 <i class="fa fa-clock-o"></i>
                 <span id="timer-display">∞</span>
@@ -167,5 +185,5 @@
     </div>
 </div>
 
-<script src="{{ asset('assets/js/quiz.js') }}"></script>
+<script src="{{ asset('assets/js/quiz.js') }}?v={{ "now"|date('U') }}"></script>
 {% endblock %}
