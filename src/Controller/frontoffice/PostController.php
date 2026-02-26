@@ -14,6 +14,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Twig\Environment;
 
 class PostController extends AbstractController
 {
@@ -172,6 +175,172 @@ class PostController extends AbstractController
             return $this->redirectToRoute('group_show', ['id' => $post->getGroupId()->getId()]);
         }
         return $this->redirectToRoute('groups_index');
+    }
+
+    #[Route('/comment/{id}/report', name: 'comment_report', methods: ['POST'])]
+    public function reportComment(
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        MailerInterface $mailer,
+        Environment $twig
+    ): Response {
+        // Get current user
+        $user = $this->getUser();
+        if (!$user) {
+            $sessionUserId = $request->getSession()->get('user_id');
+            if ($sessionUserId) {
+                $user = $em->getRepository(User::class)->find($sessionUserId);
+            }
+        }
+        if (!$user) {
+            $this->addFlash('error', 'You must be logged in to report a comment.');
+            return $this->redirectToRoute('groups_index');
+        }
+
+        // Find the comment
+        $comment = $em->getRepository(Commentaires::class)->find($id);
+        if (!$comment) {
+            $this->addFlash('error', 'Comment not found.');
+            return $this->redirectToRoute('groups_index');
+        }
+
+        // Get comment author
+        $commentAuthor = $comment->getAuthorId();
+
+        // Prevent self-reporting
+        if ($commentAuthor->getId() === $user->getId()) {
+            $this->addFlash('error', 'You cannot report your own comment.');
+            $referer = $request->headers->get('referer');
+            return $referer ? $this->redirect($referer) : $this->redirectToRoute('groups_index');
+        }
+
+        // Increment report count
+        $newReportCount = $commentAuthor->getReportNbr() + 1;
+        $commentAuthor->setReportNbr($newReportCount);
+
+        // At 4 reports → send warning email
+        if ($newReportCount == 4) {
+            try {
+                $htmlContent = $twig->render('emails/report_warning.html.twig', [
+                    'user' => $commentAuthor,
+                    'reportCount' => $newReportCount,
+                ]);
+
+                $email = (new Email())
+                    ->from('tas.sam.se@gmail.com')
+                    ->to($commentAuthor->getEmail())
+                    ->subject('⚠️ Warning: Your account has been reported multiple times')
+                    ->html($htmlContent);
+
+                $mailer->send($email);
+            } catch (\Throwable $e) {
+                // Log error but don't block the flow
+            }
+        }
+
+        // At 5+ reports → ban for 2 days
+        if ($newReportCount >= 5) {
+            $bannedUntil = new \DateTime('+2 days');
+            $commentAuthor->setBan(true);
+            $commentAuthor->setBannedUntil($bannedUntil);
+        }
+
+        $em->flush();
+
+        if ($newReportCount >= 5) {
+            $this->addFlash('success', 'User has been banned for 2 days due to excessive reports.');
+        } elseif ($newReportCount == 4) {
+            $this->addFlash('success', 'Comment reported. A warning email has been sent to the user.');
+        } else {
+            $this->addFlash('success', 'Comment reported successfully.');
+        }
+
+        $referer = $request->headers->get('referer');
+        return $referer ? $this->redirect($referer) : $this->redirectToRoute('groups_index');
+    }
+
+    #[Route('/posts/{id}/report', name: 'post_report', methods: ['POST'])]
+    public function reportPost(
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        MailerInterface $mailer,
+        Environment $twig
+    ): Response {
+        // Get current user
+        $user = $this->getUser();
+        if (!$user) {
+            $sessionUserId = $request->getSession()->get('user_id');
+            if ($sessionUserId) {
+                $user = $em->getRepository(User::class)->find($sessionUserId);
+            }
+        }
+        if (!$user) {
+            $this->addFlash('error', 'You must be logged in to report a post.');
+            return $this->redirectToRoute('groups_index');
+        }
+
+        // Find the post
+        $post = $em->getRepository(Posts::class)->find($id);
+        if (!$post) {
+            $this->addFlash('error', 'Post not found.');
+            return $this->redirectToRoute('groups_index');
+        }
+
+        // Get post author
+        $postAuthor = $post->getAuthorId();
+
+        // Prevent self-reporting
+        if ($postAuthor->getId() === $user->getId()) {
+            $this->addFlash('error', 'You cannot report your own post.');
+            $referer = $request->headers->get('referer');
+            return $referer ? $this->redirect($referer) : $this->redirectToRoute('groups_index');
+        }
+
+        // Increment report count
+        $newReportCount = $postAuthor->getReportNbr() + 1;
+        $postAuthor->setReportNbr($newReportCount);
+
+        // At 4 reports → send warning email
+        if ($newReportCount == 4) {
+            try {
+                $htmlContent = $twig->render('emails/report_warning.html.twig', [
+                    'user' => $postAuthor,
+                    'reportCount' => $newReportCount,
+                ]);
+
+                $email = (new Email())
+                    ->from('tas.sam.se@gmail.com')
+                    ->to($postAuthor->getEmail())
+                    ->subject('⚠️ Warning: Your account has been reported multiple times')
+                    ->html($htmlContent);
+
+                $mailer->send($email);
+            } catch (\Throwable $e) {
+                // Log error but don't block the flow
+            }
+        }
+
+        // At 5+ reports → ban for 2 days
+        if ($newReportCount >= 5) {
+            $bannedUntil = new \DateTime('+2 days');
+            $postAuthor->setBan(true);
+            $postAuthor->setBannedUntil($bannedUntil);
+        }
+
+        $em->flush();
+
+        if ($newReportCount >= 5) {
+            $this->addFlash('success', 'User has been banned for 2 days due to excessive reports.');
+        } elseif ($newReportCount == 4) {
+            $this->addFlash('success', 'Post reported. A warning email has been sent to the user.');
+        } else {
+            $this->addFlash('success', 'Post reported successfully.');
+        }
+
+        $referer = $request->headers->get('referer');
+        return $referer ? $this->redirect($referer) : $this->redirectToRoute('groups_index');
     }
 
     #[Route('/posts/{id}/delete', name: 'post_delete')]

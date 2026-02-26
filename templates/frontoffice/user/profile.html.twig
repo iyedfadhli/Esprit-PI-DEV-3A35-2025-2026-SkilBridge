@@ -164,6 +164,253 @@
 
 					<button type="submit" class="signin-btn">Change Password</button>
 				</form>
+				
+				<hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+				
+				<div class="biometric-section">
+					<h3>Biometric Authentication</h3>
+					<p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+						Set up fingerprint or facial recognition for faster, more secure logins.
+					</p>
+					
+					{% if user.getWebauthnCredentialId() %}
+						<div class="alert alert-success" style="display: inline-block; padding: 8px 15px;">
+							<i class="fa fa-check-circle"></i> Biometric authentication is currently active.
+						</div>
+						<br><br>
+					{% endif %}
+					
+					<button type="button" id="register-biometrics-btn" class="signin-btn" style="background-color: #f39c12; max-width: 250px;">
+                        <i class="fa fa-fingerprint"></i> Set up Biometrics
+					</button>
+					<div id="biometric-msg" style="margin-top: 10px; font-size: 14px; display: none;"></div>
+				</div>
+				
+				<script>
+				document.getElementById('register-biometrics-btn').addEventListener('click', async () => {
+					const msgDiv = document.getElementById('biometric-msg');
+					msgDiv.style.display = 'block';
+					msgDiv.style.color = '#333';
+					msgDiv.innerText = 'Creating secure credential... Please follow your browser prompts.';
+					
+					try {
+						const optRes = await fetch("{{ path('webauthn_register_options') }}", { method: 'POST' });
+						if (!optRes.ok) throw new Error('Failed to get registration options');
+						const options = await optRes.json();
+						
+						const base64urlToBuffer = base64url => {
+							const padding = '='.repeat((4 - base64url.length % 4) % 4);
+							const base64 = (base64url + padding).replace(/\-/g, '+').replace(/_/g, '/');
+							const rawData = window.atob(base64);
+							const outputArray = new Uint8Array(rawData.length);
+							for (let i = 0; i < rawData.length; ++i) {
+								outputArray[i] = rawData.charCodeAt(i);
+							}
+							return outputArray;
+						};
+
+						options.challenge = base64urlToBuffer(options.challenge);
+						options.user.id = base64urlToBuffer(options.user.id);
+						options.rp.id = 'localhost';
+						
+						const credential = await navigator.credentials.create({ publicKey: options });
+						
+						const bufferToBase64url = buffer => {
+							const bytes = new Uint8Array(buffer);
+							let str = '';
+							for (let charCode of bytes) {
+								str += String.fromCharCode(charCode);
+							}
+							const base64String = btoa(str);
+							return base64String.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+						};
+
+						const verifyData = {
+							id: credential.id,
+							rawId: bufferToBase64url(credential.rawId),
+							response: {
+								clientDataJSON: bufferToBase64url(credential.response.clientDataJSON),
+								attestationObject: bufferToBase64url(credential.response.attestationObject)
+							},
+							type: credential.type
+						};
+						
+						const verifyRes = await fetch("{{ path('webauthn_register_verify') }}", {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify(verifyData)
+						});
+						
+						const result = await verifyRes.json();
+						
+						if (verifyRes.ok) {
+							msgDiv.style.color = 'green';
+							msgDiv.innerText = result.message || 'Success! Biometrics registered.';
+							setTimeout(() => window.location.reload(), 1500);
+						} else {
+							throw new Error(result.error || 'Server rejected the credential');
+						}
+						
+					} catch (err) {
+						console.error(err);
+						msgDiv.style.color = 'red';
+						msgDiv.innerText = 'Error: ' + err.message;
+					}
+				});
+				</script>
+				
+				<hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+				
+				{# ===== FACE ID SECTION ===== #}
+				<div class="biometric-section">
+					<h3><i class="fa fa-smile-o" style="margin-right: 8px;"></i>Face ID Authentication</h3>
+					<p style="color: #666; font-size: 14px; margin-bottom: 15px;">
+						Use your camera to register your face for quick and secure logins.
+					</p>
+					
+					{% if user.getFaceDescriptor() %}
+						<div class="alert alert-success" style="display: inline-block; padding: 8px 15px;">
+							<i class="fa fa-check-circle"></i> Face ID is currently active.
+						</div>
+						<br><br>
+					{% endif %}
+					
+					<button type="button" id="register-faceid-btn" class="signin-btn" style="background-color: #8e44ad; max-width: 250px;">
+						<i class="fa fa-camera"></i> Set up Face ID
+					</button>
+					
+					<div id="faceid-container" style="display: none; margin-top: 20px; text-align: center;">
+						<div style="position: relative; display: inline-block; border: 3px solid #8e44ad; border-radius: 12px; overflow: hidden;">
+							<video id="faceid-video" width="400" height="300" autoplay muted style="display: block;"></video>
+							<canvas id="faceid-overlay" width="400" height="300" style="position: absolute; top: 0; left: 0;"></canvas>
+						</div>
+						<br>
+						<button type="button" id="faceid-capture-btn" class="signin-btn" style="background-color: #27ae60; margin-top: 15px; max-width: 250px;" disabled>
+							<i class="fa fa-check"></i> Capture & Register Face
+						</button>
+						<button type="button" id="faceid-cancel-btn" class="signin-btn" style="background-color: #e74c3c; margin-top: 10px; max-width: 250px;">
+							<i class="fa fa-times"></i> Cancel
+						</button>
+					</div>
+					<div id="faceid-msg" style="margin-top: 10px; font-size: 14px; display: none;"></div>
+				</div>
+				
+				<script src="{{ asset('assets/js/face-api.min.js') }}"></script>
+				<script>
+				(function() {
+					const registerBtn = document.getElementById('register-faceid-btn');
+					const container = document.getElementById('faceid-container');
+					const video = document.getElementById('faceid-video');
+					const overlay = document.getElementById('faceid-overlay');
+					const captureBtn = document.getElementById('faceid-capture-btn');
+					const cancelBtn = document.getElementById('faceid-cancel-btn');
+					const msgDiv = document.getElementById('faceid-msg');
+					let stream = null;
+					let detectionInterval = null;
+					let currentDescriptor = null;
+					
+					function showMsg(text, color) {
+						msgDiv.style.display = 'block';
+						msgDiv.style.color = color;
+						msgDiv.innerText = text;
+					}
+					
+					function stopCamera() {
+						if (detectionInterval) { clearInterval(detectionInterval); detectionInterval = null; }
+						if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+						container.style.display = 'none';
+					}
+					
+					registerBtn.addEventListener('click', async () => {
+						showMsg('Loading face detection models...', '#333');
+						
+						try {
+							const MODEL_URL = '{{ asset("assets/js/models") }}';
+							await Promise.all([
+								faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+								faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+								faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+							]);
+							
+							showMsg('Models loaded. Starting camera...', '#333');
+							
+							stream = await navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 300, facingMode: 'user' } });
+							video.srcObject = stream;
+							container.style.display = 'block';
+							captureBtn.disabled = true;
+							
+							video.addEventListener('playing', () => {
+								const ctx = overlay.getContext('2d');
+								
+								detectionInterval = setInterval(async () => {
+									const detection = await faceapi
+										.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+										.withFaceLandmarks()
+										.withFaceDescriptor();
+									
+									ctx.clearRect(0, 0, overlay.width, overlay.height);
+									
+									if (detection) {
+										const box = detection.detection.box;
+										ctx.strokeStyle = '#27ae60';
+										ctx.lineWidth = 3;
+										ctx.strokeRect(box.x, box.y, box.width, box.height);
+										ctx.fillStyle = '#27ae60';
+										ctx.font = '14px Arial';
+										ctx.fillText('Face Detected ✓', box.x, box.y - 8);
+										
+										currentDescriptor = Array.from(detection.descriptor);
+										captureBtn.disabled = false;
+										showMsg('Face detected! Click "Capture & Register" when ready.', '#27ae60');
+									} else {
+										currentDescriptor = null;
+										captureBtn.disabled = true;
+										showMsg('No face detected. Please look at the camera.', '#e67e22');
+									}
+								}, 500);
+							}, { once: true });
+							
+						} catch (err) {
+							console.error(err);
+							showMsg('Error: ' + err.message, 'red');
+						}
+					});
+					
+					captureBtn.addEventListener('click', async () => {
+						if (!currentDescriptor) return;
+						
+						showMsg('Registering your face...', '#333');
+						captureBtn.disabled = true;
+						
+						try {
+							const res = await fetch("{{ path('faceid_register') }}", {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' },
+								body: JSON.stringify({ descriptor: currentDescriptor })
+							});
+							
+							const result = await res.json();
+							
+							if (res.ok) {
+								showMsg(result.message || 'Face ID registered successfully!', '#27ae60');
+								stopCamera();
+								setTimeout(() => window.location.reload(), 1500);
+							} else {
+								throw new Error(result.error || 'Failed to register face');
+							}
+						} catch (err) {
+							console.error(err);
+							showMsg('Error: ' + err.message, 'red');
+							captureBtn.disabled = false;
+						}
+					});
+					
+					cancelBtn.addEventListener('click', () => {
+						stopCamera();
+						msgDiv.style.display = 'none';
+					});
+				})();
+				</script>
 			</section>
 
 

@@ -20,7 +20,7 @@
     <section class="stats-grid">
         <div class="stat-card">
             <h3>Users</h3>
-            <p class="stat-number">395</p>
+            <p class="stat-number">{{ stats.users }}</p>
         </div>
         <div class="stat-card">
             <h3>Courses</h3>
@@ -32,7 +32,7 @@
         </div>
         <div class="stat-card">
             <h3>Groups</h3>
-            <p class="stat-number">40</p>
+            <p class="stat-number">{{ stats.groups }}</p>
         </div>
         <div class="stat-card">
             <h3>Challenges</h3>
@@ -129,9 +129,11 @@
 
         <div class="stats-placeholder-grid">
 
-            <div class="placeholder-card">
-                <img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Users stats">
-                <p>User growth statistics</p>
+            <div class="placeholder-card" style="padding: 20px; display: flex; flex-direction: column; align-items: center;">
+                <h3 style="margin-bottom: 20px;">User Roles Distribution</h3>
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="userRolesChart"></canvas>
+                </div>
             </div>
 
             <div class="placeholder-card">
@@ -147,4 +149,49 @@
         </div>
     </section>
 </div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Parse the JSON data passed from the controller
+        const roleData = JSON.parse('{{ roleCounts|raw }}');
+        
+        // Setup Chart
+        const ctx = document.getElementById('userRolesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(roleData),
+                datasets: [{
+                    label: '# of Users',
+                    data: Object.values(roleData),
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)', // Student - Blue
+                        'rgba(255, 206, 86, 0.8)', // Supervisor - Yellow
+                        'rgba(75, 192, 192, 0.8)', // Entreprise - Green
+                        'rgba(255, 99, 132, 0.8)'  // Admin - Red
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

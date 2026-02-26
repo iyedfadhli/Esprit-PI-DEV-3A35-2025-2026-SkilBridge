@@ -373,6 +373,13 @@
                         <a href="{{ path('post_like', {id: post.id}) }}" class="action-btn"><i class="fa fa-thumbs-o-up"></i> Like ({{ post.likesCounter }})</a>
                         <button class="action-btn"><i class="fa fa-comment-o"></i> Comment</button>
                         <button class="action-btn"><i class="fa fa-share"></i> Share</button>
+                        {% if app.session.get('user_id') and post.AuthorId.id != app.session.get('user_id') %}
+                            <form action="{{ path('post_report', {id: post.id}) }}" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to report this post?');">
+                                <button type="submit" class="action-btn text-danger" style="font-size: 13px;">
+                                    🚩 Signaler
+                                </button>
+                            </form>
+                        {% endif %}
                     </div>
                     <div class="px-3 pb-3">
                         {% set comments = commentsByPost[post.id] ?? [] %}
@@ -382,8 +389,19 @@
                                     <div class="d-flex gap-2 mb-2">
                                         <img src="{{ asset('assets/images/frontoffice/profile_pic.png') }}" class="author-img" alt="User" style="width:32px;height:32px;">
                                         <div class="bg-light rounded-3 px-3 py-2 flex-grow-1">
-                                            <div class="small fw-bold">{{ c.authorId.prenom }} {{ c.authorId.nom }}</div>
-                                            <div class="small text-muted">{{ c.createdAt|date('M d, Y H:i') }}</div>
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <div class="small fw-bold">{{ c.authorId.prenom }} {{ c.authorId.nom }}</div>
+                                                    <div class="small text-muted">{{ c.createdAt|date('M d, Y H:i') }}</div>
+                                                </div>
+                                                {% if app.session.get('user_id') and c.authorId.id != app.session.get('user_id') %}
+                                                    <form action="{{ path('comment_report', {id: c.id}) }}" method="post" class="d-inline ms-2" onsubmit="return confirm('Are you sure you want to report this comment?');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 11px;" title="Report this comment">
+                                                            🚩 Signaler
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
                                             <div>{{ c.content }}</div>
                                         </div>
                                     </div>

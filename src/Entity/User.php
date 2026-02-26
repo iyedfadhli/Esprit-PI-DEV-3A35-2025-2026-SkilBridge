@@ -64,11 +64,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $previous_role = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTime $bannedUntil = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $archived = false;
+
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $webauthn_credential_id = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $webauthn_public_key = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $face_descriptor = null;
+
     public function __construct()
     {
         $this->ban = false;
         $this->report_nbr = 0;
         $this->is_active = true;
+        $this->archived = false;
         $this->dateInscrit = new \DateTime();
     }
 
@@ -152,4 +168,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getPreviousRole(): ?string { return $this->previous_role; }
     public function setPreviousRole(?string $previous_role): static { $this->previous_role = $previous_role; return $this; }
+
+    public function getBannedUntil(): ?\DateTime { return $this->bannedUntil; }
+    public function setBannedUntil(?\DateTime $bannedUntil): static { $this->bannedUntil = $bannedUntil; return $this; }
+
+    public function isBannedNow(): bool
+    {
+        return $this->bannedUntil !== null && $this->bannedUntil > new \DateTime();
+    }
+
+    public function isArchived(): bool { return $this->archived; }
+    public function setArchived(bool $archived): static { $this->archived = $archived; return $this; }
+
+    public function getWebauthnCredentialId(): ?string { return $this->webauthn_credential_id; }
+    public function setWebauthnCredentialId(?string $webauthn_credential_id): static { $this->webauthn_credential_id = $webauthn_credential_id; return $this; }
+
+    public function getWebauthnPublicKey(): ?string { return $this->webauthn_public_key; }
+    public function setWebauthnPublicKey(?string $webauthn_public_key): static { $this->webauthn_public_key = $webauthn_public_key; return $this; }
+
+    public function getFaceDescriptor(): ?string { return $this->face_descriptor; }
+    public function setFaceDescriptor(?string $face_descriptor): static { $this->face_descriptor = $face_descriptor; return $this; }
 }
