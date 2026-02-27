@@ -1,0 +1,126 @@
+CHAPITRE 2: INTERPOLATION POLYNOMIALE
+Introduction
+3A & B
+Analyse Numérique
+
+
+2
+Exemple introductif
+Exemple:
+En relevant toutes les 10 secondes, la vitesse d’écoulement de l’eau dans une conduite
+cylindrique, on a obtenu
+t (seconde)
+0
+10
+20
+30
+V (m/s)
+2
+1.89
+1.72
+1.44
+Question: Trouver une approximation de la vitesse V pour t = 15 secondes en
+utilisant uniquement les vitesses asssociées à t = 10 secondes et à t = 20
+secondes
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+3
+Solution
+Vu que 15 est la moyenne de 10 et 20, la
+vitesse V peut être considerée comme
+la moyenne des vitesses pour t = 10
+secondes et t = 20 secondes. On ob-
+tient ainsi:
+V ≃1.89 + 1.72
+2
+= 1.805 m/s
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+4
+La méthode utilisée pour déterminer la valeur obtenue est appelée
+Interpolation linéaire (interpolation de deux points distincts)
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+4
+La méthode utilisée pour déterminer la valeur obtenue est appelée
+Interpolation linéaire (interpolation de deux points distincts)
+↓
+La détermination de l’expression d’un polynôme P ∈R1[X]
+(P de degré inférieur ou égal à 1) dont la courbe
+représentative passe par les deux points considérés.
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+5
+Questions
+1 Peut-on avoir une approximation de la vitesse pour t = 17 secondes
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+5
+Questions
+1 Peut-on avoir une approximation de la vitesse pour t = 17 secondes
+2 Peut-on avoir une autre apporoximation de la vitesse pour t = 15 secondes en
+utilisant les vitesses asssociées à t = 0 seconde, à t = 10 secondes, à t = 20
+secondes et à t = 30 secondes
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+5
+Questions
+1 Peut-on avoir une approximation de la vitesse pour t = 17 secondes
+2 Peut-on avoir une autre apporoximation de la vitesse pour t = 15 secondes en
+utilisant les vitesses asssociées à t = 0 seconde, à t = 10 secondes, à t = 20
+secondes et à t = 30 secondes
+➳AA1: Interpolation polynomiale
+➳AA2: Approximation polynomiale
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+6
+Interpolation polynomiale
+Soient (n + 1) points (x0, y0), (x1, y1), · · · , (xn, yn) d’abscisses deux à deux distinctes.
+L’interpolation polynomiale de ces points consiste à déterminer un polynôme
+P ∈Rn[X] tel que
+P(xi) = yi
+∀i ∈{0, · · · , n}.
+Les abscisses xi (i ∈{0, · · · n}) −→Les points d’interpolation.
+Les ordonnées yi (i ∈{0, · · · n}) −→Les valeurs d’interpolation.
+Comment déterminer l’expression du polynôme P
+Equipe AN
+Analyse Numérique
+ESPRIT
+
+
+6
+Interpolation polynomiale
+Soient (n + 1) points (x0, y0), (x1, y1), · · · , (xn, yn) d’abscisses deux à deux distinctes.
+L’interpolation polynomiale de ces points consiste à déterminer un polynôme
+P ∈Rn[X] tel que
+P(xi) = yi
+∀i ∈{0, · · · , n}.
+Les abscisses xi (i ∈{0, · · · n}) −→Les points d’interpolation.
+Les ordonnées yi (i ∈{0, · · · n}) −→Les valeurs d’interpolation.
+Comment déterminer l’expression du polynôme P
+➳Méthode d’interpolation de Lagrange
+➳Méthode d’interpolation de Newton
+Equipe AN
+Analyse Numérique
+ESPRIT

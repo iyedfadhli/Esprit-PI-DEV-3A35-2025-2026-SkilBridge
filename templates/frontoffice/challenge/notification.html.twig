@@ -1,0 +1,300 @@
+<div class="notification-wrapper">
+  <button class="notification-bell" id="notificationBtn" aria-label="Notifications">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="bell-icon">
+      <path d="M12 24c1.104 0 2-.897 2-2h-4c0 1.103.896 2 2 2zm6.364-6.364l-1.414-1.414c-.627-.627-1.073-1.537-1.073-2.535V9c0-3.314-2.686-6-6-6S4.5 5.686 4.5 9v4.687c0 .998-.446 1.908-1.073 2.535L2 17.636h16.364z"/>
+    </svg>
+    <span class="notification-badge">0</span>
+  </button>
+
+  <div class="notification-panel" id="notificationPanel">
+    <div class="notification-header">
+      <h3>Notifications</h3>
+      <button class="close-btn" id="closeBtn">&times;</button>
+    </div>
+    <div class="notification-list" id="notificationList"></div>
+    <div class="notification-footer">
+      <a href="{{ path('notifications_index') }}" class="view-all">View all notifications</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .notification-wrapper {
+    position: relative;
+    display: inline-block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  .notification-bell {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+    color: #4a7fd7;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(74, 127, 215, 0.08);
+  }
+
+  .notification-bell:hover {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e0e8ff 100%);
+    box-shadow: 0 4px 16px rgba(74, 127, 215, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .notification-bell:active {
+    transform: translateY(0);
+  }
+
+  .bell-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.3s ease;
+  }
+
+  .notification-bell:hover .bell-icon {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #4a7fd7;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(74, 127, 215, 0.3);
+    border: 2px solid #ffffff;
+  }
+
+  .notification-panel {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 12px;
+    width: 360px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+  }
+
+  .notification-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .notification-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    border-bottom: 1px solid #f0f4ff;
+  }
+
+  .notification-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a202c;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+
+  .close-btn:hover {
+    color: #4a7fd7;
+  }
+
+  .notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f9fafb;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .notification-item:hover {
+    background-color: #f9fafb;
+  }
+
+  .notification-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4a7fd7;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .notification-content {
+    flex: 1;
+  }
+
+  .notification-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1a202c;
+  }
+
+  .notification-time {
+    margin: 4px 0 0 0;
+    font-size: 12px;
+    color: #9ca3af;
+  }
+
+  .notification-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #f0f4ff;
+    text-align: center;
+  }
+
+  .view-all {
+    font-size: 13px;
+    color: #4a7fd7;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .view-all:hover {
+    color: #2e5aa6;
+  }
+</style>
+
+<script>
+  const notificationBtn = document.getElementById('notificationBtn');
+  const notificationPanel = document.getElementById('notificationPanel');
+  const closeBtn = document.getElementById('closeBtn');
+  const list = document.getElementById('notificationList');
+  const badge = document.querySelector('.notification-badge');
+  const roleLabel = '{{ user ? user.getMainRoleLabel() : "" }}';
+  const studentUrl = '{{ path('old_activities') }}';
+  const supervisorUrl = '{{ path('evaluation') }}';
+
+  notificationBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notificationPanel.classList.toggle('active');
+  });
+
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notificationPanel.classList.remove('active');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!notificationBtn.contains(e.target) && !notificationPanel.contains(e.target)) {
+      notificationPanel.classList.remove('active');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      notificationPanel.classList.remove('active');
+    }
+  });
+
+  function computeTargetUrl(item) {
+    if (item && item.extra && item.extra.type === 'activity_evaluated') {
+      return studentUrl;
+    }
+    if (item && item.extra && item.extra.type === 'activity_submitted') {
+      return supervisorUrl;
+    }
+    return roleLabel === 'Supervisor' ? supervisorUrl : studentUrl;
+  }
+
+  function prependNotification(item) {
+    const container = document.createElement('div');
+    container.className = 'notification-item';
+    container.dataset.id = item.id;
+    container.dataset.url = computeTargetUrl(item);
+    const dot = document.createElement('div');
+    dot.className = 'notification-dot';
+    const content = document.createElement('div');
+    content.className = 'notification-content';
+    const title = document.createElement('p');
+    title.className = 'notification-title';
+    title.textContent = item.message;
+    const time = document.createElement('p');
+    time.className = 'notification-time';
+    time.textContent = new Date(item.createdAt).toLocaleString();
+    content.appendChild(title);
+    content.appendChild(time);
+    container.appendChild(dot);
+    container.appendChild(content);
+    list.insertBefore(container, list.firstChild);
+    badge.textContent = String(Number(badge.textContent || 0) + 1);
+    container.addEventListener('click', () => {
+      const id = container.dataset.id;
+      const url = container.dataset.url;
+      fetch(`/api/notifications/${id}/read`, { method: 'POST' })
+        .finally(() => {
+          dot.style.background = '#d1d5db';
+          badge.textContent = String(Math.max(0, Number(badge.textContent || 0) - 1));
+          if (url) {
+            window.location.href = url;
+          }
+        });
+    });
+  }
+
+  fetch('/api/notifications/unread')
+    .then(r => r.json())
+    .then(items => {
+      badge.textContent = items.length;
+      items.forEach(prependNotification);
+    })
+    .catch(() => {});
+
+  const mercureUrl = '{{ mercure_public_url }}';
+  const userId = '{{ user ? user.id : 0 }}';
+  if (userId && mercureUrl) {
+    const url = new URL(mercureUrl);
+    url.searchParams.append('topic', `/notifications/${userId}`);
+    const es = new EventSource(url.toString());
+    es.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        prependNotification(data);
+      } catch (_) {}
+    };
+  }
+</script>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Achievement</title>
+  {% set pdf = pdf|default(false) %}
+  <style>
+    @page { size: A4 landscape; margin: 10mm; }
+    body { font-family: DejaVu Sans, Arial, sans-serif; color: #0f172a; margin: 0; padding: 0; background: #eef2f7; }
+    .canvas { max-width: 1120px; margin: 0 auto; background: #f9fbff; border-radius: 18px; border: 1px solid #e5edf7; page-break-inside: avoid; }
+    .header { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 28px 36px; background: #f3f7fc; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; color: #0f172a; font-size: 16px; }
+    .brand img { height: 34px; }
+    .meta { justify-self: end; text-align: right; font-size: 12px; color: #64748b; line-height: 1.6; }
+    .main { padding: 12px 36px 8px; text-align: center; }
+    .title { font-size: 40px; font-weight: 900; color: #0ea5e9; letter-spacing: 0.02em; margin: 10px 0; }
+    .subtitle { font-size: 14px; color: #475569; margin-bottom: 6px; }
+    .recipient { font-size: 26px; font-weight: 800; color: #0f172a; margin: 12px 0; text-transform: lowercase; }
+    .note { font-size: 15px; color: #374151; margin-bottom: 6px; }
+    .challenge { font-size: 24px; font-weight: 900; color: #0f172a; margin-bottom: 10px; }
+    .info { display: grid; grid-template-columns: 1fr 1fr; max-width: 680px; margin: 10px auto 16px; gap: 12px; color: #334155; font-size: 13px; }
+    .info .label { font-weight: 800; color: #0f172a; display: inline-block; min-width: 140px; }
+    .seal-row { display: flex; justify-content: flex-end; padding: 4px 36px 0; }
+    .seal { height: 90px; }
+    .footer { background: #0f172a; color: #e5e7eb; padding: 18px 36px; }
+    .signatures { display: flex; justify-content: space-between; align-items: center; }
+    .sig { text-align: center; }
+    .sig img { height: 78px; margin-bottom: 6px; }
+    .sig .name { font-weight: 800; font-size: 12px; }
+    .sig .role { font-size: 11px; color: #cbd5e1; }
+    .badges { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+    .badges img { height: 30px; }
+  </style>
+  {% if pdf %}
+  <style>
+    @page { size: A4 landscape; margin: 6mm; }
+    .canvas { margin: 0 auto; padding: 8mm 10mm; box-shadow: none; }
+    .header { padding: 10px 16px; }
+    .main { padding: 8px 24px 6px; }
+    .title { font-size: 34px; }
+    .recipient { font-size: 22px; }
+    .note { font-size: 14px; }
+    .challenge { font-size: 20px; margin-bottom: 8px; }
+    .info { gap: 8px; font-size: 12px; }
+    .seal { height: 60px; }
+    .footer { padding: 12px 24px; }
+    .sig img { height: 50px; }
+  </style>
+  {% endif %}
+  </head>
+<body>
+  <div class="canvas">
+    <div class="header">
+      <div class="brand">
+        <img src="{{ absolute_url(asset('assets/images/frontoffice/logo.png')) }}" alt="Skill Bridge">
+        <span>Skill Bridge</span>
+      </div>
+      <div class="meta">
+        Certificate ID: {{ certNumber }}<br>
+        Issued on: {{ issueDate|date('F d, Y') }}
+      </div>
+    </div>
+    <div class="main">
+      <div class="title">Certificate of Achievement</div>
+      <div class="subtitle">Awarded by the Board of Directors of Skill Bridge to</div>
+      {% set fullName = ((user.prenom ?? '') ~ ' ' ~ (user.nom ?? ''))|trim %}
+      <div class="recipient">{{ fullName|lower }}</div>
+      <div class="note">for successfully completing all lessons and assessments in the challenge</div>
+      <div class="challenge">{{ challenge.title }}</div>
+      <div class="info">
+        <div><span class="label">Delivery Method:</span> Self Study</div>
+        <div><span class="label">Activity Score:</span> {{ score }}/20</div>
+      </div>
+    </div>
+    <div class="seal-row">
+      <img class="seal" src="{{ absolute_url(asset('assets/certificates/verified.png')) }}" alt="Verified">
+    </div>
+    <div class="footer">
+      <div class="signatures">
+        <div class="sig">
+          <img src="{{ absolute_url(asset('assets/certificates/sign1.png')) }}" alt="Signature 1">
+          <div class="name">mohamed iyed fadhli</div>
+          <div class="role">CEO, Skill Bridge</div>
+        </div>
+        <div class="sig">
+          <img src="{{ absolute_url(asset('assets/certificates/sign1.png')) }}" alt="Signature 2">
+          <div class="name">mohamed salim ben hamouda</div>
+          <div class="role">COO, Skill Bridge</div>
+        </div>
+      </div>
+     
+    </div>
+  </div>
+</body>
+</html>

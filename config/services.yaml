@@ -8,9 +8,18 @@ parameters:
     mercure.public_url: '%env(MERCURE_PUBLIC_URL)%'
     mercure.jwt_secret: '%env(MERCURE_JWT_SECRET)%'
     CHALLENGES_UPLOAD_DIR: '%env(resolve:CHALLENGES_UPLOAD_DIR)%'
+    FLOWISE_API_KEY: '%env(FLOWISE_API_KEY)%'
+    FLOWISE_API_HOST: '%env(FLOWISE_API_HOST)%'
+    FLOWISE_GRADE_FLOW_ID: '%env(FLOWISE_GRADE_FLOW_ID)%'
 
 
 services:
+    App\Service\FlowiseGraderService:
+        arguments:
+            $http: '@http_client'
+            $FLOWISE_API_KEY: '%FLOWISE_API_KEY%'
+            $FLOWISE_API_HOST: '%FLOWISE_API_HOST%'
+            $FLOWISE_GRADE_FLOW_ID: '%FLOWISE_GRADE_FLOW_ID%'
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.

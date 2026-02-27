@@ -2,10 +2,17 @@
 
 {% block stylesheets %}
 	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/old_activities.css') }}">
+    <style>
+      .about-section .challenge-wrapper { display: flex !important; flex-wrap: wrap !important; gap: 16px; max-width: 1200px; margin: 15px auto; padding: 0 10px; justify-content: center !important; }
+      .about-section .challenge-wrapper > .module-card { flex: 0 0 calc(50% - 16px) !important; width: auto !important; }
+      @media (max-width: 900px) { .about-section .challenge-wrapper > .module-card { flex-basis: 100% !important; } }
+      .pdf-inline-container { background:#fff; border:1px solid #e8eef7; border-radius:6px; padding:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+      .pdf-inline-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; font-size:12px; color:#2d3748; }
+    </style>
 {% endblock %}
 
 {% block body %}
-	<div class="challenge-wrapper">
+	<div class="challenge-wrapper" style="display:flex;flex-wrap:wrap;gap:16px;max-width:1200px;margin:15px auto;padding:0 10px;">
 
 		{% for activity in activities %}
 			{% set challenge = activity.idChallenge %}
@@ -23,91 +30,46 @@
 
 				<p>{{ challenge.description }}</p>
 
-				<hr>
+                <div class="submitted-section">
+                    <h4 style="margin-top:20px;">📄 Your Submitted Activity</h4>
+                    <div class="activity-card">
+                        <h5>Submission Summary</h5>
 
-				<div class="submitted-section">
-					<h4 style="margin-top:20px;">📄 Your Submitted Activity</h4>
-					<div class="activity-card">
-						<h5>Submission Summary</h5>
+                        {% if activity.submissionFile %}
+                            <p>
+                                <button class="signin-btn open-pdf" data-target="pdf-container-{{ activity.id }}" data-src="{{ asset('assets/challenge/pdf/' ~ activity.submissionFile) }}">📎 Open</button>
+                            </p>
+                            <div id="pdf-container-{{ activity.id }}" class="pdf-inline-container" style="display:none; margin-top:10px;">
+                                <div class="pdf-inline-header">
+                                    <span>Submission Preview</span>
+                                    <button class="signin-btn close-pdf" data-target="pdf-container-{{ activity.id }}">Close</button>
+                                </div>
+                                <iframe src="" class="pdf-frame" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>
+                            </div>
+                        {% endif %}
 
-						{% if activity.submissionFile %}
-							<p>
-								<button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ activity.submissionFile) }}">
-									📎
-									Open
-								</button>
-							</p>
-						{% endif %}
+                        <div class="challenge-meta" style="margin-top: 12px;">
+                            Submitted on: {{ activity.submissionDate|date('d F Y') }}
+                        </div>
+                    </div>
+                </div>
 
-						<div class="challenge-meta" style="margin-top: 12px;">
-							Submitted on:
-							{{ activity.submissionDate|date('d F Y') }}
-						</div>
-					</div>
-				</div>
-
-				<hr>
-
-				<div class="evaluation-section" style="margin-top:20px;">
-					<h4>📝 Evaluation</h4>
-
-					{% if activity.status == "evaluated" %}
-						<p>Status:
-							{{ activity.status }}</p>
-						<button class="signin-btn open-modal" data-challenge="{{ challenge.id }}" data-group="{{ activity.getGroupId().id }}">
-							See Evaluation
-						</button>
-					{% else %}
-						<button class="signin-btn disabled-btn" disabled>
-							Not Evaluated Yet
-						</button>
-					{% endif %}
-				</div>
+                <div class="evaluation-section" style="margin-top:20px;">
+                    <h4>📝 Evaluation</h4>
+                    <div class="activity-card">
+                        <p class="challenge-meta">Status: {{ activity.status }}</p>
+                        {% set gf = groupFeedback[activity.id] ?? null %}
+                        <button class="signin-btn open-prefeedback" data-json="{{ gf is not null and gf.preFeedback ? gf.preFeedback|e('html_attr') : '' }}">Pre Feedback</button>
+                        {% if activity.status == "evaluated" %}
+                            <a class="signin-btn" href="{{ path('old_activity_evaluation', {'activityId': activity.id}) }}">See Evaluation</a>
+                        {% else %}
+                            <button class="signin-btn disabled-btn" disabled>Not Evaluated Yet</button>
+                        {% endif %}
+                    </div>
+                </div>
 
 			</div>
-			<div id="activities-data-{{ challenge.id }}-{{ activity.getGroupId().id }}" style="display: none;">
-				<div class="evaluation-popup">
-
-
-					{% for problem in problemSolutions[activity.id] %}
-						<div class="problem-card">
-							<p>
-								<strong>Problem:</strong>
-								{{ problem.problemDescription }}</p>
-							<p>
-								<strong>Group solution:</strong>
-								{{ problem.groupSolution }}</p>
-							<p>
-								<strong>Supervisor solution:</strong>
-								{{ problem.supervisorSolution }}</p>
-						</div>
-					{% else %}
-						<p>No problems submittet.</p>
-					{% endfor %}
-					{% if groupFeedback is defined and groupFeedback[activity.id] is defined %}
-						<div style="margin-top:10px; padding:10px; background:#e0e7ff; border-radius:8px;">
-							{% if indivScore[activity.id] is defined and indivScore[activity.id] != null %}
-								<p>
-									<strong>Your Individual Score:</strong>
-									{{ indivScore[activity.id] }}
-								</p>
-							{% endif %}
-							<p>
-								<strong>Submitted Group Score:</strong>
-								{{ groupFeedback[activity.id].score }}</p>
-							{% if groupFeedback[activity.id].pdfFilename %}
-								<p>
-									<strong>Feedback PDF:</strong>
-									<button class="signin-btn open-pdf" data-src="{{ asset('assets/challenge/pdf/' ~ groupFeedback[activity.id].pdfFilename) }}">
-										Open
-									</button>
-								</p>
-							{% endif %}
-						</div>
-					{% endif %}
-
-				</div>
-			</div>
+            <div class="evaluation-popup"></div>
 
 		{% else %}
 			<p>No activities found for your groups.</p>
@@ -115,74 +77,138 @@
 
 	</div>
 
-	{# Modal #}
-	<div id="activity-modal" class="modal" style="display: none;">
-		<div class="modal-content">
-			<span class="close">&times;</span>
-			<div
-				id="modal-body"><!-- Evaluation content will be injected dynamically -->
-			</div>
-		</div>
-	</div>
-	<div id="pdf-modal" class="modal" style="position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;">
-		<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);">
-			<span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span>
-			<iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe>
-		</div>
-	</div>
+    
 {% endblock %}
 
 {% block javascripts %}
-	 <script>
-																document.addEventListener('DOMContentLoaded', () => {
-																
-																    const modal = document.getElementById('activity-modal');
-																    if (!modal) return;
-																
-																    const modalBody = document.getElementById('modal-body');
-																    const closeBtn = modal.querySelector('.close');
-																
-																   document.querySelectorAll('.open-modal').forEach(btn => {
-																    btn.addEventListener('click', () => {
-																        const challengeId = btn.dataset.challenge;
-																        const groupId = btn.dataset.group;
-																        const contentDiv = document.getElementById(`activities-data-${challengeId}-${groupId}`);
-																        if (!contentDiv) return;
-																
-																        modalBody.innerHTML = contentDiv.innerHTML;
-																        modal.style.display = 'flex';
-																    });
-																});
-																
-																
-																    closeBtn.addEventListener('click', () => {
-																        modal.style.display = 'none';
-																        modalBody.innerHTML = '';
-																    });
-																
-																    window.addEventListener('click', (e) => {
-																        if (e.target === modal) {
-																            modal.style.display = 'none';
-																            modalBody.innerHTML = '';
-																        }
-																    });
-																
-																	const pdfModal = document.getElementById('pdf-modal');
-																	const pdfClose = pdfModal.querySelector('.close');
-																	const pdfFrame = document.getElementById('pdf-frame');
-																	document.addEventListener('click', (e) => {
-																		const btn = e.target.closest('.open-pdf');
-																		if (btn) {
-																			const src = btn.dataset.src;
-																			pdfFrame.src = src;
-																			pdfModal.style.display = 'flex';
-																		}
-																	});
-																	pdfClose.addEventListener('click', () => {
-																		pdfFrame.src = '';
-																		pdfModal.style.display = 'none';
-																	});
-																});
-																</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const modal = document.createElement('div');
+  modal.id = 'prefeedback-modal';
+  modal.style.display = 'none';
+  modal.style.position = 'fixed';
+  modal.style.zIndex = '5000';
+  modal.style.left = '0';
+  modal.style.top = '0';
+  modal.style.width = '100%';
+  modal.style.height = '100%';
+  modal.style.background = 'rgba(0,0,0,0.6)';
+  const content = document.createElement('div');
+  content.style.background = '#fff';
+  content.style.margin = '50px auto';
+  content.style.padding = '24px';
+  content.style.borderRadius = '16px';
+  content.style.width = '92%';
+  content.style.maxWidth = '880px';
+  content.style.boxShadow = '0 10px 30px rgba(0,0,0,0.25)';
+  const header = document.createElement('div');
+  header.style.display = 'flex';
+  header.style.alignItems = 'center';
+  header.style.justifyContent = 'space-between';
+  const title = document.createElement('h3');
+  title.textContent = 'Pre Feedback';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'signin-btn';
+  closeBtn.textContent = 'Close';
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+  const body = document.createElement('div');
+  body.id = 'prefeedback-body';
+  content.appendChild(header);
+  content.appendChild(body);
+  modal.appendChild(content);
+  document.body.appendChild(modal);
 
+  function renderPreFeedback(jsonText) {
+    body.innerHTML = '';
+    if (!jsonText) {
+      body.innerHTML = '<div>No pre-feedback available for this activity.</div>';
+      return;
+    }
+    let data = null;
+    try { data = JSON.parse(jsonText); } catch(e) {}
+    if (!data || typeof data !== 'object') {
+      body.innerHTML = '<pre style="white-space:pre-wrap;word-wrap:break-word;font-size:12px;background:#f7fafc;padding:8px;border-radius:6px;">' + (jsonText || '') + '</pre>';
+      return;
+    }
+    const wrap = document.createElement('div');
+    wrap.style.display = 'grid';
+    wrap.style.gridTemplateColumns = '1fr 1fr';
+    wrap.style.gap = '14px';
+    const overall = document.createElement('div');
+    overall.className = 'metric-card';
+    overall.innerHTML = '<div class="metric-label">Overall Score</div><div class="metric-value">' + (data.overall_score ?? '—') + '</div>';
+    const criteria = document.createElement('div');
+    criteria.className = 'metric-card';
+    const c = data.criteria || {};
+    criteria.innerHTML = '<div class="metric-label">Criteria</div>' +
+      '<div>Completeness: ' + (c.completeness ?? '—') + '</div>' +
+      '<div>Accuracy: ' + (c.accuracy ?? '—') + '</div>' +
+      '<div>Clarity: ' + (c.clarity ?? '—') + '</div>' +
+      '<div>Structure: ' + (c.structure ?? '—') + '</div>';
+    const strengths = document.createElement('div');
+    strengths.className = 'solution-card';
+    strengths.innerHTML = '<div class="label">Strengths</div><div class="solution-text">' + ((Array.isArray(data.strengths) && data.strengths.length) ? data.strengths.join(', ') : '—') + '</div>';
+    const weaknesses = document.createElement('div');
+    weaknesses.className = 'solution-card';
+    weaknesses.innerHTML = '<div class="label">Weaknesses</div><div class="solution-text">' + ((Array.isArray(data.weaknesses) && data.weaknesses.length) ? data.weaknesses.join(', ') : '—') + '</div>';
+    const missing = document.createElement('div');
+    missing.className = 'solution-card';
+    missing.innerHTML = '<div class="label">Missing Requirements</div><div class="solution-text">' + ((Array.isArray(data.missing_requirements) && data.missing_requirements.length) ? data.missing_requirements.join(', ') : '—') + '</div>';
+    const feedback = document.createElement('div');
+    feedback.className = 'solution-card';
+    feedback.innerHTML = '<div class="label">Final Feedback</div><div class="solution-text">' + (data.final_feedback ?? '—') + '</div>';
+    wrap.appendChild(overall);
+    wrap.appendChild(criteria);
+    wrap.appendChild(strengths);
+    wrap.appendChild(weaknesses);
+    wrap.appendChild(missing);
+    wrap.appendChild(feedback);
+    body.appendChild(wrap);
+  }
+
+  document.querySelectorAll('.open-prefeedback').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const json = btn.dataset.json || '';
+      renderPreFeedback(json);
+      modal.style.display = 'block';
+    });
+  });
+  closeBtn.addEventListener('click', () => { modal.style.display = 'none'; body.innerHTML = ''; });
+  modal.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; body.innerHTML = ''; } });
+  document.querySelectorAll('.prefeedback-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const container = document.getElementById(targetId);
+      if (!container) return;
+      container.style.display = 'block';
+    });
+  });
+  document.querySelectorAll('.open-pdf').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const src = btn.dataset.src;
+      const container = document.getElementById(targetId);
+      if (!container) return;
+      const frame = container.querySelector('.pdf-frame');
+      if (frame) {
+        frame.src = src;
+      }
+      container.style.display = 'block';
+    });
+  });
+  document.querySelectorAll('.close-pdf').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const container = document.getElementById(targetId);
+      if (!container) return;
+      const frame = container.querySelector('.pdf-frame');
+      if (frame) {
+        frame.src = '';
+      }
+      container.style.display = 'none';
+    });
+  });
+});
+</script>
 {% endblock %}

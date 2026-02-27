@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\EvaluationRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: EvaluationRepository::class)]
@@ -14,16 +15,16 @@ class Evaluation
     private ?int $id = null;
 
     #[ORM\OneToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false,onDelete:"CASCADE")]
     private ?Activity $activity_id = null;
 
     #[ORM\Column(nullable: true)]
     private ?float $groupScore = null;
 
-    #[ORM\Column(length: 255,nullable: true)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $feedback = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $pre_feedback = null;
 
     public function getId(): ?int

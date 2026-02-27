@@ -9,6 +9,11 @@
     gap: 10px;
 }
 
+/* Per-activity row grid */
+.row-grid { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; }
+.row-grid > .submitted-section,
+.row-grid > .evaluation-section { flex: 1 1 0; min-width: 0; }
+
 /* Module Cards - Challenge & Activity Sections */
 .module-card {
     background: white;
@@ -170,6 +175,9 @@
         padding: 0 10px;
         gap: 8px;
     }
+    .row-grid { flex-direction: column; }
+    .row-grid > .submitted-section,
+    .row-grid > .evaluation-section { width: 100%; }
 
     .module-card {
         padding: 10px;
@@ -212,6 +220,9 @@
         gap: 6px;
         margin: 10px auto;
     }
+    .row-grid { flex-direction: column; }
+    .row-grid > .submitted-section,
+    .row-grid > .evaluation-section { width: 100%; }
 
     .evaluation-popup {
         position: fixed;
@@ -276,4 +287,125 @@
     right: 15px;
     font-size: 24px;
     cursor: pointer;
+}
+
+/* Inline PDF container */
+.pdf-inline-container {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.pdf-inline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #2d3748;
+}
+
+/* Evaluation page */
+.evaluation-page {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+.evaluation-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+.center-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+}
+.evaluation-page .activity-card {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.problems-section {
+    margin-top: 12px;
+}
+.evaluation-page .problem-item {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    margin: 16px 0;
+    border-top: 3px solid #4a76f0;
+}
+.evaluation-page .problem-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.evaluation-page .pill {
+    display: inline-block;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #1a202c;
+    font-size: 12px;
+    line-height: 26px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+.evaluation-page .problem-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1a202c;
+}
+.evaluation-page .problem-desc {
+    font-size: 12px;
+    color: #4a5568;
+    text-align: center;
+    margin-bottom: 12px;
+}
+.evaluation-page .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.evaluation-page .solution-card {
+    background: #f7fafc;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+.evaluation-page .label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 4px;
+}
+.evaluation-page .solution-text {
+    font-size: 12px;
+    color: #4a5568;
+}
+.evaluation-page .scores-box {
+    margin-top: 14px;
+    padding: 14px;
+    background: #e0e7ff;
+    border-radius: 10px;
+    text-align: center;
+}
+.evaluation-page .score-number {
+    font-size: 26px;
+    font-weight: 900;
+    color: #1a202c;
+}
+@media (max-width: 900px) {
+    .evaluation-page .problem-grid {
+        grid-template-columns: 1fr;
+    }
 }

@@ -163,6 +163,23 @@
 .signin-btn:hover {
     background-color: #357ABD;
 }
+
+/* Inline PDF container (supervisor page) */
+.pdf-inline-container {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.pdf-inline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #2d3748;
+}
 /* Custom file input wrapper */
 .file-input-wrapper {
     position: relative;

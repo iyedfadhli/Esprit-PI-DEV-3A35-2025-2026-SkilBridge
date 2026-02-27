@@ -8,6 +8,8 @@ use App\Entity\Membership;
 use App\Entity\ProblemSolution;
 use App\Entity\MemberActivity;
 use App\Entity\User;
+use App\Entity\Evaluation;
+use Symfony\Component\HttpFoundation\File\File;
 
 use App\Repository\GroupRepository;
 
@@ -16,6 +18,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\Mime\Part\DataPart;
+use Symfony\Component\Mime\Part\Multipart\FormDataPart;
 
 final class ActivityController extends AbstractController
 {
@@ -78,7 +83,7 @@ final class ActivityController extends AbstractController
 
 
     #[Route('/activity/start', name: 'activity_start', methods: ['POST'])]
-    public function startActivity(Request $request, EntityManagerInterface $em): Response
+    public function startActivity(Request $request, EntityManagerInterface $em, HttpClientInterface $http): Response
     {
         $challengeId = $request->request->get('challenge_id');
         $groupId = $request->request->get('group_id');
@@ -97,7 +102,7 @@ final class ActivityController extends AbstractController
             $this->addFlash('warning', 'Ce groupe participe déjà à ce challenge.');
             return $this->redirectToRoute('activity_resume', [
                 'activity_id' => $existingActivity->getId(),
-                'role' => 'admin', 
+                'role' => 'admin',
             ]);
         }
         // Prevent starting if any member of this group is busy in another in-progress activity
@@ -115,6 +120,42 @@ final class ActivityController extends AbstractController
         $em->persist($activity);
         $em->flush();
         $this->addFlash('success', 'Activité démarrée pour ce groupe.');
+
+        // Optional KB upsert if configured (works with Qdrant/PGVector KB)
+        $pdfPublicPath = $challenge->getContent();
+        if ($pdfPublicPath) {
+            $filenameBase = basename($pdfPublicPath);
+            $uploadDir = rtrim((string) $this->getParameter('CHALLENGES_UPLOAD_DIR'), "/\\");
+            $uploadAbs = $uploadDir . DIRECTORY_SEPARATOR . $filenameBase;
+            $publicAbs = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($pdfPublicPath, '/');
+            $existingAbs = null;
+            if (file_exists($uploadAbs)) {
+                $existingAbs = $uploadAbs;
+            } elseif (file_exists($publicAbs)) {
+                $existingAbs = $publicAbs;
+            }
+            if ($existingAbs && is_readable($existingAbs)) {
+                $formData = new FormDataPart([
+                    'files' => DataPart::fromPath($existingAbs, $filenameBase, 'application/pdf'),
+                    'metadata' => json_encode(['challenge_id' => (string) $challenge->getId()]),
+                    'additionalMetadata' => json_encode(['challenge_id' => (string) $challenge->getId()]),
+                    'returnList' => 'true',
+                ]);
+                $headers = $formData->getPreparedHeaders()->toArray();
+                try {
+                    $resp = $http->request('POST', 'http://localhost:3000/api/v1/vector/upsert/556a4e54-5118-47a8-bf43-c080b3951fc5', [
+                        'headers' => $headers,
+                        'body' => $formData->bodyToString(),
+                    ]);
+                    $status = $resp->getStatusCode();
+                    if ($status !== 200 && $status !== 201) {
+                        $this->addFlash('error', 'KB upsert failed');
+                    }
+                } catch (\Throwable $e) {
+                    $this->addFlash('error', 'KB upsert error: ' . $e->getMessage());
+                }
+            }
+        }
 
         return $this->redirectToRoute('activity_resume', [
             'activity_id' => $activity->getId(),
@@ -198,105 +239,220 @@ final class ActivityController extends AbstractController
             'problems' => $problems,
             'role' => $role,
             'memberActivity' => $memberActivity,
-            'memberActivityList' =>$memberActivityList,
+            'memberActivityList' => $memberActivityList,
         ]);
     }
-    #[Route('/activity/submit/admin/{activity_id}', name: 'activity_submit_admin', methods: ['POST'])]
-    public function submitAdmin(Request $request, EntityManagerInterface $em, int $activity_id): Response
+    #[Route('/api/activity/{activity_id}/chat', name: 'activity_chat', methods: ['POST'])]
+    public function chatActivity(int $activity_id, Request $request, EntityManagerInterface $em, HttpClientInterface $http): Response
     {
         $activity = $em->getRepository(Activity::class)->find($activity_id);
         if (!$activity) {
-            throw $this->createNotFoundException('Activity not found');
+            return $this->json(['error' => 'Activity not found'], 404);
         }
 
-        $userId = $request->getSession()->get('user_id');
-        if (!$userId) {
-            return $this->redirectToRoute('sign');
+        $payload = json_decode($request->getContent(), true) ?? [];
+        $question = isset($payload['question']) ? (string) $payload['question'] : '';
+        if ($question === '') {
+            return $this->json(['error' => 'Missing question'], 400);
         }
+
+        $challengeId = isset($payload['challenge_id']) && $payload['challenge_id'] !== ''
+            ? (string) $payload['challenge_id']
+            : '67';
+
+        $metadataFilter = 'challenge_id:"' . $challengeId . '"';
+
+        $userId = $payload['user_id'] ?? 'anonymous';
+        $sessionId = "challenge_{$challengeId}_user_{$userId}";
+
+        try {
+            $headers = [];
+            $apiKey = $this->getParameter('FLOWISE_API_KEY') ?? null;
+            if ($apiKey) {
+                $headers['Authorization'] = 'Bearer ' . $apiKey; // REQUIRED
+                $headers['X-API-Key'] = $apiKey; // Optional, some versions of Flowise need this
+            } else {
+                throw new \RuntimeException("FLOWISE_API_KEY is not set in parameters.yaml");
+            }
+            $headers['Accept'] = 'application/json';
+
+
+            $pdfPublicPath = $activity->getIdChallenge()->getContent();
+            $fileUrl = null;
+            if (is_string($pdfPublicPath) && $pdfPublicPath !== '') {
+                $fileUrl = rtrim((string) $request->getSchemeAndHttpHost(), '/') . '/' . ltrim($pdfPublicPath, '/');
+            }
+
+
+            $resp = $http->request('POST', 'http://localhost:3000/api/v1/prediction/556a4e54-5118-47a8-bf43-c080b3951fc5', [
+                'headers' => $headers,
+                'json' => [
+                    'question' => $question,
+                    'session_id' => $sessionId,
+                    'grade_activity_TEST_' . time() .
+                    'additional_parameters' => [
+                        'temperature' => 0,
+                        'max_tokens' => 500
+                    ],
+                    'overrideConfig' => [
+                        'fileUrl' => $fileUrl,
+                        'challenge_id' => $challengeId
+                    ]
+                ],
+            ]);
+
+            $status = $resp->getStatusCode();
+            $body = $resp->getContent(false);
+            $data = json_decode($body, true);
+
+            if ($status !== 200 && $status !== 201) {
+                return $this->json(['error' => $data ?? $body], $status);
+            }
+
+            $headersResp = $resp->getHeaders(false);
+            $contentType = $headersResp['content-type'][0] ?? '';
+            if (stripos($contentType, 'text/html') !== false) {
+                return $this->json([
+                    'error' => 'Flowise returned HTML instead of JSON. Verify chatflow ID and API key; ensure API endpoint /api/v1/chatflows/{id} is correct.',
+                    'raw' => $body
+                ], 502);
+            }
+
+            $text = '';
+            $sources = [];
+            if (is_array($data)) {
+                foreach ($data as $item) {
+                    if (is_array($item)) {
+                        $text = $item['text'] ?? $item['answer'] ?? $text;
+                    }
+                }
+            } elseif (is_array($data) || is_object($data)) {
+                if (is_array($data)) {
+                    $text = $data['text'] ?? $data['answer'] ?? $text;
+                }
+            }
+            $stack = [];
+            if (is_array($data)) {
+                $stack[] = $data;
+            }
+            while (!empty($stack)) {
+                $current = array_pop($stack);
+                if (!is_array($current)) {
+                    continue;
+                }
+                if (isset($current['sourceDocuments']) && is_array($current['sourceDocuments'])) {
+                    $sources = $current['sourceDocuments'];
+                    break;
+                }
+                if (isset($current['sources']) && is_array($current['sources'])) {
+                    $sources = $current['sources'];
+                    break;
+                }
+                foreach ($current as $v) {
+                    if (is_array($v)) {
+                        $stack[] = $v;
+                    }
+                }
+            }
+
+            $validSources = [];
+            if (is_array($sources)) {
+                foreach ($sources as $s) {
+                    if (is_array($s)) {
+                        $m = $s['metadata'] ?? $s['meta'] ?? null;
+                        if (is_array($m)) {
+                            $cid = $m['challenge_id'] ?? ($m['challengeId'] ?? null);
+                            if ($cid !== null && (string) $cid === (string) $challengeId) {
+                                $validSources[] = $s;
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            return $this->json([
+                'text' => $text,
+                'sources' => $validSources,
+                'raw' => $data
+            ]);
+
+        } catch (\Throwable $e) {
+            return $this->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    #[Route('/activity/submit/admin/{activity_id}', name: 'activity_submit_admin', methods: ['POST'])]
+    public function submitAdmin(
+        Request $request,
+        EntityManagerInterface $em,
+        \App\Service\NotificationService $notifier,
+        HttpClientInterface $http,
+        \App\Service\FlowiseGraderService $graderService,
+        int $activity_id
+    ): Response {
+        $activity = $em->getRepository(Activity::class)->find($activity_id);
+        if (!$activity)
+            throw $this->createNotFoundException('Activity not found');
+
+        $userId = $request->getSession()->get('user_id');
+        if (!$userId)
+            return $this->redirectToRoute('sign');
         $user = $em->getRepository(User::class)->find($userId);
 
         $activityDescription = $request->request->get('activity_description');
         if ($activityDescription !== null) {
-            $memberActivity = $em->getRepository(MemberActivity::class)
-                ->findOneByActivityAndUser($activity, $user);
-
-            if (!$memberActivity) {
-                $memberActivity = new MemberActivity();
-                $memberActivity->setIdActivity($activity);
-                $memberActivity->setUserId($user);
-            }
-
+            $memberActivity = $em->getRepository(MemberActivity::class)->findOneByActivityAndUser($activity, $user) ?? new MemberActivity();
+            $memberActivity->setIdActivity($activity);
+            $memberActivity->setUserId($user);
             $memberActivity->setActivityDescription($activityDescription);
             $em->persist($memberActivity);
             $activity->setStatus('in_progress');
             $em->flush();
-            $this->addFlash('success', 'Description d’activité enregistrée.');
-
-            return $this->redirectToRoute('activity_resume', [
-                'activity_id' => $activity->getId(),
-                'role' => 'admin'
-            ]);
+            return $this->redirectToRoute('activity_resume', ['activity_id' => $activity->getId(), 'role' => 'admin']);
         }
 
-        // 1️⃣ Handle Problem Form
-        $problemDescription = $request->request->get('problem_description');
-        if ($problemDescription !== null && trim($problemDescription) !== '') {
-            $solutionDescription = $request->request->get('solution_description');
-
-            $problem = new ProblemSolution();
-            $problem->setActivityId($activity);
-            $problem->setProblemDescription($problemDescription);
-
-            if ($solutionDescription !== null && trim($solutionDescription) !== '') {
-                $problem->setGroupSolution($solutionDescription);
-            }
-
-            $em->persist($problem);
-            $em->flush();
-            $message = 'Problème ajouté.';
-            if ($solutionDescription !== null && trim($solutionDescription) !== '') {
-                $message = 'Problème et solution ajoutés.';
-            }
-            $this->addFlash('success', $message);
-        }
-
-        // 3️⃣ Solution form (for existing unsolved problem)
-        $problemId = $request->request->get('problem_id');
-        $solutionDescription = $request->request->get('solution_description');
-        if ($problemId && $solutionDescription !== null && trim($solutionDescription) !== '') {
-            $problem = $em->getRepository(ProblemSolution::class)->find($problemId);
-            if ($problem && !$problem->getGroupSolution()) {
-                $problem->setGroupSolution($solutionDescription);
-                $em->persist($problem);
-                $em->flush();
-                $this->addFlash('success', 'Solution du groupe enregistrée.');
-            }
-        }
-
-        // 3️⃣ Handle Submission File Form
         $file = $request->files->get('submission_file');
         if ($file) {
+            $challenge = $activity->getIdChallenge();
+            $group = $activity->getGroupId();
+
             $filename = md5(uniqid()) . '.' . $file->guessExtension();
-            $file->move($this->getParameter('CHALLENGES_UPLOAD_DIR'), $filename);
+            $uploadDirAbs = rtrim($this->getParameter('CHALLENGES_UPLOAD_DIR'), DIRECTORY_SEPARATOR);
+            $file->move($uploadDirAbs, $filename);
+
             $activity->setSubmissionFile($filename);
             $activity->setSubmissionDate(new \DateTime());
-            $activity->setStatus('submitted'); // mark as submitted
+            $activity->setStatus('submitted');
             $em->flush();
-            $this->addFlash('success', 'Fichier de soumission envoyé.');
 
-            return $this->redirectToRoute('activity_check', [
-                'activity_id' => $activity->getId(),
-                'role' => 'admin'
-            ]);
+            try {
+                $projectDir = $this->getParameter('kernel.project_dir');
+                $challengePath = $projectDir . '/public/' . ltrim($challenge->getContent(), '/');
+                $submissionPath = $uploadDirAbs . DIRECTORY_SEPARATOR . $filename;
+                $appUrl = (string) $request->getSchemeAndHttpHost();
+                $apiKey = (string) ($this->getParameter('FLOWISE_API_KEY') ?? '');
+
+                $grade = $graderService->gradeByTextExtraction($challengePath, $submissionPath, $appUrl, $apiKey);
+
+                $evaluation = $em->getRepository(Evaluation::class)->findOneBy(['activity_id' => $activity]) ?? new \App\Entity\Evaluation();
+                $evaluation->setActivityId($activity);
+                $evaluation->setGroupScore(min(20, max(0, (float) ($grade['overall_score'] ?? 0))));
+                $evaluation->setPreFeedback(json_encode($grade, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+
+                $em->persist($evaluation);
+                $em->flush();
+
+                $this->addFlash('success', 'Graded successfully. Score: ' . $evaluation->getGroupScore());
+
+            } catch (\Throwable $e) {
+                $this->addFlash('error', 'Grading failed: ' . $e->getMessage());
+            }
+
+            return $this->redirectToRoute('activity_check', ['activity_id' => $activity->getId(), 'role' => 'admin']);
         }
 
-        // Default redirect
-        return $this->redirectToRoute('activity_resume', [
-            'activity_id' => $activity->getId(),
-            'role' => 'admin'
-        ]);
+        return $this->redirectToRoute('activity_resume', ['activity_id' => $activity->getId(), 'role' => 'admin']);
     }
-
 
     #[Route('/activity/submit/member/{activity_id}', name: 'activity_submit_member', methods: ['POST'])]
     public function submitMember(Request $request, EntityManagerInterface $em, int $activity_id): Response
@@ -326,8 +482,8 @@ final class ActivityController extends AbstractController
 
         if (!$memberActivity) {
             $memberActivity = new MemberActivity();
-            $memberActivity->setUserId($user);  
-            $memberActivity->setIdActivity($activity); 
+            $memberActivity->setUserId($user);
+            $memberActivity->setIdActivity($activity);
         }
 
         if ($activityDescription) {
@@ -391,7 +547,7 @@ final class ActivityController extends AbstractController
 
             return $this->redirectToRoute('activity_check', [
                 'activity_id' => $problem->getActivityId()->getId(),
-                'role' => 'admin' 
+                'role' => 'admin'
             ]);
         }
 
@@ -426,58 +582,59 @@ final class ActivityController extends AbstractController
         ]);
     }
     #[Route('/member/activity/delete/{id}', name: 'member_activity_delete', methods: ['POST'])]
-public function deleteMemberActivity(Request $request, EntityManagerInterface $em, int $id): Response
-{
-    $memberActivity = $em->getRepository(MemberActivity::class)->find($id);
+    public function deleteMemberActivity(Request $request, EntityManagerInterface $em, int $id): Response
+    {
+        $memberActivity = $em->getRepository(MemberActivity::class)->find($id);
 
-    if (!$memberActivity) {
-        throw $this->createNotFoundException('Member activity not found.');
-    }
+        if (!$memberActivity) {
+            throw $this->createNotFoundException('Member activity not found.');
+        }
 
-    // CSRF token validation
-    if ($this->isCsrfTokenValid('delete'.$memberActivity->getId(), $request->request->get('_token'))) {
-        $em->remove($memberActivity);
-        $em->flush();
+        // CSRF token validation
+        if ($this->isCsrfTokenValid('delete' . $memberActivity->getId(), $request->request->get('_token'))) {
+            $em->remove($memberActivity);
+            $em->flush();
             $this->addFlash('success', 'Contribution supprimée.');
+        }
+
+        // Redirect back to activity page
+        return $this->redirectToRoute('activity_check', [
+            'activity_id' => $memberActivity->getIdActivity()->getId(),
+            'role' => 'member'
+        ]);
     }
+    #[Route('/member/activity/edit/{id}', name: 'member_activity_edit', methods: ['POST'])]
+    public function editMemberActivity(Request $request, EntityManagerInterface $em, int $id): Response
+    {
+        $memberActivity = $em->getRepository(MemberActivity::class)->find($id);
 
-    // Redirect back to activity page
-    return $this->redirectToRoute('activity_check', [
-        'activity_id' => $memberActivity->getIdActivity()->getId(),
-        'role' => 'member'
-    ]);
-}
-#[Route('/member/activity/edit/{id}', name: 'member_activity_edit', methods: ['POST'])]
-public function editMemberActivity(Request $request, EntityManagerInterface $em, int $id): Response
-{
-    $memberActivity = $em->getRepository(MemberActivity::class)->find($id);
+        if (!$memberActivity) {
+            throw $this->createNotFoundException('Member activity not found.');
+        }
 
-    if (!$memberActivity) {
-        throw $this->createNotFoundException('Member activity not found.');
+        // Get updated values
+        $description = $request->request->get('activity_description');
+
+        if ($description) {
+            $memberActivity->setActivityDescription($description);
+        }
+
+
+        $em->flush();
+        $this->addFlash('success', 'Contribution mise à jour.');
+
+        // Redirect back to activity page
+        return $this->redirectToRoute('activity_check', [
+            'activity_id' => $memberActivity->getIdActivity()->getId(),
+            'role' => 'member'
+        ]);
     }
+    #[Route('/activity_evaluation', name: 'activity_evaluation')]
+    public function index(): Response
+    {
+        return $this->render('frontoffice/challenge/evaluation.html.twig');
 
-    // Get updated values
-    $description = $request->request->get('activity_description');
-
-    if ($description) {
-        $memberActivity->setActivityDescription($description);
     }
-
-   
-    $em->flush();
-    $this->addFlash('success', 'Contribution mise à jour.');
-
-    // Redirect back to activity page
-    return $this->redirectToRoute('activity_check', [
-        'activity_id' => $memberActivity->getIdActivity()->getId(),
-        'role' => 'member'
-    ]);
-}
-#[Route('/activity_evaluation', name: 'activity_evaluation')]
-public function index():Response{
-     return $this->render('frontoffice/challenge/evaluation.html.twig');
-
-}
 
 
 

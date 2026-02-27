@@ -151,6 +151,62 @@ function toggleEdit(id) {
         viewRow.style.display = '';
     }
 }
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('assistant-form');
+    if (!form) return;
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const input = document.getElementById('assistant-q');
+        const box = document.getElementById('chat-box');
+        const q = (input.value || '').trim();
+        if (!q) return;
+        const res = await fetch('{{ path("activity_chat", {"activity_id": activity.id}) }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({question: q, challenge_id: "{{ challenge.id }}"})
+        });
+        let data;
+        try {
+            data = await res.json();
+        } catch (_) {
+            data = { text: await res.text() };
+        }
+        function pick(o) {
+            if (!o) return '';
+            if (typeof o === 'string') return o;
+            if (Array.isArray(o)) {
+                for (const it of o) {
+                    const t = pick(it);
+                    if (t) return t;
+                }
+                return '';
+            }
+            if (typeof o === 'object') {
+                if (typeof o.text === 'string' && o.text.trim()) return o.text.trim();
+                if (typeof o.answer === 'string' && o.answer.trim()) return o.answer.trim();
+                const a = pick(o.data);
+                if (a) return a;
+                if (o.raw && typeof o.raw.text === 'string' && o.raw.text.trim()) return o.raw.text.trim();
+                const b = pick(o.raw);
+                if (b && b.trim()) return b.trim();
+                const c = pick(o.output);
+                if (c && c.trim()) return c.trim();
+                return '';
+            }
+            return '';
+        }
+        let text = pick(data);
+        text = (text || '').trim();
+        if (!res.ok) {
+            const err = data && data.error;
+            text = typeof err === 'string' ? err : (err && err.message ? err.message : text);
+        }
+        const p = document.createElement('p');
+        p.textContent = text || 'No response';
+        box.appendChild(p);
+        input.value = '';
+    });
+})
 	</script>
 
 {% endblock %}
@@ -160,7 +216,6 @@ function toggleEdit(id) {
 		<div
 			class="container">
 
-			<!-- Selected Challenge Info -->
 			<div class="challenge-card selected-challenge">
 				<div class="challenge-header">
 					<h3>{{ challenge.title }}</h3>
@@ -185,6 +240,14 @@ function toggleEdit(id) {
 					{% endif %}
 				{% endif %}
 			</div>
+           <script type="module">
+    import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js"
+    Chatbot.init({
+        chatflowid: "556a4e54-5118-47a8-bf43-c080b3951fc5",
+        apiHost: "http://localhost:3000",
+    })
+</script>
+            
 
 			<!-- Activity Form -->
 			<div class="activity-form">
@@ -417,6 +480,7 @@ function toggleEdit(id) {
             </tbody>
         </table>
     </div>
+    
 </div>
 		</section>
 	{% endblock %}

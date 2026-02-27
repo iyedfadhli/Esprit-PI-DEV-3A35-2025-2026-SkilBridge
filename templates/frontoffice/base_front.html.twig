@@ -86,6 +86,8 @@
 				{% endif %}
 				<a href="{{ path('app_front_hackathon_index') }}">Hackathon</a>
 				{% if user %}
+				    {% include 'frontoffice/challenge/notification.html.twig' %}
+
 					<div class="header-profile">
 						<a href="{{path('profile')}}">
 							<img src="{{ asset(user.photo ?: 'assets/images/frontoffice/user_pic/profile_pic.png') }}" alt="Profile" class="profile-img"></a>
