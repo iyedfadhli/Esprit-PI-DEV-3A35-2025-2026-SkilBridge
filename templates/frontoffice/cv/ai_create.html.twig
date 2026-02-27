@@ -1,0 +1,62 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Générer un CV avec IA{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+    <div class="section-header">
+        <div>
+            <h1><i class="fa fa-magic"></i> Générer un CV avec IA</h1>
+            <p class="section-subtitle">Entrez votre objectif, votre parcours, l'IA structure votre CV.</p>
+        </div>
+        <a href="{{ path('preview_front_cv_index') }}" class="btn-secondary">
+            ← Mes CVs
+        </a>
+    </div>
+
+    {% for type, messages in app.flashes %}
+        <div class="flash-messages">
+            {% for message in messages %}
+                <div class="flash-message {{ type }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+
+    <div class="bo-form-card">
+        <form action="{{ path('cv_ai_generate') }}" method="post" class="bo-form ai-form-grid">
+            <input type="hidden" name="_token" value="{{ csrf_token('cv_ai_generate') }}">
+
+            <div class="bo-form-group">
+                <label for="language">Langue cible</label>
+                <select id="language" name="language">
+                    <option value="French">Français</option>
+                    <option value="English">English</option>
+                    <option value="Dutch">Dutch</option>
+                </select>
+                <div class="helper">La langue finale du CV.</div>
+            </div>
+
+            <div class="bo-form-group">
+                <label for="job_title">Intitulé du poste visé</label>
+                <input type="text" id="job_title" name="job_title" placeholder="Ex: Développeur Symfony" required>
+                <div class="helper">Exemples: Data Analyst, Java Developer, UI/UX Designer.</div>
+            </div>
+
+            <div class="bo-form-group full">
+                <label for="description">Décrivez votre parcours</label>
+                <textarea id="description" name="description" rows="12" placeholder="Parlez librement de vos études, expériences, projets, compétences..." required></textarea>
+                <div class="helper">Ajoutez vos études, expériences, projets, stacks, certifications, langues…</div>
+            </div>
+
+            <div class="bo-form-actions full">
+                <button type="submit" class="btn-primary">Générer avec IA</button>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}
+

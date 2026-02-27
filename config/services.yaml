@@ -26,3 +26,16 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+
+   # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    #App\Service\AtsScoringService:
+       # arguments:
+         #   $hfApiKey: '%env(default::HF_API_TOKEN)%'
+
+    App\Service\AIgeneratorService:
+        arguments:
+            $apiKey: '%env(default::HF_API_TOKEN)%'
+            $model: '%env(default::HF_MODEL)%'

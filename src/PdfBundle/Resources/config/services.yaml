@@ -1,0 +1,17 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    App\PdfBundle\:
+        resource: '../../*'
+        exclude: '../../{DependencyInjection,Resources,Tests}'
+
+    App\PdfBundle\Service\Engine\KnpSnappyEngine:
+        arguments:
+            $pdf: '@knp_snappy.pdf'
+
+    App\PdfBundle\Service\PdfGenerator:
+        arguments:
+            $engine: '@pdf.engine'

@@ -26,9 +26,14 @@ class CvController extends AbstractController
 {
     // ===================== CV INDEX =====================
     #[Route('/cv', name: 'preview_front_cv_index')]
-    public function cvIndex(EntityManagerInterface $em): Response
+    public function cvIndex(Request $request, EntityManagerInterface $em): Response
     {
-        $cvs = $em->getRepository(Cv::class)->findAll();
+        $userId = $request->getSession()->get('user_id');
+        if (!$userId) {
+            return $this->redirectToRoute('sign');
+        }
+
+        $cvs = $em->getRepository(Cv::class)->findBy(['user' => $userId]);
 
         return $this->render('frontoffice/cv/index.html.twig', [
             'cvs' => $cvs,
@@ -39,8 +44,13 @@ class CvController extends AbstractController
     #[Route('/cv/new', name: 'preview_front_cv_new', methods: ['GET','POST'])]
     public function cvNew(Request $request, EntityManagerInterface $em): Response
     {
+        $userId = $request->getSession()->get('user_id');
+        if (!$userId) {
+            return $this->redirectToRoute('sign');
+        }
+        $user = $em->getRepository(User::class)->find($userId);
+
         $cv = new Cv();
-        $user = $em->getRepository(User::class)->find(2); // Replace with logged-in user
         $cv->setUser($user);
         $cv->setCreationDate(new \DateTime());
         $cv->setUpdatedAt(new \DateTimeImmutable());
@@ -67,8 +77,9 @@ class CvController extends AbstractController
     #[Route('/cv/{id}/edit', name: 'preview_front_cv_edit', methods: ['GET','POST'])]
     public function cvEdit(int $id, Request $request, EntityManagerInterface $em): Response
     {
-        $cv = $em->getRepository(Cv::class)->find($id);
-        if (!$cv) throw $this->createNotFoundException("CV not found");
+        $userId = $request->getSession()->get('user_id');
+        $cv = $em->getRepository(Cv::class)->findOneBy(['id' => $id, 'user' => $userId]);
+        if (!$cv) throw $this->createNotFoundException("CV not found or access denied");
 
         $form = $this->createForm(CvType::class, $cv);
         $form->handleRequest($request);
@@ -91,10 +102,11 @@ class CvController extends AbstractController
 
     // ===================== CV SHOW =====================
     #[Route('/cv/{id}', name: 'preview_front_cv_show')]
-    public function cvShow(int $id, EntityManagerInterface $em): Response
+    public function cvShow(int $id, Request $request, EntityManagerInterface $em): Response
     {
-        $cv = $em->getRepository(Cv::class)->find($id);
-        if (!$cv) throw $this->createNotFoundException("CV not found");
+        $userId = $request->getSession()->get('user_id');
+        $cv = $em->getRepository(Cv::class)->findOneBy(['id' => $id, 'user' => $userId]);
+        if (!$cv) throw $this->createNotFoundException("CV not found or access denied");
 
         return $this->render('frontoffice/cv/show.html.twig', [
             'cv' => $cv,
@@ -109,9 +121,10 @@ class CvController extends AbstractController
   #[Route('/cv/{id}/delete', name: 'preview_front_cv_delete', methods: ['POST'])]
 public function cvDelete(int $id, Request $request, EntityManagerInterface $em): Response
 {
-    $cv = $em->getRepository(Cv::class)->find($id);
+    $userId = $request->getSession()->get('user_id');
+    $cv = $em->getRepository(Cv::class)->findOneBy(['id' => $id, 'user' => $userId]);
     if (!$cv) {
-        throw $this->createNotFoundException("CV not found");
+        throw $this->createNotFoundException("CV not found or access denied");
     }
 
     // CSRF check
@@ -244,20 +257,21 @@ public function generateCvPdf(int $id, EntityManagerInterface $em): Response
 
     //===================== OFFER SHOW =====================
 #[Route('/offers/{id}', name: 'preview_front_offer_show')]
-public function offerShow(int $id, EntityManagerInterface $em): Response
+public function offerShow(int $id, Request $request, EntityManagerInterface $em): Response
 {
     $offer = $em->getRepository(Offer::class)->find($id);
     if (!$offer) throw $this->createNotFoundException("Offer not found");
 
-    // Get the currently logged-in user
-    $user = $this->getUser();
-
-    // Fetch only CVs of the logged-in user
-    $userCvs = $em->getRepository(Cv::class)->findBy(['user' => 2]);
+    // Get user from session (manual auth used in this project)
+    $userId = $request->getSession()->get('user_id');
+    $userCvs = [];
+    if ($userId) {
+        $userCvs = $em->getRepository(Cv::class)->findBy(['user' => $userId]);
+    }
 
     return $this->render('frontoffice/offer/show.html.twig', [
         'offer' => $offer,
-        'user_cvs' => $userCvs,  // <-- pass them to Twig
+        'user_cvs' => $userCvs,
     ]);
 }
 
@@ -274,6 +288,13 @@ public function applyOffer(int $id, Request $request, EntityManagerInterface $em
 
     // Get the selected CV id from the form
     $cvId = $request->request->get('cv_id');
+
+    // CSRF check
+    $token = $request->request->get('_token');
+    if (!$this->isCsrfTokenValid('apply' . $offer->getId(), $token)) {
+        $this->addFlash('error', 'Jeton CSRF invalide.');
+        return $this->redirectToRoute('preview_front_offer_show', ['id' => $id]);
+    }
 
     if (!$cvId) {
         $this->addFlash('error', 'Veuillez sélectionner un CV.');
@@ -297,8 +318,12 @@ public function applyOffer(int $id, Request $request, EntityManagerInterface $em
         return $this->redirectToRoute('preview_front_offer_show', ['id' => $id]);
     }
 
-    // Temporary user (ID = 2) since login is not yet implemented
-    $user = $em->getRepository(User::class)->find(2);
+    // Current logged-in user from session
+    $userId = $request->getSession()->get('user_id');
+    if (!$userId || $cv->getUser()->getId() !== $userId) {
+        $this->addFlash('error', 'Candidature invalide.');
+        return $this->redirectToRoute('preview_front_offer_show', ['id' => $id]);
+    }
 
     // Create the application
     $application = new CvApplication();
@@ -335,5 +360,4 @@ public function applyOffer(int $id, Request $request, EntityManagerInterface $em
         $em->flush();
     }
 }
-
 

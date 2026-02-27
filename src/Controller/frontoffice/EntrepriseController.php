@@ -24,12 +24,13 @@ class EntrepriseController extends AbstractController
 {
     // ===================== MES OFFRES =====================
     #[Route('/offers', name: 'entreprise_offer_index')]
-    public function myOffers(EntityManagerInterface $em): Response
+    public function myOffers(Request $request, EntityManagerInterface $em): Response
     {
-        $entreprise = $em->getRepository(User::class)->find(3);
+        $userId = $request->getSession()->get('user_id');
+        if (!$userId) return $this->redirectToRoute('sign');
 
         $offers = $em->getRepository(Offer::class)->findBy([
-            'entreprise' => $entreprise
+            'entreprise' => $userId
         ]);
 
         return $this->render('frontoffice/entreprise/index.html.twig', [
@@ -46,7 +47,10 @@ class EntrepriseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entreprise = $em->getRepository(User::class)->find(3);
+            $userId = $request->getSession()->get('user_id');
+            if (!$userId) return $this->redirectToRoute('sign');
+            $entreprise = $em->getRepository(User::class)->find($userId);
+            
             $offer->setEntreprise($entreprise);
             $offer->setCreatedAt(new \DateTimeImmutable());
 
@@ -71,9 +75,10 @@ class EntrepriseController extends AbstractController
     #[Route('/offers/{id}/edit', name: 'entreprise_offer_edit', methods: ['GET', 'POST'])]
     public function edit(int $id, Request $request, EntityManagerInterface $em): Response
     {
-        $offer = $em->getRepository(Offer::class)->find($id);
+        $userId = $request->getSession()->get('user_id');
+        $offer = $em->getRepository(Offer::class)->findOneBy(['id' => $id, 'entreprise' => $userId]);
         if (!$offer) {
-            throw $this->createNotFoundException("Offer not found");
+            throw $this->createNotFoundException("Offer not found or access denied");
         }
 
         $form = $this->createForm(OfferType::class, $offer);
@@ -95,9 +100,10 @@ class EntrepriseController extends AbstractController
     #[Route('/offers/{id}/delete', name: 'entreprise_offer_delete', methods: ['POST'])]
     public function delete(int $id, Request $request, EntityManagerInterface $em): Response
     {
-        $offer = $em->getRepository(Offer::class)->find($id);
+        $userId = $request->getSession()->get('user_id');
+        $offer = $em->getRepository(Offer::class)->findOneBy(['id' => $id, 'entreprise' => $userId]);
         if (!$offer) {
-            throw $this->createNotFoundException("Offer not found");
+            throw $this->createNotFoundException("Offer not found or access denied");
         }
 
         if ($this->isCsrfTokenValid('delete' . $offer->getId(), $request->request->get('_token'))) {
@@ -116,11 +122,12 @@ class EntrepriseController extends AbstractController
 
     // ===================== VIEW APPLICATIONS =====================
     #[Route('/offers/{id}/applications', name: 'entreprise_offer_applications')]
-    public function showApplications(int $id, EntityManagerInterface $em): Response
+    public function showApplications(int $id, Request $request, EntityManagerInterface $em): Response
     {
-        $offer = $em->getRepository(Offer::class)->find($id);
+        $userId = $request->getSession()->get('user_id');
+        $offer = $em->getRepository(Offer::class)->findOneBy(['id' => $id, 'entreprise' => $userId]);
         if (!$offer) {
-            throw $this->createNotFoundException("Offer not found");
+            throw $this->createNotFoundException("Offer not found or access denied");
         }
 
         $applications = $em->getRepository(CvApplication::class)->findBy(['offer' => $offer]);
@@ -133,11 +140,13 @@ class EntrepriseController extends AbstractController
 
     // ===================== REVIEW CV =====================
     #[Route('/application/{id}/review', name: 'entreprise_application_review')]
-    public function reviewCv(int $id, EntityManagerInterface $em): Response
+    public function reviewCv(int $id, Request $request, EntityManagerInterface $em): Response
     {
+        $userId = $request->getSession()->get('user_id');
         $application = $em->getRepository(CvApplication::class)->find($id);
-        if (!$application) {
-            throw $this->createNotFoundException("Application not found");
+        
+        if (!$application || $application->getOffer()->getEntreprise()->getId() !== $userId) {
+            throw $this->createNotFoundException("Application not found or access denied");
         }
 
         $cv = $application->getCv();

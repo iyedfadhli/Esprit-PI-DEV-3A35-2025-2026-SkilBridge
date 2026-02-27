@@ -1,0 +1,8 @@
+knp_snappy:
+    pdf:
+        enabled: true
+        binary: '%env(WKHTMLTOPDF_BIN)%'
+        options:
+            enable-local-file-access: true
+    temporary_folder: '%kernel.cache_dir%/snappy'
+

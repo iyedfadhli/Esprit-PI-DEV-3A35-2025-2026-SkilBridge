@@ -2,160 +2,80 @@
 
 namespace App\Entity;
 
-use App\Repository\EducationRepository;
-use Doctrine\DBAL\Types\Types;
+use App\Repository\EvaluationRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: EducationRepository::class)]
-class Education
+#[ORM\Entity(repositoryClass: EvaluationRepository::class)]
+class Evaluation
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\OneToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Cv $cv = null;
+    private ?Activity $activity_id = null;
 
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'Le diplôme ne peut pas être vide')]
-    #[Assert\Length(
-        min: 2,
-        max: 100,
-        minMessage: 'Le diplôme doit contenir au moins 2 caractères',
-        maxMessage: 'Le diplôme ne peut pas dépasser 100 caractères'
-    )]
-    private ?string $degree = null;
+    #[ORM\Column(nullable: true)]
+    private ?float $groupScore = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    #[Assert\Length(
-        max: 100,
-        maxMessage: 'Le domaine d\'étude ne peut pas dépasser 100 caractères'
-    )]
-    private ?string $fieldOfStudy = null;
+    #[ORM\Column(length: 255,nullable: true)]
+    private ?string $feedback = null;
 
-    #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'L\'établissement ne peut pas être vide')]
-    #[Assert\Length(
-        min: 2,
-        max: 100,
-        minMessage: 'L\'établissement doit contenir au moins 2 caractères',
-        maxMessage: 'L\'établissement ne peut pas dépasser 100 caractères'
-    )]
-    private ?string $school = null;
-
-    #[ORM\Column(length: 100, nullable: true)]
-    #[Assert\Length(
-        max: 100,
-        maxMessage: 'La ville ne peut pas dépasser 100 caractères'
-    )]
-    private ?string $city = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $startDate = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTime $endDate = null;
-
-    #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Assert\Length(
-        max: 1000,
-        maxMessage: 'La description ne peut pas dépasser 1000 caractères'
-    )]
-    private ?string $description = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $pre_feedback = null;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCv(): ?Cv
+    public function getActivityId(): ?Activity
     {
-        return $this->cv;
+        return $this->activity_id;
     }
 
-    public function setCv(?Cv $cv): static
+    public function setActivityId(Activity $activity_id): static
     {
-        $this->cv = $cv;
+        $this->activity_id = $activity_id;
+
         return $this;
     }
 
-    public function getDegree(): ?string
+    public function getGroupScore(): ?float
     {
-        return $this->degree;
+        return $this->groupScore;
     }
 
-    public function setDegree(string $degree): static
+    public function setGroupScore(float $groupScore): static
     {
-        $this->degree = $degree;
+        $this->groupScore = $groupScore;
+
         return $this;
     }
 
-    public function getFieldOfStudy(): ?string
+    public function getFeedback(): ?string
     {
-        return $this->fieldOfStudy;
+        return $this->feedback;
     }
 
-    public function setFieldOfStudy(?string $fieldOfStudy): static
+    public function setFeedback(string $feedback): static
     {
-        $this->fieldOfStudy = $fieldOfStudy;
+        $this->feedback = $feedback;
+
         return $this;
     }
 
-    public function getSchool(): ?string
+    public function getPreFeedback(): ?string
     {
-        return $this->school;
+        return $this->pre_feedback;
     }
 
-    public function setSchool(string $school): static
+    public function setPreFeedback(?string $pre_feedback): static
     {
-        $this->school = $school;
-        return $this;
-    }
+        $this->pre_feedback = $pre_feedback;
 
-    public function getCity(): ?string
-    {
-        return $this->city;
-    }
-
-    public function setCity(?string $city): static
-    {
-        $this->city = $city;
-        return $this;
-    }
-
-    public function getStartDate(): ?\DateTime
-    {
-        return $this->startDate;
-    }
-
-    public function setStartDate(?\DateTime $startDate): static
-    {
-        $this->startDate = $startDate;
-        return $this;
-    }
-
-    public function getEndDate(): ?\DateTime
-    {
-        return $this->endDate;
-    }
-
-    public function setEndDate(?\DateTime $endDate): static
-    {
-        $this->endDate = $endDate;
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(?string $description): static
-    {
-        $this->description = $description;
         return $this;
     }
 }

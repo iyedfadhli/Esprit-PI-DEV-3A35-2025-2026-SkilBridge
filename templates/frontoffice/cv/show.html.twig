@@ -185,6 +185,9 @@
             <a href="{{ path('preview_front_cv_index') }}" class="btn-secondary">
                 <i class="fa fa-list"></i> Tous mes CVs
             </a>
+            <a href="{{ path('cv_translate_select', {id: cv.id}) }}" class="btn-secondary">
+                <i class="fa fa-language"></i> Traduire
+            </a>
              <a href="{{ path('user_cv_pdf', {id: cv.id}) }}" class="btn btn-primary" target="_blank">
     <i class="fa fa-file-pdf-o"></i> Télécharger en PDF
 </a>
