@@ -7,6 +7,7 @@
 parameters:
     mercure.public_url: '%env(MERCURE_PUBLIC_URL)%'
     mercure.jwt_secret: '%env(MERCURE_JWT_SECRET)%'
+    CHALLENGES_UPLOAD_DIR: '%env(resolve:CHALLENGES_UPLOAD_DIR)%'
 
 
 services:
@@ -14,7 +15,8 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-
+    Symfony\Component\Security\Http\Logout\LogoutUrlGenerator:
+        alias: security.logout_url_generator
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
@@ -23,6 +25,9 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    App\EventSubscriber\TwigGlobalsSubscriber:
+        tags:
+            - { name: 'kernel.event_subscriber' }
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

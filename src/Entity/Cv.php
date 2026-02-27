@@ -18,14 +18,14 @@ class Cv
     private ?int $id = null;
 
     #[ORM\Column(length: 30)]
-    #[Assert\NotBlank(message: 'Le nom du CV ne peut pas être vide')]
+    #[Assert\NotBlank(message: 'Le nom du CV est obligatoire')]
     #[Assert\Length(
         min: 2,
         max: 30,
         minMessage: 'Le nom du CV doit contenir au moins 2 caractères',
         maxMessage: 'Le nom du CV ne peut pas dépasser 30 caractères'
     )]
-    private ?string $nom_cv = null;
+    private ?string $nomCv = null;
 
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank(message: 'La langue est obligatoire')]
@@ -37,7 +37,7 @@ class Cv
 
     #[ORM\Column(nullable: true)]
     #[Assert\Positive(message: 'L\'ID template doit être un nombre positif')]
-    private ?int $id_template = null;
+    private ?int $idTemplate = null;
 
     #[ORM\Column(nullable: true)]
     #[Assert\Range(
@@ -49,10 +49,10 @@ class Cv
 
     #[ORM\Column]
     #[Assert\NotNull(message: 'La date de création est obligatoire')]
-    private ?\DateTime $creation_date = null;
+    private ?\DateTime $creationDate = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?\DateTimeImmutable $updatedAt = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
@@ -60,9 +60,10 @@ class Cv
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Url(message: 'L\'URL LinkedIn doit être valide')]
-    private ?string $linkedin_url = null;
+    private ?string $linkedinUrl = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: 'Le résumé est obligatoire')]
     #[Assert\Length(
         max: 1000,
         maxMessage: 'Le résumé ne peut pas dépasser 1000 caractères'
@@ -100,12 +101,12 @@ class Cv
 
     public function getNomCv(): ?string
     {
-        return $this->nom_cv;
+        return $this->nomCv;
     }
 
-    public function setNomCv(string $nom_cv): static
+    public function setNomCv(?string $nomCv): static
     {
-        $this->nom_cv = $nom_cv;
+        $this->nomCv = $nomCv;
         return $this;
     }
 
@@ -114,7 +115,7 @@ class Cv
         return $this->langue;
     }
 
-    public function setLangue(string $langue): static
+    public function setLangue(?string $langue): static
     {
         $this->langue = $langue;
         return $this;
@@ -122,12 +123,12 @@ class Cv
 
     public function getIdTemplate(): ?int
     {
-        return $this->id_template;
+        return $this->idTemplate;
     }
 
-    public function setIdTemplate(?int $id_template): static
+    public function setIdTemplate(?int $idTemplate): static
     {
-        $this->id_template = $id_template;
+        $this->idTemplate = $idTemplate;
         return $this;
     }
 
@@ -144,23 +145,23 @@ class Cv
 
     public function getCreationDate(): ?\DateTime
     {
-        return $this->creation_date;
+        return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTime $creation_date): static
+    public function setCreationDate(\DateTime $creationDate): static
     {
-        $this->creation_date = $creation_date;
+        $this->creationDate = $creationDate;
         return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeImmutable
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updated_at): static
+    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
         return $this;
     }
 
@@ -177,12 +178,12 @@ class Cv
 
     public function getLinkedinUrl(): ?string
     {
-        return $this->linkedin_url;
+        return $this->linkedinUrl;
     }
 
-    public function setLinkedinUrl(?string $linkedin_url): static
+    public function setLinkedinUrl(?string $linkedinUrl): static
     {
-        $this->linkedin_url = $linkedin_url;
+        $this->linkedinUrl = $linkedinUrl;
         return $this;
     }
 

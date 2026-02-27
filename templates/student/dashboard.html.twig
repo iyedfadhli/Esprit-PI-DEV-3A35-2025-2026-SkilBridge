@@ -1,0 +1,270 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Mon Tableau de Bord - Skill Bridge{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/student.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="student-dashboard">
+    {# Dashboard Header #}
+    <div class="dashboard-header">
+        <div class="dashboard-header-content">
+            <h1>👋 Bienvenue sur votre espace d'apprentissage</h1>
+            <p>Continuez votre progression et développez vos compétences</p>
+        </div>
+    </div>
+
+    {# Stats Overview #}
+    {% set in_progress_count = 0 %}
+    {% set completed_count = 0 %}
+    {% set locked_count = 0 %}
+    {% set total_score = 0 %}
+    {% set score_count = 0 %}
+    
+    {% for item in courses %}
+        {% if item.status == 'IN_PROGRESS' %}
+            {% set in_progress_count = in_progress_count + 1 %}
+        {% elseif item.status == 'COMPLETED' %}
+            {% set completed_count = completed_count + 1 %}
+            {% if item.score is not null %}
+                {% set total_score = total_score + item.score %}
+                {% set score_count = score_count + 1 %}
+            {% endif %}
+        {% else %}
+            {% set locked_count = locked_count + 1 %}
+        {% endif %}
+    {% endfor %}
+    
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-icon progress">
+                <i class="fa fa-spinner"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ in_progress_count }}</h3>
+                <p>Cours en cours</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon completed">
+                <i class="fa fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ completed_count }}</h3>
+                <p>Cours terminés</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon locked">
+                <i class="fa fa-lock"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ locked_count }}</h3>
+                <p>À débloquer</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon score">
+                <i class="fa fa-trophy"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ score_count > 0 ? (total_score / score_count)|round ~ '%' : '—' }}</h3>
+                <p>Score moyen</p>
+            </div>
+        </div>
+    </div>
+
+    {# In Progress Courses #}
+    <section class="course-section">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>📚 Cours en cours</h2>
+                <span class="section-badge">{{ in_progress_count }}</span>
+            </div>
+        </div>
+        
+        {% set has_in_progress = false %}
+        <div class="courses-grid">
+            {% for item in courses %}
+                {% if item.status == 'IN_PROGRESS' %}
+                    {% set has_in_progress = true %}
+                    <article class="course-card">
+                        <div class="course-image">
+                            <img src="{{ asset('assets/images/courses/' ~ item.course.id ~ '.png') }}" 
+                                 alt="{{ item.course.title }}"
+                                 onerror="this.parentElement.innerHTML='<div class=\'course-image-placeholder\'><i class=\'fa fa-book\'></i></div>'">
+                            <span class="course-status-badge in-progress">En cours</span>
+                        </div>
+                        <div class="course-content">
+                            <h3>{{ item.course.title }}</h3>
+                            <p>{{ item.course.content|striptags|slice(0, 100) ~ '...' }}</p>
+                            
+                            <div class="progress-container">
+                                <div class="progress-header">
+                                    <span class="progress-label">Progression</span>
+                                    <span class="progress-value">{{ item.progress|default(0) }}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: {{ item.progress|default(0) }}%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <span class="course-meta-item">
+                                    <i class="fa fa-clock-o"></i>
+                                    {{ item.course.duration|default(0) }} min
+                                </span>
+                                <span class="course-meta-item">
+                                    <i class="fa fa-list"></i>
+                                    {{ item.course.chapters|length }} chapitres
+                                </span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <a href="{{ path('student_course', {'id': item.course.id}) }}" class="btn-course primary">
+                                <i class="fa fa-play"></i> Continuer
+                            </a>
+                        </div>
+                    </article>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if not has_in_progress %}
+            <div class="empty-state">
+                <i class="fa fa-book"></i>
+                <h3>Aucun cours en cours</h3>
+                <p>Inscrivez-vous à un cours pour commencer votre apprentissage</p>
+            </div>
+        {% endif %}
+    </section>
+
+    {# Completed Courses #}
+    <section class="course-section">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>🏆 Cours terminés</h2>
+                <span class="section-badge">{{ completed_count }}</span>
+            </div>
+        </div>
+        
+        {% set has_completed = false %}
+        <div class="courses-grid">
+            {% for item in courses %}
+                {% if item.status == 'COMPLETED' %}
+                    {% set has_completed = true %}
+                    <article class="course-card">
+                        <div class="course-image">
+                            <img src="{{ asset('assets/images/courses/' ~ item.course.id ~ '.png') }}" 
+                                 alt="{{ item.course.title }}"
+                                 onerror="this.parentElement.innerHTML='<div class=\'course-image-placeholder\'><i class=\'fa fa-book\'></i></div>'">
+                            <span class="course-status-badge completed">Terminé</span>
+                        </div>
+                        <div class="course-content">
+                            <h3>{{ item.course.title }}</h3>
+                            <p>{{ item.course.content|striptags|slice(0, 100) ~ '...' }}</p>
+                            
+                            {% if item.score is not null %}
+                                <div class="score-display">
+                                    <i class="fa fa-star"></i>
+                                    <span>Score final: {{ item.score }}%</span>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="course-meta">
+                                <span class="course-meta-item">
+                                    <i class="fa fa-clock-o"></i>
+                                    {{ item.course.duration|default(0) }} min
+                                </span>
+                                <span class="course-meta-item">
+                                    <i class="fa fa-check"></i>
+                                    Complété
+                                </span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <a href="{{ path('student_course', {'id': item.course.id}) }}" class="btn-course secondary">
+                                <i class="fa fa-eye"></i> Revoir
+                            </a>
+                        </div>
+                    </article>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if not has_completed %}
+            <div class="empty-state">
+                <i class="fa fa-trophy"></i>
+                <h3>Aucun cours terminé</h3>
+                <p>Complétez vos cours en cours pour les voir apparaître ici</p>
+            </div>
+        {% endif %}
+    </section>
+
+    {# Locked Courses #}
+    <section class="course-section">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>🔒 Cours disponibles</h2>
+                <span class="section-badge">{{ locked_count }}</span>
+            </div>
+        </div>
+        
+        {% set has_locked = false %}
+        <div class="courses-grid">
+            {% for item in courses %}
+                {% if item.status == 'LOCKED' %}
+                    {% set has_locked = true %}
+                    <article class="course-card locked">
+                        <div class="course-image">
+                            <img src="{{ asset('assets/images/courses/' ~ item.course.id ~ '.png') }}" 
+                                 alt="{{ item.course.title }}"
+                                 onerror="this.parentElement.innerHTML='<div class=\'course-image-placeholder\'><i class=\'fa fa-book\'></i></div>'">
+                            <span class="course-status-badge locked">Non inscrit</span>
+                        </div>
+                        <div class="course-content">
+                            <h3>{{ item.course.title }}</h3>
+                            <p>{{ item.course.content|striptags|slice(0, 100) ~ '...' }}</p>
+                            
+                            {% if item.course.prerequisiteQuiz %}
+                                <div style="background: #fef3c7; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.85rem; color: #92400e;">
+                                    <i class="fa fa-info-circle"></i>
+                                    Prérequis: {{ item.course.prerequisiteQuiz.title }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="course-meta">
+                                <span class="course-meta-item">
+                                    <i class="fa fa-clock-o"></i>
+                                    {{ item.course.duration|default(0) }} min
+                                </span>
+                                <span class="course-meta-item">
+                                    <i class="fa fa-list"></i>
+                                    {{ item.course.chapters|length }} chapitres
+                                </span>
+                            </div>
+                        </div>
+                        <div class="course-actions">
+                            <form method="post" action="{{ path('student_enrol_course', {'id': item.course.id}) }}" style="flex: 1;">
+                                <button type="submit" class="btn-course primary" style="width: 100%;">
+                                    <i class="fa fa-plus"></i> S'inscrire
+                                </button>
+                            </form>
+                        </div>
+                    </article>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if not has_locked %}
+            <div class="empty-state">
+                <i class="fa fa-check-circle"></i>
+                <h3>Vous êtes inscrit à tous les cours</h3>
+                <p>Félicitations ! Continuez votre apprentissage</p>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

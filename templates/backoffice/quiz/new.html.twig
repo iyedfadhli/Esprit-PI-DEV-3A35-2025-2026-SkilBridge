@@ -1,0 +1,103 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}New Quiz - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-plus"></i> Create New Quiz</h1>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_quiz_index') }}">Quizzes</a>
+        <span>/</span>
+        <span>New</span>
+    </nav>
+
+    <!-- Form Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-clipboard-question"></i> Quiz Information</h2>
+        </div>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'crud-form', 'novalidate': 'novalidate'}}) }}
+            
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.title, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.title) }}
+                    {% if form.title.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.title) }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.supervisor, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.supervisor) }}
+                    {% if form.supervisor.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.supervisor) }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.course, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.course) }}
+                    {% if form.course.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.course) }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.chapter, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.chapter) }}
+                    {% if form.chapter.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.chapter) }}</div>
+                    {% endif %}
+                    <div class="form-hint">Leave empty for a course-level quiz</div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(form.passing_score, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.passing_score) }}
+                    {% if form.passing_score.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.passing_score) }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form_label(form.max_attempts, null, {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.max_attempts) }}
+                    {% if form.max_attempts.vars.errors|length > 0 %}
+                        <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.max_attempts) }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.questions_per_attempt, null, {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.questions_per_attempt) }}
+                {% if form.questions_per_attempt.vars.errors|length > 0 %}
+                    <div class="form-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_errors(form.questions_per_attempt) }}</div>
+                {% endif %}
+                <div class="form-hint">Number of random questions per attempt. Leave empty for all questions.</div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ path('admin_quiz_index') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-xmark"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> Create Quiz
+                </button>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

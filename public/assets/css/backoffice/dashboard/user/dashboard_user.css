@@ -1,0 +1,195 @@
+/* ============================= */
+/* PAGE LAYOUT */
+/* ============================= */
+.admin-user-page {
+    padding: 40px 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    background: #f8f9fa;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: #4a7fd7;
+    margin-bottom: 30px;
+}
+
+/* ============================= */
+/* TABLE WRAPPER */
+/* ============================= */
+.user-table-wrapper {
+    overflow-x: auto;
+    background: #fff;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+/* ============================= */
+/* TABLE BASE */
+/* ============================= */
+.user-table {
+    width: 100%;
+    border-collapse: separate;  /* important for borders to appear */
+    border-spacing: 0;
+    min-width: 1200px;
+    font-size: 14px;
+    border: 1px solid #ccc;  /* outer border */
+}
+
+/* ============================= */
+/* HEADER */
+.user-table thead th {
+    background-color: #4a7fd7;
+    color: #fff;
+    font-weight: 700;
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+/* ============================= */
+/* BODY CELLS */
+.user-table tbody td {
+    padding: 12px 15px;
+    border: 1px solid #ccc;
+    text-align: center;
+    vertical-align: middle;
+    color: #333;
+}
+
+/* Zebra rows */
+.user-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Hover row */
+.user-table tbody tr:hover {
+    background-color: #eef3ff;
+}
+
+/* Empty cells */
+.user-table td:empty {
+    color: #aaa;
+    font-style: italic;
+}
+
+/* ============================= */
+/* USER PHOTO */
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    display: inline-block;
+    color: #aaa;
+    font-style: italic;
+}
+
+/* ============================= */
+/* ROLE BADGES */
+.role-badge {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.role-admin { background: #6f42c1; }
+.role-supervisor { background: #4a7fd7; }
+.role-student { background: #28a745; }
+.role-entreprise { background: #fd7e14; }
+
+/* ============================= */
+/* STATUS BADGES */
+.badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.badge-success { background-color: #28a745; }
+.badge-secondary { background-color: #6c757d; }
+.badge-danger { background-color: #dc3545; }
+.badge-info { background-color: #17a2b8; }
+
+/* ============================= */
+/* ACTION BUTTONS */
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+}
+
+.actions a.icon-btn {
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    color: #000;
+    transition: 0.3s;
+}
+
+.actions a.edit {
+    background-color: #4a7fd7;
+    color: #fff;
+    border: none;
+}
+
+.actions a.edit:hover {
+    background-color: #3a6bb8;
+}
+
+.actions a.delete {
+    background-color: #ff4d4f;
+    color: #fff;
+    border: none;
+}
+
+.actions a.delete:hover {
+    background-color: #d9363e;
+}
+
+/* ============================= */
+/* EMPTY ROW */
+.empty {
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #666;
+}
+
+/* ============================= */
+/* RESPONSIVE */
+@media (max-width: 1200px) {
+    .user-table {
+        font-size: 13px;
+        min-width: 1000px;
+    }
+}
+
+@media (max-width: 992px) {
+    .user-table {
+        font-size: 12px;
+        min-width: 900px;
+    }
+    .actions a.icon-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .user-table {
+        font-size: 11px;
+        min-width: 700px;
+    }
+}

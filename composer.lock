@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< Updated upstream
-    "content-hash": "2da17adf9af9dcd140befbd63355b565",
-=======
     "content-hash": "04a954a92e1ed6e13f7c0a95c631c273",
->>>>>>> Stashed changes
     "packages": [
         {
             "name": "brick/math",
@@ -9614,13 +9610,8 @@
             "time": "2025-12-02T11:50:18+00:00"
         },
         {
-<<<<<<< Updated upstream
-            "name": "thecodingmachine/safe",
-            "version": "v3.3.0",
-=======
             "name": "tecnickcom/tcpdf",
             "version": "6.10.1",
->>>>>>> Stashed changes
             "source": {
                 "type": "git",
                 "url": "https://github.com/tecnickcom/TCPDF.git",
@@ -9830,11 +9821,7 @@
                     "type": "github"
                 }
             ],
-<<<<<<< Updated upstream
-            "time": "2025-05-14T06:15:44+00:00"
-=======
             "time": "2026-02-04T18:08:13+00:00"
->>>>>>> Stashed changes
         },
         {
             "name": "twig/extra-bundle",

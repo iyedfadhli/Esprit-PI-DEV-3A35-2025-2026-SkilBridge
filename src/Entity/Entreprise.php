@@ -10,7 +10,7 @@ class Entreprise extends User
 {
     
 
-    #[ORM\Column(length: 50)]
+    #[ORM\Column(length: 50,nullable: true)]
     private ?string $domaine = null;
 
   

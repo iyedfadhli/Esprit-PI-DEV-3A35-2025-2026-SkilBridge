@@ -1,0 +1,192 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Courses - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-book"></i> Courses Management</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_course_new') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Add New Course
+            </a>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <span>Courses</span>
+    </nav>
+
+    <!-- Quick Nav Tabs -->
+    <div class="nav-tabs">
+        <a href="{{ path('admin_course_index') }}" class="active">Courses</a>
+        <a href="{{ path('admin_chapter_index') }}">Chapters</a>
+        <a href="{{ path('admin_quiz_index') }}">Quizzes</a>
+        <a href="{{ path('admin_question_index') }}">Questions</a>
+        <a href="{{ path('admin_answer_index') }}">Answers</a>
+    </div>
+
+    <!-- Section Title with Count -->
+    <div class="section-title">
+        <h2>All Courses</h2>
+        <span class="count">{{ total }}</span>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <form class="search-box" method="get">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="search" value="{{ search }}" placeholder="Search courses...">
+            <input type="hidden" name="sort" value="{{ sort }}">
+            <input type="hidden" name="direction" value="{{ direction }}">
+        </form>
+        <form class="sort-box" method="get" style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+            <input type="hidden" name="search" value="{{ search }}">
+            <label for="sort" style="white-space:nowrap;font-weight:600;font-size:0.9rem;"><i class="fa-solid fa-arrow-down-short-wide"></i> Trier par :</label>
+            <select name="sort" id="sort" onchange="this.form.submit()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border-color,#d1d5db);font-size:0.9rem;background:#fff;cursor:pointer;">
+                <option value="id" {{ sort == 'id' ? 'selected' }}>ID</option>
+                <option value="title" {{ sort == 'title' ? 'selected' }}>Titre</option>
+                <option value="duration" {{ sort == 'duration' ? 'selected' }}>Durée</option>
+                <option value="validationScore" {{ sort == 'validationScore' ? 'selected' }}>Score de validation</option>
+            </select>
+            <select name="direction" onchange="this.form.submit()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border-color,#d1d5db);font-size:0.9rem;background:#fff;cursor:pointer;">
+                <option value="ASC" {{ direction == 'ASC' ? 'selected' }}>Croissant</option>
+                <option value="DESC" {{ direction == 'DESC' ? 'selected' }}>Décroissant</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Data Card -->
+    <div class="card">
+        {% if courses|length > 0 %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="{{ path('admin_course_index', {search: search, sort: 'id', direction: sort == 'id' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                ID
+                                {% if sort == 'id' %}
+                                    <i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort" style="opacity:0.3;"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_course_index', {search: search, sort: 'title', direction: sort == 'title' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                Course
+                                {% if sort == 'title' %}
+                                    <i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort" style="opacity:0.3;"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_course_index', {search: search, sort: 'duration', direction: sort == 'duration' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                Duration
+                                {% if sort == 'duration' %}
+                                    <i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort" style="opacity:0.3;"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a href="{{ path('admin_course_index', {search: search, sort: 'validationScore', direction: sort == 'validationScore' and direction == 'ASC' ? 'DESC' : 'ASC'}) }}" style="color:inherit;text-decoration:none;">
+                                Validation Score
+                                {% if sort == 'validationScore' %}
+                                    <i class="fa-solid fa-sort-{{ direction == 'ASC' ? 'up' : 'down' }}"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-sort" style="opacity:0.3;"></i>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th>Creator</th>
+                        <th>Chapters</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                    <tr>
+                        <td><span class="badge badge-secondary">#{{ course.id }}</span></td>
+                        <td>
+                            <div class="cell-title">{{ course.title }}</div>
+                            <div class="cell-subtitle">{{ course.description|length > 50 ? course.description|slice(0, 50) ~ '...' : course.description }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">
+                                <i class="fa-regular fa-clock"></i> {{ course.duration }}h
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-success">{{ course.validationScore }}%</span>
+                        </td>
+                        <td>{{ course.creator ? course.creator.email : 'N/A' }}</td>
+                        <td>
+                            <span class="badge badge-primary">{{ course.chapters|length }}</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ path('admin_course_show', {'id': course.id}) }}" class="btn btn-icon btn-sm btn-secondary" data-tooltip="View">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_course_edit', {'id': course.id}) }}" class="btn btn-icon btn-sm btn-warning" data-tooltip="Edit">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                                <form method="post" action="{{ path('admin_course_delete', {'id': course.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this course? This will also delete all related chapters and quizzes.');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ course.id) }}">
+                                    <button type="submit" class="btn btn-icon btn-sm btn-danger" data-tooltip="Delete">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if totalPages > 1 %}
+        <div class="card-footer">
+            <div class="pagination">
+                <span class="pagination-info">Showing page {{ currentPage }} of {{ totalPages }}</span>
+                
+                {% if currentPage > 1 %}
+                    <a href="{{ path('admin_course_index', {'page': 1, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angles-left"></i></a>
+                    <a href="{{ path('admin_course_index', {'page': currentPage - 1, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angle-left"></i></a>
+                {% endif %}
+                
+                {% for p in max(1, currentPage - 2)..min(totalPages, currentPage + 2) %}
+                    <a href="{{ path('admin_course_index', {'page': p, 'search': search, 'sort': sort, 'direction': direction}) }}" class="{{ p == currentPage ? 'active' : '' }}">{{ p }}</a>
+                {% endfor %}
+                
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('admin_course_index', {'page': currentPage + 1, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angle-right"></i></a>
+                    <a href="{{ path('admin_course_index', {'page': totalPages, 'search': search, 'sort': sort, 'direction': direction}) }}"><i class="fa-solid fa-angles-right"></i></a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-book-open"></i>
+            <h3>No courses found</h3>
+            <p>Get started by creating your first course</p>
+            <a href="{{ path('admin_course_new') }}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Create Course
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

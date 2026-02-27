@@ -1,0 +1,46 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block body %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-primary text-white">
+        <h4>Create a New Group</h4>
+    </div>
+    <div class="card-body">
+        {{ form_start(form) }}
+            <div class="mb-3">
+                {{ form_label(form.name) }}
+                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.type) }}
+                    {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.level) }}
+                    {{ form_widget(form.level, {'attr': {'class': 'form-select'}}) }}
+                </div>
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.max_members) }}
+                {{ form_widget(form.max_members, {'attr': {'class': 'form-control'}}) }}
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.icon_file, 'Icon Upload (Optional)') }}
+                    {{ form_widget(form.icon_file, {'attr': {'class': 'form-control'}}) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.icon_url, 'Icon URL (Optional)') }}
+                    {{ form_widget(form.icon_url, {'attr': {'class': 'form-control', 'placeholder': 'https://...'}}) }}
+                </div>
+            </div>
+            <button class="btn btn-success">Save Group</button>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

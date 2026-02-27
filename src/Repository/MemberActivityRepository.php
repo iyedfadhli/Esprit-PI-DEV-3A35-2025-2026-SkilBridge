@@ -16,28 +16,34 @@ class MemberActivityRepository extends ServiceEntityRepository
         parent::__construct($registry, MemberActivity::class);
     }
 
-    //    /**
-    //     * @return MemberActivity[] Returns an array of MemberActivity objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('m.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function findByActivity(\App\Entity\Activity $activity): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.id_activity = :activity')
+            ->setParameter('activity', $activity)
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?MemberActivity
-    //    {
-    //        return $this->createQueryBuilder('m')
-    //            ->andWhere('m.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    public function findOneByActivityAndUser(\App\Entity\Activity $activity, \App\Entity\User $user): ?MemberActivity
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.id_activity = :activity')
+            ->andWhere('m.user_id = :user')
+            ->setParameter('activity', $activity)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findListByUserAndActivity(\App\Entity\User $user, \App\Entity\Activity $activity): array
+    {
+        return $this->createQueryBuilder('m')
+            ->andWhere('m.user_id = :user')
+            ->andWhere('m.id_activity = :activity')
+            ->setParameter('user', $user)
+            ->setParameter('activity', $activity)
+            ->getQuery()
+            ->getResult();
+    }
 }

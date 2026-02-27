@@ -1,0 +1,91 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}Answer #{{ answer.id }} - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-check-double"></i> Answer Details</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_answer_edit', {'id': answer.id}) }}" class="btn btn-warning">
+                <i class="fa-solid fa-pen"></i> Edit
+            </a>
+            <form method="post" action="{{ path('admin_answer_delete', {'id': answer.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ answer.id) }}">
+                <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash"></i> Delete</button>
+            </form>
+        </div>
+    </header>
+
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_answer_index') }}">Answers</a>
+        <span>/</span>
+        <span>Answer #{{ answer.id }}</span>
+    </nav>
+
+    <div class="card">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-info-circle"></i> Answer Information</h2>
+            <div class="d-flex gap-1">
+                {% if answer.isCorrect %}
+                    <span class="badge badge-success"><i class="fa-solid fa-check"></i> Correct Answer</span>
+                {% else %}
+                    <span class="badge badge-danger"><i class="fa-solid fa-xmark"></i> Incorrect Answer</span>
+                {% endif %}
+                <span class="badge badge-secondary">#{{ answer.id }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="detail-item">
+                <div class="detail-label">Content</div>
+                <div class="detail-value">{{ answer.content }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Question</div>
+                <div class="detail-value">
+                    <a href="{{ path('admin_question_show', {'id': answer.question.id}) }}">
+                        {{ answer.question.content }} <i class="fa-solid fa-external-link"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Quiz</div>
+                <div class="detail-value">
+                    <a href="{{ path('admin_quiz_show', {'id': answer.question.quiz.id}) }}">
+                        {{ answer.question.quiz.title }}
+                    </a>
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Course</div>
+                <div class="detail-value">
+                    <a href="{{ path('admin_course_show', {'id': answer.question.quiz.course.id}) }}">
+                        {{ answer.question.quiz.course.title }}
+                    </a>
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Is Correct?</div>
+                <div class="detail-value">
+                    {% if answer.isCorrect %}
+                        <span class="badge badge-success"><i class="fa-solid fa-check"></i> Yes - This is the correct answer</span>
+                    {% else %}
+                        <span class="badge badge-danger"><i class="fa-solid fa-xmark"></i> No - This is an incorrect answer</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{{ path('admin_answer_index') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Answers
+        </a>
+        <a href="{{ path('admin_question_show', {'id': answer.question.id}) }}" class="btn btn-outline">
+            <i class="fa-solid fa-circle-question"></i> View Question
+        </a>
+    </div>
+</div>
+{% endblock %}

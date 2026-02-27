@@ -94,16 +94,16 @@
         
 
         <!-- Supprimer -->
-        <form method="post"
-              action="{{ path('preview_back_cv_delete', {id: cv.id}) }}"
-              class="action-btn delete"
-            title="Supprimer"
-              onsubmit="return confirm('Are you sûr de vouloir supprimer ce CV ?');">
-            <input type="hidden" name="_token" value="{{ csrf_token('delete_cv_' ~ cv.id) }}">
-            
-                <i class="fa fa-trash"></i>
-            </button>
-        </form>
+<form method="post"
+      action="{{ path('preview_back_cv_delete', {id: cv.id}) }}"
+      class="action-btn delete"
+      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce CV ?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete_cv_' ~ cv.id) }}">
+    <button type="submit" class="action-btn delete" title="Supprimer">
+        <i class="fa fa-trash"></i>
+    </button>
+</form>
+
 
     </div>
 </td>

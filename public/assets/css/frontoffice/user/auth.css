@@ -1,0 +1,192 @@
+/* ==============================
+   Auth Page Layout
+============================== */
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f7f8fc;
+    padding: 20px;
+}
+
+.auth-card {
+    width: 420px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 35px 30px;
+    box-shadow: 0 20px 40px rgba(74, 127, 215, 0.15);
+}
+
+/* ==============================
+   Tabs
+============================== */
+.auth-tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-radius: 30px;
+    background: #f0f4ff;
+    overflow: hidden;
+}
+
+.tab {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.tab.active {
+    background: #4a7fd7;
+    color: white;
+}
+
+/* ==============================
+   Forms
+============================== */
+.auth-form {
+    display: none;
+    animation: fade 0.4s ease;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+.auth-form h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.auth-form label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.auth-form input,
+.auth-form select {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    margin-bottom: 18px;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+    border-color: #4a7fd7;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74,127,215,0.15);
+}
+
+/* ==============================
+   File Input Styling
+============================== */
+.auth-form input[type="file"] {
+    padding: 6px 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fc;
+}
+
+/* ==============================
+   Buttons & Extras
+============================== */
+.primary-btn {
+    width: 100%;
+    background: #4a7fd7;
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 25px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.primary-btn:hover {
+    background: #3a6bb8;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.checkbox {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.forgot-link {
+    font-size: 13px;
+    color: #4a7fd7;
+    text-decoration: none;
+}
+
+.forgot-link:hover {
+    text-decoration: underline;
+}
+
+/* ==============================
+   Animations
+============================== */
+@keyframes fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==============================
+   Responsive
+============================== */
+@media(max-width: 480px) {
+    .auth-card {
+        width: 100%;
+        padding: 25px 20px;
+    }
+}
+
+/* ==============================
+   Dynamic Fields (Hidden for Entreprise)
+============================== */
+#prenomDiv,
+#dobDiv,
+#drivingDiv {
+    transition: 0.3s;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ==============================
+   Select Styling
+============================== */
+.auth-form select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2210%22%20height%3D%227%22%20viewBox%3D%220%200%2010%207%22%20fill%3D%22none%22%20xmlns%3D%22http://www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M1%201L5%206L9%201%22%20stroke%3D%22%234a7fd7%22%20stroke-width%3D%222%22/%3E%3C/svg%3E") no-repeat right 12px center;
+    background-color: #fff;
+    background-size: 10px 7px;
+    padding-right: 35px;
+    cursor: pointer;
+}

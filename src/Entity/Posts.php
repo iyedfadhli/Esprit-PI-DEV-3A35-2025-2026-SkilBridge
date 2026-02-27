@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\PostsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PostsRepository::class)]
 class Posts
@@ -15,9 +16,13 @@ class Posts
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "Post content cannot be empty")]
+    #[Assert\Length(min: 5, minMessage: "Content must be at least 5 characters")]
     private ?string $description = null;
 
     #[ORM\Column(length: 30)]
+    #[Assert\NotBlank(message: "Title is required")]
+    #[Assert\Length(max: 30, maxMessage: "Title cannot exceed 30 characters")]
     private ?string $titre = null;
 
     #[ORM\Column(length: 30)]
@@ -43,7 +48,7 @@ class Posts
     private ?Group $group_id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $Author_id = null;
 
     public function getId(): ?int

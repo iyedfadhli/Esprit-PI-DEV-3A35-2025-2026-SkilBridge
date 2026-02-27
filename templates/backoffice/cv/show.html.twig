@@ -144,13 +144,17 @@
             <a href="{{ path('preview_back_cv_index') }}" class="btn-secondary">
                 <i class="fa fa-arrow-left"></i> Retour
             </a>
-            {# TODO: replace href="#" with {{ path('backoffice_cv_delete', {id: cv.id}) }} #}
-            <a href="#"
-               class="btn-primary"
-               style="background:#c62828;"
-               onclick="return confirm('Supprimer definitivement ce CV ?')">
-                <i class="fa fa-trash"></i> Supprimer
-            </a>
+            
+          <form method="post"
+      action="{{ path('preview_back_cv_delete', {id: cv.id}) }}"
+      onsubmit="return confirm('Supprimer définitivement ce CV ?');"
+      style="display:inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete_cv_' ~ cv.id) }}">
+    <button type="submit" class="btn-primary" style="background:#c62828;">
+        <i class="fa fa-trash"></i> Supprimer
+    </button>
+</form>
+
         </div>
 
     </div>

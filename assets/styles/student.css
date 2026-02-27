@@ -1,0 +1,47 @@
+/* Fresh palette, Google font (Inter) — course grid and cards */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+:root{
+  --bg: #f7fafc;
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --accent: #0ea5a4; /* teal */
+  --accent-dark: #0b7b79;
+  --shadow: 0 6px 18px rgba(12, 74, 73, 0.06);
+}
+
+body{font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); color:#0f172a}
+
+.student-dashboard{padding:24px}
+
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+
+.course-card{background:var(--card-bg);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;min-height:220px}
+.course-card img{width:100%;height:130px;object-fit:cover}
+.course-card .card-body{padding:16px;flex:1;display:flex;flex-direction:column}
+.course-card h3{margin:0 0 8px;font-size:1.05rem}
+.course-card p{margin:0 0 12px;color:var(--muted);font-size:0.95rem}
+.course-card .meta{margin-top:auto;display:flex;justify-content:space-between;align-items:center}
+.btn{display:inline-block;padding:8px 12px;border-radius:8px;background:#eef2f7;color:#0f172a;text-decoration:none;border:none;cursor:pointer}
+.btn.primary{background:var(--accent);color:#fff}
+.badge{padding:6px 10px;border-radius:999px;font-size:0.85rem}
+.badge.success{background:#dcfce7;color:#166534}
+
+/* chapters list */
+.chapters ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr;gap:12px}
+.chapter-item{background:#fff;border-radius:10px;padding:12px;box-shadow:0 4px 14px rgba(2,6,23,0.04)}
+
+@media (max-width:768px){
+  .course-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+}
+
+/* header spacing tweak for student pages */
+.student-page-header{padding:28px 24px}
+/* Minimal student styles */
+.student-dashboard .cols { display:flex; gap:1rem; }
+.student-dashboard .col { flex:1; padding:0.5rem; }
+.course-card { background:#fff; padding:0.75rem; margin-bottom:0.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.06);} 
+.locked-card { opacity:0.6 }
+.btn { display:inline-block; padding:0.4rem 0.6rem; border-radius:4px; background:#eee; text-decoration:none; }
+.btn.primary { background:#007bff; color:#fff }
+.review { background:#fffbe6; padding:0.75rem; border-radius:6px }

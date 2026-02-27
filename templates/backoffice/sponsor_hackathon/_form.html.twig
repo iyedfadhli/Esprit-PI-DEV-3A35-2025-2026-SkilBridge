@@ -1,0 +1,48 @@
+<style>
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: #444; }
+    .form-control { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 14px; transition: 0.3s; background: rgba(255, 255, 255, 0.9); }
+    .form-control:focus { border-color: #4a7fd7; box-shadow: 0 0 0 3px rgba(74, 127, 215, 0.1); outline: none; }
+    .form-error { color: #d32f2f; font-size: 12px; margin-top: 5px; }
+    .form-error ul { list-style: none; padding: 0; margin: 0; }
+    .form-error li { color: #d32f2f; }
+</style>
+
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="form-group">
+        {{ form_label(form.sponsor) }}
+        {{ form_widget(form.sponsor, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.sponsor) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.hackathon) }}
+        {{ form_widget(form.hackathon, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.hackathon) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.contribution_type) }}
+        {{ form_widget(form.contribution_type, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.contribution_type) }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.contribution_value) }}
+        {{ form_widget(form.contribution_value, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.contribution_value) }}
+        </div>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <button class="primary-btn">{{ button_label|default('Assign Sponsor') }}</button>
+        <a href="{{ path('app_back_sponsor_hackathon_index') }}" style="margin-left: 15px; text-decoration: none; color: #666;">Cancel</a>
+    </div>
+{{ form_end(form) }}

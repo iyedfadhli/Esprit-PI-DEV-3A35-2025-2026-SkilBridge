@@ -1,0 +1,217 @@
+{% extends 'backoffice/base_back.html.twig' %}
+
+{% block title %}{{ course.title }} - Skill Bridge{% endblock %}
+
+{% block body %}
+<div class="slide-up">
+    <!-- Header -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-book"></i> {{ course.title }}</h1>
+        <div class="header-actions">
+            <a href="{{ path('admin_course_edit', {'id': course.id}) }}" class="btn btn-warning">
+                <i class="fa-solid fa-pen"></i> Edit
+            </a>
+            <form method="post" action="{{ path('admin_course_delete', {'id': course.id}) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this course?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ course.id) }}">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="{{ path('dashboard') }}">Dashboard</a>
+        <span>/</span>
+        <a href="{{ path('admin_course_index') }}">Courses</a>
+        <span>/</span>
+        <span>{{ course.title }}</span>
+    </nav>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Chapters</h3>
+            <p class="stat-number">{{ course.chapters|length }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Quizzes</h3>
+            <p class="stat-number">{{ course.quizzes|length }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Duration</h3>
+            <p class="stat-number">{{ course.duration }}h</p>
+        </div>
+        <div class="stat-card">
+            <h3>Pass Score</h3>
+            <p class="stat-number">{{ course.validationScore }}%</p>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Course Information Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-info-circle"></i> Course Information</h2>
+                <span class="badge badge-secondary">#{{ course.id }}</span>
+            </div>
+            <div class="card-body">
+                <div class="detail-item">
+                    <div class="detail-label">Title</div>
+                    <div class="detail-value">{{ course.title }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Description</div>
+                    <div class="detail-value">{{ course.description }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Duration</div>
+                    <div class="detail-value">
+                        <span class="badge badge-primary">
+                            <i class="fa-regular fa-clock"></i> {{ course.duration }} hours
+                        </span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Validation Score</div>
+                    <div class="detail-value">
+                        <span class="badge badge-success">{{ course.validationScore }}%</span>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Content URL</div>
+                    <div class="detail-value">
+                        <a href="{{ course.content }}" target="_blank" class="text-primary">
+                            {{ course.content }} <i class="fa-solid fa-external-link"></i>
+                        </a>
+                    </div>
+                </div>
+                {% if course.material %}
+                <div class="detail-item">
+                    <div class="detail-label">Material URL</div>
+                    <div class="detail-value">
+                        <a href="{{ course.material }}" target="_blank" class="text-primary">
+                            {{ course.material }} <i class="fa-solid fa-external-link"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+                <div class="detail-item">
+                    <div class="detail-label">Creator</div>
+                    <div class="detail-value">{{ course.creator ? course.creator.email : 'N/A' }}</div>
+                </div>
+                {% if course.prerequisiteQuiz %}
+                <div class="detail-item">
+                    <div class="detail-label">Prerequisite Quiz</div>
+                    <div class="detail-value">
+                        <a href="{{ path('admin_quiz_show', {'id': course.prerequisiteQuiz.id}) }}">
+                            {{ course.prerequisiteQuiz.title }}
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Chapters Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-bookmark"></i> Chapters</h2>
+                <a href="{{ path('admin_chapter_new') }}" class="btn btn-sm btn-primary">
+                    <i class="fa-solid fa-plus"></i> Add
+                </a>
+            </div>
+            <div class="card-body">
+                {% if course.chapters|length > 0 %}
+                    {% for chapter in course.chapters %}
+                    <div class="detail-item d-flex justify-between align-center">
+                        <div>
+                            <span class="badge badge-secondary">{{ chapter.chapterOrder }}</span>
+                            <strong>{{ chapter.title }}</strong>
+                            <span class="badge badge-{{ chapter.status == 'published' ? 'success' : (chapter.status == 'draft' ? 'warning' : 'secondary') }}">
+                                {{ chapter.status }}
+                            </span>
+                        </div>
+                        <div class="action-buttons">
+                            <a href="{{ path('admin_chapter_show', {'id': chapter.id}) }}" class="btn btn-icon btn-sm btn-secondary">
+                                <i class="fa-solid fa-eye"></i>
+                            </a>
+                            <a href="{{ path('admin_chapter_edit', {'id': chapter.id}) }}" class="btn btn-icon btn-sm btn-warning">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fa-solid fa-bookmark"></i>
+                        <p>No chapters yet</p>
+                        <a href="{{ path('admin_chapter_new') }}" class="btn btn-sm btn-primary">Add Chapter</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quizzes Card -->
+    <div class="card mt-3">
+        <div class="card-header">
+            <h2><i class="fa-solid fa-clipboard-question"></i> Quizzes</h2>
+            <a href="{{ path('admin_quiz_new') }}" class="btn btn-sm btn-primary">
+                <i class="fa-solid fa-plus"></i> Add Quiz
+            </a>
+        </div>
+        {% if course.quizzes|length > 0 %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Chapter</th>
+                        <th>Passing Score</th>
+                        <th>Max Attempts</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for quiz in course.quizzes %}
+                    <tr>
+                        <td><strong>{{ quiz.title }}</strong></td>
+                        <td>{{ quiz.chapter ? quiz.chapter.title : 'Course-level' }}</td>
+                        <td><span class="badge badge-success">{{ quiz.passingScore }}%</span></td>
+                        <td>{{ quiz.maxAttempts }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ path('admin_quiz_show', {'id': quiz.id}) }}" class="btn btn-icon btn-sm btn-secondary">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <a href="{{ path('admin_quiz_edit', {'id': quiz.id}) }}" class="btn btn-icon btn-sm btn-warning">
+                                    <i class="fa-solid fa-pen"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="fa-solid fa-clipboard-question"></i>
+                <p>No quizzes yet</p>
+                <a href="{{ path('admin_quiz_new') }}" class="btn btn-sm btn-primary">Add Quiz</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-3">
+        <a href="{{ path('admin_course_index') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Back to Courses
+        </a>
+    </div>
+</div>
+{% endblock %}

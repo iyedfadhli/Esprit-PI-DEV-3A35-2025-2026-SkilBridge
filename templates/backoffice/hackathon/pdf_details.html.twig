@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Hackathon Details</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; color: #333; line-height: 1.6; padding: 20px; }
+        .header { text-align: center; margin-bottom: 40px; border-bottom: 3px solid #4a7fd7; padding-bottom: 20px; }
+        .title { font-size: 28px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; color: #2c3e50; margin-bottom: 10px; }
+        .subtitle { font-size: 14px; color: #666; }
+        .content { margin-bottom: 30px; }
+        .section { margin-bottom: 25px; page-break-inside: avoid; }
+        .section-title { font-size: 18px; font-weight: bold; color: #4a7fd7; border-bottom: 2px solid #4a7fd7; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; }
+        .info-row { margin-bottom: 12px; }
+        .label { font-weight: bold; color: #2c3e50; width: 200px; display: inline-block; }
+        .value { color: #555; }
+        .description-box, .rules-box { background: #f8f9fa; padding: 15px; border-left: 4px solid #4a7fd7; margin-top: 10px; border-radius: 4px; }
+        .sponsors-section { margin-top: 20px; }
+        .sponsor-item { background: #f8f9fa; padding: 10px; margin-bottom: 10px; border-radius: 4px; border-left: 3px solid #4a7fd7; }
+        .sponsor-name { font-weight: bold; color: #2c3e50; }
+        .sponsor-details { color: #666; font-size: 13px; margin-top: 5px; }
+        .status-badge { display: inline-block; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .status-active { background: #d4edda; color: #155724; }
+        .status-upcoming { background: #d1ecf1; color: #0c5460; }
+        .status-completed { background: #f8d7da; color: #721c24; }
+        .status-cancelled { background: #e2e3e5; color: #383d41; }
+        .footer { text-align: center; font-size: 10px; color: #aaa; margin-top: 50px; border-top: 1px solid #eee; padding-top: 10px; }
+        .dates-grid { display: flex; justify-content: space-between; margin-top: 10px; }
+        .date-box { flex: 1; background: #f8f9fa; padding: 10px; margin: 0 5px; border-radius: 4px; text-align: center; }
+        .date-label { font-size: 11px; color: #666; text-transform: uppercase; }
+        .date-value { font-weight: bold; color: #2c3e50; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">{{ hackathon.title }}</h1>
+        <p class="subtitle">Hackathon Details Document</p>
+        <p style="font-size: 12px; color: #999;">Ref: HACK-{{ hackathon.id }}-{{ "now"|date("Y") }}</p>
+    </div>
+
+    <div class="content">
+        <!-- Basic Information -->
+        <div class="section">
+            <div class="section-title">Basic Information</div>
+            <div class="info-row">
+                <span class="label">Title:</span>
+                <span class="value">{{ hackathon.title }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Theme:</span>
+                <span class="value">{{ hackathon.theme }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Status:</span>
+                <span class="value">
+                    <span class="status-badge status-{{ hackathon.status|lower }}">{{ hackathon.status }}</span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Location:</span>
+                <span class="value">{{ hackathon.location }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Registration Fee:</span>
+                <span class="value">{{ hackathon.fee|number_format(2) }} TND</span>
+            </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="section">
+            <div class="section-title">Important Dates</div>
+            <div class="dates-grid">
+                <div class="date-box">
+                    <div class="date-label">Registration Opens</div>
+                    <div class="date-value">{{ hackathon.registrationOpenAt ? hackathon.registrationOpenAt|date('d M Y') : 'N/A' }}</div>
+                </div>
+                <div class="date-box">
+                    <div class="date-label">Registration Closes</div>
+                    <div class="date-value">{{ hackathon.registrationCloseAt ? hackathon.registrationCloseAt|date('d M Y') : 'N/A' }}</div>
+                </div>
+            </div>
+            <div class="dates-grid" style="margin-top: 10px;">
+                <div class="date-box">
+                    <div class="date-label">Event Starts</div>
+                    <div class="date-value">{{ hackathon.startAt ? hackathon.startAt|date('d M Y') : 'N/A' }}</div>
+                </div>
+                <div class="date-box">
+                    <div class="date-label">Event Ends</div>
+                    <div class="date-value">{{ hackathon.endAt ? hackathon.endAt|date('d M Y') : 'N/A' }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Information -->
+        <div class="section">
+            <div class="section-title">Team Information</div>
+            <div class="info-row">
+                <span class="label">Maximum Teams:</span>
+                <span class="value">{{ hackathon.maxTeams }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Maximum Team Size:</span>
+                <span class="value">{{ hackathon.teamSizeMax }} members</span>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="section">
+            <div class="section-title">Description</div>
+            <div class="description-box">
+                {{ hackathon.description|nl2br }}
+            </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="section">
+            <div class="section-title">Rules & Guidelines</div>
+            <div class="rules-box">
+                {{ hackathon.rules|nl2br }}
+            </div>
+        </div>
+
+        <!-- Sponsors -->
+        <div class="section sponsors-section">
+            <div class="section-title">Sponsors ({{ hackathon.sponsorHackathons|length }})</div>
+            {% if hackathon.sponsorHackathons|length > 0 %}
+                {% for assignment in hackathon.sponsorHackathons %}
+                    <div class="sponsor-item">
+                        <div class="sponsor-name">{{ assignment.sponsor.name }}</div>
+                        <div class="sponsor-details">
+                            Contribution Type: {{ assignment.contributionType }}
+                            {% if assignment.contributionValue %}
+                                | Value: {{ assignment.contributionValue|number_format(2) }} TND
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="color: #999; font-style: italic; padding: 15px;">No sponsors assigned to this hackathon.</div>
+            {% endif %}
+        </div>
+
+        <!-- Additional Information -->
+        <div class="section">
+            <div class="section-title">Additional Information</div>
+            <div class="info-row">
+                <span class="label">Created By:</span>
+                <span class="value">{{ hackathon.creatorId ? hackathon.creatorId.email : 'N/A' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Created At:</span>
+                <span class="value">{{ hackathon.createdAt ? hackathon.createdAt|date('d F Y, H:i') : 'N/A' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Generated by Skill Bridge Admin System on {{ "now"|date("Y-m-d H:i:s") }}
+    </div>
+</body>
+</html>

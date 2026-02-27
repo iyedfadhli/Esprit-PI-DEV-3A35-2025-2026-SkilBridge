@@ -1,110 +1,150 @@
 {% extends 'backoffice/base_back.html.twig' %}
 
-
 {% block body %}
-	<main
-		class="admin-content">
 
-		<!-- Top Bar -->
-		<header class="admin-header">
-			<h1>Dashboard</h1>
-			<div class="admin-user">
-				<i class="fa fa-user-circle"></i>
-				<span>Admin</span>
-			</div>
-		</header>
+<div class="slide-up">
+    <!-- Top Bar -->
+    <header class="admin-header">
+        <h1><i class="fa-solid fa-gauge-high"></i> Dashboard</h1>
+        <div class="admin-user">
+            <i class="fa-solid fa-user-circle"></i>
+            <span>Admin</span>
+        </div>
+    </header>
 
-		<section class="stats-grid">
-			<div class="stat-card">
-				<h3>users</h3>
-				<p class="stat-number">395</p>
-			</div>
-			<div class="stat-card">
-				<h3>Courses</h3>
-				<p class="stat-number">24</p>
-			</div>
-			<div class="stat-card">
-				<h3>Groups</h3>
-				<p class="stat-number">40</p>
-			</div>
-			<div class="stat-card">
-				<h3>Challenges</h3>
-				<p class="stat-number">18</p>
-			</div>
-			<div class="stat-card">
-				<h3>Hackathons</h3>
-				<p class="stat-number">7</p>
-			</div>
-			<div class="stat-card">
-				<h3>Internship</h3>
-				<p class="stat-number">32</p>
-			</div>
-		</section>
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <span>Dashboard</span>
+    </nav>
 
-		<!-- Management Sections -->
-		<section class="admin-section" id="courses">
-			<h2>Courses Management</h2>
-			<div class="admin-card">
-				<p>Manage courses (Add / Edit / Delete / Publish)</p>
-				<button class="primary-btn">Add Course</button>
-			</div>
-		</section>
+    <section class="stats-grid">
+        <div class="stat-card">
+            <h3>Users</h3>
+            <p class="stat-number">395</p>
+        </div>
+        <div class="stat-card">
+            <h3>Courses</h3>
+            <p class="stat-number">24</p>
+        </div>
+        <div class="stat-card">
+            <h3>Quizzes</h3>
+            <p class="stat-number">48</p>
+        </div>
+        <div class="stat-card">
+            <h3>Groups</h3>
+            <p class="stat-number">40</p>
+        </div>
+        <div class="stat-card">
+            <h3>Challenges</h3>
+            <p class="stat-number">18</p>
+        </div>
+        <div class="stat-card">
+            <h3>Hackathons</h3>
+            <p class="stat-number">7</p>
+        </div>
+    </section>
 
-		<section class="admin-section" id="groups">
-			<h2>Groups Management</h2>
-			<div class="admin-card">
-				<p>Create and manage student groups</p>
-				<button class="primary-btn">Create Group</button>
-			</div>
-		</section>
+    <!-- Management Sections - Pedagogical Module -->
+    <section class="admin-section" id="pedagogical">
+        <h2>Pedagogical Management</h2>
+        <div class="card">
+            <div class="card-body">
+                <p class="mb-2">Manage courses, chapters, quizzes, questions and answers</p>
+                <div class="d-flex gap-2" style="flex-wrap: wrap;">
+                    <a href="{{ path('admin_course_index') }}" class="btn btn-primary">
+                        <i class="fa-solid fa-book"></i> Courses
+                    </a>
+                    <a href="{{ path('admin_chapter_index') }}" class="btn btn-outline">
+                        <i class="fa-solid fa-bookmark"></i> Chapters
+                    </a>
+                    <a href="{{ path('admin_quiz_index') }}" class="btn btn-outline">
+                        <i class="fa-solid fa-clipboard-question"></i> Quizzes
+                    </a>
+                    <a href="{{ path('admin_question_index') }}" class="btn btn-outline">
+                        <i class="fa-solid fa-circle-question"></i> Questions
+                    </a>
+                    <a href="{{ path('admin_answer_index') }}" class="btn btn-outline">
+                        <i class="fa-solid fa-check-double"></i> Answers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-		<section class="admin-section" id="challenges">
-			<h2>Challenges Management</h2>
-			<div class="admin-card">
-				<p>Manage challenges and submissions</p>
-				<button class="primary-btn">Add Challenge</button>
-			</div>
-		</section>
+    <section class="admin-section" id="groups">
+        <h2>Community Management</h2>
+        <div class="card">
+            <div class="card-body">
+                <p class="mb-2">Manage student groups and posts</p>
+                <div class="d-flex gap-2" style="flex-wrap: wrap;">
+                    <a href="{{ path('admin_groups_index') }}" class="btn btn-primary">
+                        <i class="fa-solid fa-users"></i> Manage Groups
+                    </a>
+                    <a href="{{ path('admin_posts_index') }}" class="btn btn-outline">
+                        <i class="fa-solid fa-comments"></i> Manage Posts
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-		<section class="admin-section" id="cv">
-			<h2>CV & Internship</h2>
-			<div class="admin-card">
-				<p>Review CVs and internship offers</p>
-				<button class="primary-btn">View Applications</button>
-			</div>
-		</section>
+    <section class="admin-section" id="challenges">
+        <h2>Challenges Management</h2>
+        <div class="card">
+            <div class="card-body">
+                <p class="mb-2">Manage challenges and submissions</p>
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-trophy"></i> Add Challenge
+                </button>
+            </div>
+        </div>
+    </section>
 
-		<section class="admin-section" id="hackathon">
-			<h2>Hackathon</h2>
-			<div class="admin-card">
-				<p>Manage hackathons and teams</p>
-				<button class="primary-btn">Create Hackathon</button>
-			</div>
-		</section>
+    <section class="admin-section" id="cv">
+        <h2>CV & Internship</h2>
+        <div class="card">
+            <div class="card-body">
+                <p class="mb-2">Review CVs and internship offers</p>
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-file-lines"></i> View Applications
+                </button>
+            </div>
+        </div>
+    </section>
 
-		<section class="admin-section statistics-placeholder">
-			<h2>Statistics</h2>
+    <section class="admin-section" id="hackathon">
+        <h2>Hackathon</h2>
+        <div class="card">
+            <div class="card-body">
+                <p class="mb-2">Manage hackathons and teams</p>
+                <button class="btn btn-primary">
+                    <i class="fa-solid fa-lightbulb"></i> Create Hackathon
+                </button>
+            </div>
+        </div>
+    </section>
 
-			<div class="stats-placeholder-grid">
+    <section class="admin-section statistics-placeholder">
+        <h2>Statistics</h2>
 
-				<div class="placeholder-card">
-					<img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Users stats">
-					<p>User growth statistics</p>
-				</div>
+        <div class="stats-placeholder-grid">
 
-				<div class="placeholder-card">
-					<img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Courses stats">
-					<p>Courses & challenges comparison</p>
-				</div>
+            <div class="placeholder-card">
+                <img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Users stats">
+                <p>User growth statistics</p>
+            </div>
 
-				<div class="placeholder-card">
-					<img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Internship stats">
-					<p>Internship applications statistics</p>
-				</div>
+            <div class="placeholder-card">
+                <img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Courses stats">
+                <p>Courses & challenges comparison</p>
+            </div>
 
-			</div>
-		</section>
+            <div class="placeholder-card">
+                <img src="{{ asset('assets/images/backoffice/user_stat.png') }}" alt="Internship stats">
+                <p>Internship applications statistics</p>
+            </div>
 
-
-	</main>
+        </div>
+    </section>
+</div>
 {% endblock %}

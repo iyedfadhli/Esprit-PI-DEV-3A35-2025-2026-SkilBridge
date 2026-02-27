@@ -1,0 +1,422 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/activity_challenge.css') }}">
+	<style>
+		/* Table Styling */
+		.activity-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-top: 20px;
+			font-family: Arial, sans-serif;
+		}
+
+		.activity-table thead {
+			background: #f5f7fa;
+		}
+
+		.activity-table th,
+		.activity-table td {
+			border: 1px solid #ddd;
+			padding: 10px;
+			vertical-align: top;
+		}
+
+		.activity-table th {
+			font-weight: 600;
+			text-align: left;
+		}
+
+		.activity-table tbody tr {
+			transition: background 0.2s;
+		}
+
+		.activity-table tbody tr:hover {
+			background: #f0f4ff;
+		}
+
+		.text-wrap {
+			max-width: 280px;
+			word-break: break-word;
+		}
+
+		/* Badges */
+		.badge {
+			padding: 4px 8px;
+			border-radius: 12px;
+			font-size: 12px;
+		}
+
+		.badge-success {
+			background: #28a745;
+			color: white;
+		}
+
+		.badge-pending {
+			background: #6c757d;
+			color: white;
+		}
+
+		/* Action buttons */
+		.actions {
+			display: flex;
+			gap: 6px;
+		}
+
+		.btn {
+			padding: 5px 10px;
+			font-size: 12px;
+			border-radius: 4px;
+			text-decoration: none;
+			cursor: pointer;
+		}
+
+		.btn-edit {
+			background: #ffc107;
+			color: #000;
+			border: none;
+		}
+
+		.btn-edit:hover {
+			background: #e0a800;
+		}
+
+		.btn-delete {
+			background: #dc3545;
+			color: #fff;
+			border: none;
+		}
+
+		.btn-delete:hover {
+			background: #c82333;
+		}
+
+		/* Inline edit form */
+		.inline-edit-form {
+			background: #f8f9fa;
+			padding: 15px;
+			border-radius: 10px;
+			border: 1px solid #d1d5db;
+		}
+
+		.inline-edit-form textarea {
+			width: 100%;
+			padding: 10px;
+			font-size: 13px;
+			border-radius: 6px;
+			border: 1px solid #ccc;
+		}
+
+		.inline-edit-form .form-actions {
+			display: flex;
+			gap: 10px;
+			justify-content: flex-end;
+			margin-top: 10px;
+		}
+
+		.btn-cancel {
+			background: #6c757d;
+			color: #fff;
+		}
+
+		.btn-cancel:hover {
+			background: #5a6268;
+		}
+	</style>
+{% endblock %}
+
+{% block javascripts %}
+	{{ parent() }}
+	 <script>
+	function toggleEditActivity(id) {
+    const viewRow = document.getElementById('view-activity-' + id);
+    const editRow = document.getElementById('edit-activity-' + id);
+    if (editRow.style.display === 'none') {
+        editRow.style.display = '';
+        viewRow.style.display = 'none';
+    } else {
+        editRow.style.display = 'none';
+        viewRow.style.display = '';
+    }
+}
+function toggleEdit(id) {
+    const viewRow = document.getElementById('view-row-' + id);
+    const editRow = document.getElementById('edit-row-' + id);
+    if (editRow.style.display === 'none') {
+        editRow.style.display = '';
+        viewRow.style.display = 'none';
+    } else {
+        editRow.style.display = 'none';
+        viewRow.style.display = '';
+    }
+}
+	</script>
+
+{% endblock %}
+
+{% block body %}
+	<section class="activity-page">
+		<div
+			class="container">
+
+			<!-- Selected Challenge Info -->
+			<div class="challenge-card selected-challenge">
+				<div class="challenge-header">
+					<h3>{{ challenge.title }}</h3>
+					<span>📌 Difficulty:
+						<strong>{{ challenge.difficulty }}</strong>
+					</span>
+					<span>⏱ Deadline:
+						<strong>{{ challenge.deadline|date('d-m-Y H:i') }}</strong>
+					</span>
+				</div>
+				<p class="challenge-desc">{{ challenge.description }}</p>
+
+				{% if challenge.content %}
+					{% set extension = challenge.content|split('.')|last|lower %}
+					{% if extension in ['pdf', 'doc', 'docx'] %}
+						<p class="challenge-desc">
+							<a href="{{ asset(challenge.content) }}" target="_blank">
+								📎
+								{{ challenge.content|split('/')|last }}
+							</a>
+						</p>
+					{% endif %}
+				{% endif %}
+			</div>
+
+			<!-- Activity Form -->
+			<div class="activity-form">
+				<h4>🚀 Votre Avancement pour ce Challenge</h4>
+
+				{% if role == 'admin' %}
+					<!-- 1️⃣ Activity Description Form -->
+					<div class="activity-form">
+						<h4>✏️ Description de l'activité</h4>
+						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" data-validate="true">
+							<div class="form-group">
+								<textarea name="activity_description" required placeholder="Décrivez votre activité">{{ activity.memberActivity.activityDescription ?? '' }}</textarea>
+								<div class="input-error"></div>
+							</div>
+							<button type="submit" class="primary-btn">Enregistrer Description</button>
+						</form>
+					</div>
+
+					<!-- 2️⃣ Problem Description Form -->
+					<div class="activity-form">
+						<h4>⚠️ Problème rencontré</h4>
+						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" data-validate="true">
+							<div class="form-group">
+								<textarea name="problem_description" placeholder="Décrivez le problème"></textarea>
+								<div class="input-error"></div>
+							</div>
+							<button type="submit" class="primary-btn">Enregistrer Problème</button>
+						</form>
+					</div>
+
+					<!-- 3️⃣ Solution Description Form -->
+					{% set unsolvedProblems = problems|filter(p => p.groupSolution is empty) %}
+					{% if unsolvedProblems|length > 0 %}
+						<div class="activity-form">
+							<h4>💡 Proposez une solution</h4>
+							<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" data-validate="true">
+								<div class="form-group">
+									<label>Choisir un problème à résoudre</label>
+									<select name="problem_id" required>
+										{% for p in unsolvedProblems %}
+											<option value="{{ p.id }}">{{ p.problemDescription }}</option>
+										{% endfor %}
+									</select>
+									<div class="input-error"></div>
+								</div>
+								<div class="form-group">
+									<label>Solution proposée</label>
+									<textarea name="solution_description" placeholder="Votre solution"></textarea>
+									<div class="input-error"></div>
+								</div>
+								<button type="submit" class="primary-btn">Enregistrer Solution</button>
+							</form>
+						</div>
+					{% else %}
+						<p>Aucun problème en attente de solution pour le moment.</p>
+					{% endif %}
+
+					<!-- 4️⃣ Submission File Form -->
+					<div class="activity-form">
+						<h4>📤 Soumission du fichier</h4>
+						<form method="post" action="{{ path('activity_submit_admin', {'activity_id': activity.id}) }}" enctype="multipart/form-data" data-validate="true">
+							<div class="form-group">
+								<input type="file" name="submission_file" id="submissionFileAdmin" accept=".pdf,.doc,.docx" required>
+								<span class="file-name"></span>
+								<div class="input-error"></div>
+							</div>
+							<button type="submit" class="primary-btn">Soumettre Fichier</button>
+						</form>
+					</div>
+
+				{% else %}
+					<!-- Member Forms -->
+					<div class="activity-form">
+						<h4>✏️ Votre activité</h4>
+						<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}" data-validate="true">
+							<div class="form-group">
+								<textarea name="activity_description" required placeholder="Décrivez votre activité">{{ activity.memberActivity.activityDescription ?? '' }}</textarea>
+								<div class="input-error"></div>
+							</div>
+							<button type="submit" class="primary-btn">Enregistrer Description</button>
+						</form>
+					</div>
+
+					<!-- Problem Description Form -->
+					<div class="activity-form">
+						<h4>⚠️ Problème rencontré</h4>
+						<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}" data-validate="true">
+							<div class="form-group">
+								<textarea name="problem_description" placeholder="Décrivez le problème"></textarea>
+								<div class="input-error"></div>
+							</div>
+							<button type="submit" class="primary-btn">Enregistrer Problème</button>
+						</form>
+					</div>
+
+					<!-- Solution Description Form -->
+					{% set unsolvedProblems = problems|filter(p => p.groupSolution is empty) %}
+					{% if unsolvedProblems|length > 0 %}
+						<div class="activity-form">
+							<h4>💡 Proposez une solution</h4>
+							<form method="post" action="{{ path('activity_submit_member', {'activity_id': activity.id}) }}" data-validate="true">
+								<div class="form-group">
+									<label>Choisir un problème à résoudre</label>
+									<select name="problem_id" required>
+										{% for p in unsolvedProblems %}
+											<option value="{{ p.id }}">{{ p.problemDescription }}</option>
+										{% endfor %}
+									</select>
+									<div class="input-error"></div>
+								</div>
+								<div class="form-group">
+									<label>Solution proposée</label>
+									<textarea name="solution_description" placeholder="Votre solution"></textarea>
+									<div class="input-error"></div>
+								</div>
+								<button type="submit" class="primary-btn">Enregistrer Solution</button>
+							</form>
+						</div>
+					{% else %}
+						<p>Aucun problème en attente de solution pour le moment.</p>
+					{% endif %}
+				{% endif %}
+
+
+			</div>
+			<div class="activity-form">
+    <h4>📊 Suivi de l’activité</h4>
+
+    {# ===== Member Activities Table ===== #}
+    {% if memberActivityList|length > 0 %}
+        <div class="activity-form">
+            <h4>📝 Vos activités précédentes</h4>
+            <table class="activity-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Description</th>
+                        <th style="width: 160px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ma in memberActivityList %}
+                        <tr id="view-activity-{{ ma.id }}">
+                            <td>{{ loop.index }}</td>
+                            <td class="text-wrap">{{ ma.activityDescription }}</td>
+                         
+                            <td class="actions">
+                                <button class="btn btn-edit" onclick="toggleEditActivity({{ ma.id }})">✏️ Modifier</button>
+                                <form method="post" action="{{ path('member_activity_delete', {id: ma.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer cette activité ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ma.id) }}">
+                                    <button class="btn btn-delete">🗑</button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        {# Edit Row #}
+                        <tr id="edit-activity-{{ ma.id }}" style="display:none;">
+                            <td colspan="4">
+                                <form method="post" action="{{ path('member_activity_edit', {id: ma.id}) }}" enctype="multipart/form-data" data-validate="true">
+                                    <div class="form-group">
+                                        <label>Description</label>
+                                        <textarea name="activity_description" required>{{ ma.activityDescription }}</textarea>
+                                        <div class="input-error"></div>
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button class="btn btn-success">💾 Enregistrer</button>
+                                        <button type="button" class="btn btn-cancel" onclick="toggleEditActivity({{ ma.id }})">Annuler</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    <hr style="margin:30px 0;">
+
+    {# ===== Problems & Solutions Table ===== #}
+    <div class="activity-form">
+        <h4>⚠️ Problèmes & Solutions</h4>
+        <table class="activity-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Problème</th>
+                    <th>Solution</th>
+                    <th style="width: 160px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for problem in problems %}
+                    <tr id="view-row-{{ problem.id }}">
+                        <td>{{ loop.index }}</td>
+                        <td class="text-wrap">{{ problem.problemDescription }}</td>
+                        <td class="text-wrap">{{ problem.groupSolution ?: '—' }}</td>
+                        <td class="actions">
+                            <button class="btn btn-edit" onclick="toggleEdit({{ problem.id }})">✏️ Modifier</button>
+                            <form method="post" action="{{ path('problem_delete', { id: problem.id }) }}" style="display:inline" onsubmit="return confirm('Supprimer ce problème ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ problem.id) }}">
+                                <button class="btn btn-delete">🗑</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    {# Edit Row #}
+                    <tr id="edit-row-{{ problem.id }}" style="display:none;">
+                        <td colspan="4">
+                            <form method="post" action="{{ path('problem_edit', { id: problem.id }) }}" data-validate="true">
+                                <div class="form-group">
+                                    <label>Problème</label>
+                                    <textarea name="problem_description" required>{{ problem.problemDescription }}</textarea>
+                                    <div class="input-error"></div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Solution</label>
+                                    <textarea name="solution_description">{{ problem.groupSolution }}</textarea>
+                                    <div class="input-error"></div>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+                                    <button type="button" class="btn btn-cancel" onclick="toggleEdit({{ problem.id }})">Annuler</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+		</section>
+	{% endblock %}

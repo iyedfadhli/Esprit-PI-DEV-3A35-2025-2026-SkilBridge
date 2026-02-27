@@ -1,13 +1,13 @@
 {# ============================================================
-   File: templates/frontoffice/offer/index.html.twig
-   Description: Browse all available offers (internship / job)
-   ============================================================ #}
+File: templates/frontoffice/offer/index.html.twig
+Description: Browse all available offers (internship / job)
+============================================================ #}
 {% extends 'frontoffice/base_front.html.twig' %}
 
 {% block title %}Offres de stage et emploi - Skill Bridge{% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -15,11 +15,11 @@
 
     {# Flash messages #}
     {% for type, messages in app.flashes %}
-        <div class="flash-messages">
-            {% for message in messages %}
-                <div class="flash-message {{ type }}">{{ message }}</div>
-            {% endfor %}
-        </div>
+    <div class="flash-messages">
+        {% for message in messages %}
+        <div class="flash-message {{ type }}">{{ message }}</div>
+        {% endfor %}
+    </div>
     {% endfor %}
 
     {# Section header #}
@@ -28,6 +28,9 @@
             <h1>Offres disponibles</h1>
             <p class="section-subtitle">Consultez les offres de stage et d'emploi</p>
         </div>
+        <a href="{{ path('preview_front_cv_index') }}" class="btn-secondary">
+            <i class="fa fa-file-text-o"></i> Gérer mes CV
+        </a>
     </div>
 
     {# Filter bar #}
@@ -49,75 +52,77 @@
 
     {# Offers grid #}
     {% if offers is defined and offers|length > 0 %}
-        <div class="cv-grid" id="offers-grid">
-            {% for offer in offers %}
-                <div class="cv-card offer-card"
-                     data-title="{{ offer.title|lower }}"
-                     data-type="{{ offer.offerType|lower }}"
-                     data-field="{{ offer.field|lower }}">
+    <div class="cv-grid" id="offers-grid">
+        {% for offer in offers %}
+        <div class="cv-card offer-card" data-title="{{ offer.title|lower }}" data-type="{{ offer.offerType|lower }}"
+            data-field="{{ offer.field|lower }}">
 
-                    <div class="cv-card-header">
-                        <h3>{{ offer.title }}</h3>
-                        <span class="cv-card-badge">{{ offer.offerType == 'internship' ? 'Stage' : 'Emploi' }}</span>
-                    </div>
+            <div class="cv-card-header">
+                <h3>{{ offer.title }}</h3>
+                <span class="cv-card-badge">{{ offer.offerType == 'internship' ? 'Stage' : 'Emploi' }}</span>
+            </div>
 
-                    <div class="cv-card-meta">
-                        <span><i class="fa fa-building"></i> {{ offer.enterprise.name|default('Entreprise') }}</span>
-                        <span><i class="fa fa-map-marker"></i> {{ offer.location }}</span>
-                        <span><i class="fa fa-calendar"></i> {{ offer.createdAt|date('d/m/Y') }}</span>
-                    </div>
+            <div class="cv-card-meta">
+                <span><i class="fa fa-building"></i> {{ offer.enterprise.name|default('Entreprise') }}</span>
+                <span><i class="fa fa-map-marker"></i> {{ offer.location }}</span>
+                <span><i class="fa fa-calendar"></i> {{ offer.createdAt|date('d/m/Y') }}</span>
+            </div>
 
-                    <p style="font-size:14px;color:#555;margin:12px 0;line-height:1.5;">
-                        {{ offer.description|length > 120 ? offer.description|slice(0, 120) ~ '...' : offer.description }}
-                    </p>
+            <p style="font-size:14px;color:#555;margin:12px 0;line-height:1.5;">
+                {{ offer.description|length > 120 ? offer.description|slice(0, 120) ~ '...' : offer.description }}
+            </p>
 
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
-                        {% if offer.contractType %}
-                            <span style="background:#e3f2fd;color:#1565c0;padding:3px 10px;border-radius:12px;font-size:12px;">{{ offer.contractType }}</span>
-                        {% endif %}
-                        {% if offer.requiredLevel %}
-                            <span style="background:#f3e5f5;color:#7b1fa2;padding:3px 10px;border-radius:12px;font-size:12px;">{{ offer.requiredLevel }}</span>
-                        {% endif %}
-                        {% if offer.duration %}
-                            <span style="background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:12px;font-size:12px;">{{ offer.duration }}</span>
-                        {% endif %}
-                    </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+                {% if offer.contractType %}
+                <span style="background:#e3f2fd;color:#1565c0;padding:3px 10px;border-radius:12px;font-size:12px;">{{
+                    offer.contractType }}</span>
+                {% endif %}
+                {% if offer.requiredLevel %}
+                <span style="background:#f3e5f5;color:#7b1fa2;padding:3px 10px;border-radius:12px;font-size:12px;">{{
+                    offer.requiredLevel }}</span>
+                {% endif %}
+                {% if offer.duration %}
+                <span style="background:#e8f5e9;color:#2e7d32;padding:3px 10px;border-radius:12px;font-size:12px;">{{
+                    offer.duration }}</span>
+                {% endif %}
+            </div>
 
-                    <div class="cv-card-actions">
-                        <a href="{{ path('preview_front_offer_show', {id: offer.id}) }}" class="btn-view" style="flex:1;text-align:center;">
-                            <i class="fa fa-eye"></i> Voir les details
-                        </a>
-                    </div>
-                </div>
-            {% endfor %}
+            <div class="cv-card-actions">
+                <a href="{{ path('preview_front_offer_show', {id: offer.id}) }}" class="btn-view"
+                    style="flex:1;text-align:center;">
+                    <i class="fa fa-eye"></i> Voir les details
+                </a>
+            </div>
         </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <div class="empty-state">
-            <i class="fa fa-briefcase"></i>
-            <p>Aucune offre disponible pour le moment.</p>
-        </div>
+    <div class="empty-state">
+        <i class="fa fa-briefcase"></i>
+        <p>Aucune offre disponible pour le moment.</p>
+    </div>
     {% endif %}
 
 </section>
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script>
-        function filterOffers() {
-            const search = document.getElementById('offer-search').value.toLowerCase();
-            const type = document.getElementById('offer-type-filter').value.toLowerCase();
-            const field = document.getElementById('offer-field-filter').value.toLowerCase();
-            const cards = document.querySelectorAll('.offer-card');
-            cards.forEach(function(card) {
-                const title = card.getAttribute('data-title');
-                const cardType = card.getAttribute('data-type');
-                const cardField = card.getAttribute('data-field');
-                const matchTitle = title.includes(search);
-                const matchType = !type || cardType === type;
-                const matchField = !field || cardField.includes(field);
-                card.style.display = (matchTitle && matchType && matchField) ? '' : 'none';
-            });
-        }
-    </script>
+{{ parent() }}
+<script>
+    function filterOffers() {
+        const search = document.getElementById('offer-search').value.toLowerCase();
+        const type = document.getElementById('offer-type-filter').value.toLowerCase();
+        const field = document.getElementById('offer-field-filter').value.toLowerCase();
+        const cards = document.querySelectorAll('.offer-card');
+        cards.forEach(function (card) {
+            const title = card.getAttribute('data-title');
+            const cardType = card.getAttribute('data-type');
+            const cardField = card.getAttribute('data-field');
+            const matchTitle = title.includes(search);
+            const matchType = !type || cardType === type;
+            const matchField = !field || cardField.includes(field);
+            card.style.display = (matchTitle && matchType && matchField) ? '' : 'none';
+        });
+    }
+</script>
 {% endblock %}

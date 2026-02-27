@@ -4,6 +4,13 @@ namespace App\Entity;
 
 use App\Repository\QuizAttemptsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+
+use App\Entity\Course;
+use App\Entity\Quiz;
+use App\Entity\User;
+use App\Entity\StudentResponse;
 
 #[ORM\Entity(repositoryClass: QuizAttemptsRepository::class)]
 class QuizAttempts
@@ -23,12 +30,20 @@ class QuizAttempts
     private ?\DateTimeImmutable $submitted_at = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $student = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?quiz $quiz = null;
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    private ?Quiz $quiz = null;
+
+    #[ORM\OneToMany(mappedBy: 'attempt', targetEntity: StudentResponse::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $studentResponses;
+
+    public function __construct()
+    {
+        $this->studentResponses = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -83,15 +98,33 @@ class QuizAttempts
         return $this;
     }
 
-    public function getQuiz(): ?quiz
+    public function getQuiz(): ?Quiz
     {
         return $this->quiz;
     }
 
-    public function setQuiz(?quiz $quiz): static
+    public function setQuiz(?Quiz $quiz): static
     {
         $this->quiz = $quiz;
 
         return $this;
+    }
+
+    // helper for admin display: Student name + email
+    public function getStudentDisplay(): string
+    {
+        if ($this->student instanceof User) {
+            return trim(($this->student->getNom() ?? '').' '.($this->student->getPrenom() ?? '')).' (' . ($this->student->getEmail() ?? '') . ')';
+        }
+        return '—';
+    }
+
+    // helper for admin: quiz -> course title
+    public function getQuizCourseTitle(): string
+    {
+        if ($this->quiz instanceof Quiz && $this->quiz->getCourse()) {
+            return $this->quiz->getCourse()->getTitle();
+        }
+        return (string) ($this->quiz?->getTitle() ?? '—');
     }
 }

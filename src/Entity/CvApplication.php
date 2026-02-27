@@ -15,11 +15,11 @@ class CvApplication
     private ?int $id = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Cv $cv = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Offer $offer = null;
 
     #[ORM\Column(length: 30)]
@@ -27,7 +27,6 @@ class CvApplication
 
     #[ORM\Column]
     private ?\DateTimeImmutable $applied_at = null;
-    
 
     // --- ATS Scoring ---------------------------------------------------------
 

@@ -75,8 +75,7 @@
             <label for="contractType">Type de contrat *</label>
             <select id="contractType" name="contractType">
                 <option value="">-- Choisir --</option>
-                <option value="CDI" {{ offer.contractType == 'CDI' ? 'selected' : '' }}>CDI</option>
-                <option value="CDD" {{ offer.contractType == 'CDD' ? 'selected' : '' }}>CDD</option>
+                
                 <option value="Stage" {{ offer.contractType == 'Stage' ? 'selected' : '' }}>Stage</option>
                 <option value="Freelance" {{ offer.contractType == 'Freelance' ? 'selected' : '' }}>Freelance</option>
                 <option value="Alternance" {{ offer.contractType == 'Alternance' ? 'selected' : '' }}>Alternance</option>

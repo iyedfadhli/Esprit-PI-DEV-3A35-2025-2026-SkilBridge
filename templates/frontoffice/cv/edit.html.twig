@@ -20,7 +20,7 @@
         </a>
     </div>
 
-    {{ form_start(form, {'attr': {'class': 'cv-form-wrapper', 'id': 'cvForm'}}) }}
+    {{ form_start(form, {'attr': {'class': 'cv-form-wrapper', 'id': 'cvForm', 'novalidate': 'novalidate'}}) }}
     <div class="global-errors">
         {{ form_errors(form) }}
     </div>
@@ -79,21 +79,25 @@
             <div class="form-group">
                 {{ form_label(form.experiences.vars.prototype.jobTitle) }}
                 {{ form_widget(form.experiences.vars.prototype.jobTitle, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.jobTitle) }}
             </div>
             <div class="form-group">
                 {{ form_label(form.experiences.vars.prototype.company) }}
                 {{ form_widget(form.experiences.vars.prototype.company, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.company) }}
             </div>
         </div>
         <div class="form-row">
             <div class="form-group">
                 {{ form_label(form.experiences.vars.prototype.location) }}
                 {{ form_widget(form.experiences.vars.prototype.location, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.location) }}
             </div>
             <div class="form-group">
                 <div style="margin-top: 2rem;">
                     {{ form_widget(form.experiences.vars.prototype.currentlyWorking) }}
                     {{ form_label(form.experiences.vars.prototype.currentlyWorking) }}
+                    {{ form_errors(form.experiences.vars.prototype.currentlyWorking) }}
                 </div>
             </div>
         </div>
@@ -101,10 +105,12 @@
             <div class="form-group">
                 {{ form_label(form.experiences.vars.prototype.startDate) }}
                 {{ form_widget(form.experiences.vars.prototype.startDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.startDate) }}
             </div>
             <div class="form-group">
                 {{ form_label(form.experiences.vars.prototype.endDate) }}
                 {{ form_widget(form.experiences.vars.prototype.endDate, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.experiences.vars.prototype.endDate) }}
             </div>
         </div>
         <div class="form-row single">
@@ -112,6 +118,7 @@
                 {{ form_label(form.experiences.vars.prototype.description) }}
                 {{ form_widget(form.experiences.vars.prototype.description, {'attr': {'class': 'form-control', 'rows':
                 3}}) }}
+                {{ form_errors(form.experiences.vars.prototype.description) }}
             </div>
         </div>
         {% endset %}
@@ -147,7 +154,7 @@
                             {{ form_errors(experienceField.location) }}
                         </div>
                         <div class="form-group">
-                            <div style="margin-top: 2.3rem;">
+                            <div style="margin-top: 2rem;">
                                 {{ form_widget(experienceField.currentlyWorking) }}
                                 {{ form_label(experienceField.currentlyWorking) }}
                                 {{ form_errors(experienceField.currentlyWorking) }}
