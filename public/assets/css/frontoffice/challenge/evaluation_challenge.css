@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Groups under the challenge card */
 .groups-container {
     max-height: 0;
@@ -200,3 +201,224 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+=======
+/* Groups under the challenge card */
+.groups-container {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin-bottom: 20px; /* space under the challenge card */
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+}
+
+.group-card {
+    background: #f5f7ff;
+    padding: 15px 20px;
+    border-radius: 15px;
+    margin: 10px 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+
+    /* Center content */
+    display: flex;
+    flex-direction: column; /* stack h4, p, button vertically */
+    align-items: center;    /* center horizontally */
+    text-align: center;     /* center text inside h4/p */
+    justify-content: center; /* optional: center vertically if card is taller */
+}
+
+.group-card h4 {
+    margin-bottom: 5px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.group-card p {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.group-card button {
+    margin-top: 5px;
+}
+
+/* Challenge wrapper spacing */
+.challenge-wrapper {
+    margin-bottom: 30px; /* space between challenges */
+}
+
+/* Module card styling */
+.module-card {
+    background: #ffffff;
+    padding: 20px 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.module-icon {
+    font-size: 25px;
+    margin-bottom: 10px;
+}
+
+.signin-btn {
+    padding: 7px 15px;
+    border: none;
+    background-color: #4a76f0;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.signin-btn:hover {
+    background-color: #365dc1;
+}
+/* Modal background */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    background-color: rgba(0,0,0,0.6);
+}
+
+/* Modal box */
+.modal-content {
+    background-color: #fff;
+    margin: 50px auto;
+    padding: 20px 30px;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 900px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    animation: slideDown 0.3s ease;
+}
+
+/* Slide-in effect */
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Close button */
+.close {
+    color: #555;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close:hover { color: #000; }
+
+/* Activity card */
+.activity-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9fb;
+}
+
+/* Problems section */
+.problems-section {
+    margin-top: 10px;
+    padding-left: 10px;
+}
+.problem-card {
+    border-left: 3px solid #4a90e2;
+    padding-left: 10px;
+    margin-bottom: 8px;
+}
+
+/* Members section */
+.members-section {
+    margin-top: 10px;
+    padding-left: 10px;
+}
+.member-card {
+    border-left: 3px solid #50c878;
+    padding-left: 10px;
+    margin-bottom: 5px;
+}
+
+/* Group card in main page */
+.group-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.signin-btn {
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+.signin-btn:hover {
+    background-color: #357ABD;
+}
+
+/* Inline PDF container (supervisor page) */
+.pdf-inline-container {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.pdf-inline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #2d3748;
+}
+/* Custom file input wrapper */
+.file-input-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 200px; /* adjust as needed */
+}
+
+.file-input-wrapper input[type="file"] {
+    display: none; /* hide original input */
+}
+
+.file-input-wrapper label {
+    display: block;
+    background-color: #4f46e5; /* purple button */
+    color: white;
+    padding: 8px 15px;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.file-input-wrapper label:hover {
+    background-color: #4338ca;
+}
+
+/* Display chosen file name */
+.file-input-wrapper .file-name {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #555;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+>>>>>>> gestion_challenge_advanced_features

@@ -9,48 +9,48 @@
 	{{parent()}}
 
 	 <script>
-										
-										const pdfInput = document.getElementById('pdfFile');
-										const pdfName = document.getElementById('pdfFileName');
-										if (pdfInput && pdfName) {
-											pdfInput.addEventListener('change', () => {
-												pdfName.textContent = pdfInput.files.length > 0 ? pdfInput.files[0].name : 'No file chosen';
-											});
-										}
-										
-															function toggleForm_proposition(id) {
-															    var form = document.getElementById('proposition-form-' + id);
-															    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-															}
-															
-															function toggleForm(id) {
-															    var form = document.getElementById('edit-form-' + id);
-															    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
-															}
-                                                            // inline PDF viewer modal
-                                                            document.addEventListener('DOMContentLoaded', () => {
-                                                                const pdfModal = document.createElement('div');
-                                                                pdfModal.id = 'pdf-modal';
-                                                                pdfModal.className = 'modal';
-                                                                pdfModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;';
-                                                                pdfModal.innerHTML = '<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);"><span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span><iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe></div>';
-                                                                document.body.appendChild(pdfModal);
-                                                                const pdfClose = pdfModal.querySelector('.close');
-                                                                const pdfFrame = document.getElementById('pdf-frame');
-                                                                document.addEventListener('click', function(e) {
-                                                                    const btn = e.target.closest('.open-pdf');
-                                                                    if (btn) {
-                                                                        const src = btn.dataset.src;
-                                                                        pdfFrame.src = src;
-                                                                        pdfModal.style.display = 'block';
-                                                                    }
-                                                                });
-                                                                pdfClose.addEventListener('click', function() {
-                                                                    pdfFrame.src = '';
-                                                                    pdfModal.style.display = 'none';
-                                                                });
-                                                            });
-															</script>
+											
+											const pdfInput = document.getElementById('pdfFile');
+											const pdfName = document.getElementById('pdfFileName');
+											if (pdfInput && pdfName) {
+												pdfInput.addEventListener('change', () => {
+													pdfName.textContent = pdfInput.files.length > 0 ? pdfInput.files[0].name : 'No file chosen';
+												});
+											}
+											
+																function toggleForm_proposition(id) {
+																    var form = document.getElementById('proposition-form-' + id);
+																    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+																}
+																
+																function toggleForm(id) {
+																    var form = document.getElementById('edit-form-' + id);
+																    form.style.display = (form.style.display === "none" || form.style.display === "") ? "block" : "none";
+																}
+	                                                            // inline PDF viewer modal
+	                                                            document.addEventListener('DOMContentLoaded', () => {
+	                                                                const pdfModal = document.createElement('div');
+	                                                                pdfModal.id = 'pdf-modal';
+	                                                                pdfModal.className = 'modal';
+	                                                                pdfModal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:9999;';
+	                                                                pdfModal.innerHTML = '<div class="modal-content" style="background:#fff;border-radius:8px;max-width:1000px;width:90%;padding:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);"><span class="close" style="float:right;cursor:pointer;font-size:20px;">&times;</span><iframe id="pdf-frame" src="" style="width:100%;height:80vh;border:none;"></iframe></div>';
+	                                                                document.body.appendChild(pdfModal);
+	                                                                const pdfClose = pdfModal.querySelector('.close');
+	                                                                const pdfFrame = document.getElementById('pdf-frame');
+	                                                                document.addEventListener('click', function(e) {
+	                                                                    const btn = e.target.closest('.open-pdf');
+	                                                                    if (btn) {
+	                                                                        const src = btn.dataset.src;
+	                                                                        pdfFrame.src = src;
+	                                                                        pdfModal.style.display = 'block';
+	                                                                    }
+	                                                                });
+	                                                                pdfClose.addEventListener('click', function() {
+	                                                                    pdfFrame.src = '';
+	                                                                    pdfModal.style.display = 'none';
+	                                                                });
+	                                                            });
+																</script>
 {% endblock %}
 
 {% block body %}
@@ -87,11 +87,13 @@
 								<br>
 								{% if extension == 'pdf' %}
 									<button class="btn-outline open-pdf" data-src="{{ asset(challenge.content) }}">
-										View File: {{ challenge.content|split('/')|last }}
+										View File:
+										{{ challenge.content|split('/')|last }}
 									</button>
 								{% else %}
 									<a href="{{ asset(challenge.content) }}" target="_blank">
-										View File: {{ challenge.content|split('/')|last }}
+										View File:
+										{{ challenge.content|split('/')|last }}
 									</a>
 								{% endif %}
 							{% endif %}
@@ -111,7 +113,8 @@
 						</div>
 
 						<div style="display: flex; justify-content: space-between; width: 100%;">
-							<span style="flex:1; text-align: left;">👥 participations: {{ groupsWorked[challenge.id]|default(0) }}</span>
+							<span style="flex:1; text-align: left;">👥 participations:
+								{{ groupsWorked[challenge.id]|default(0) }}</span>
 							<span style="flex:1; text-align: center;">🔢 Min / Max Group Nbr:
 								{{challenge.minGroupNbr}}
 								/
@@ -186,7 +189,10 @@
 					<div id="proposition-form-{{ challenge.id }}" style="display:none; margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; background: #f9f9f9;">
 						{% if groupsByChallenge[challenge.id] is defined and groupsByChallenge[challenge.id]|length > 0 %}
 							{% for g in groupsByChallenge[challenge.id] %}
-								<p><strong>Group {{ loop.index }}:</strong> {{ g.name }}</p>
+								<p>
+									<strong>Group
+										{{ loop.index }}:</strong>
+									{{ g.name }}</p>
 							{% endfor %}
 						{% else %}
 							<p>No groups for this challenge yet.</p>
@@ -243,7 +249,6 @@
 
 				{{ form_end(formA) }}
 			</aside>
-
 
 
 		</div>

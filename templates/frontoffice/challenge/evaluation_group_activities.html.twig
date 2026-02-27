@@ -1,0 +1,197 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/evaluation_challenge.css') }}">
+  <style>
+    .supervisor-group-page .center-wrap { max-width: 820px; margin: 0 auto; }
+    .supervisor-group-page .activity-card { background:#fff;border:1px solid #e8eef7;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.06);padding:14px; }
+    .supervisor-group-page .problems-section { margin-top:12px; }
+    .supervisor-group-page .problem-item { margin:16px 0; border-top:3px solid #4a76f0; padding:16px; background:#fff; border:1px solid #e8eef7; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+    .supervisor-group-page .problem-header { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; }
+    .supervisor-group-page .pill { min-width:26px; height:26px; line-height:26px; border-radius:999px; background:#eef2ff; border:1px solid #e5e7eb; }
+    .supervisor-group-page .problem-title { font-weight:800; color:#1a202c; }
+    .supervisor-group-page .problem-desc { text-align:center; margin-bottom:12px; color:#4a5568; }
+    .supervisor-group-page .problem-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .supervisor-group-page .solution-card { text-align:center; background:#f7fafc; border:1px solid #e8eef7; border-radius:10px; padding:12px; }
+    .supervisor-group-page .label { font-weight:700; color:#2d3748; margin-bottom:4px; }
+    .supervisor-group-page .solution-text { color:#4a5568; }
+    .supervisor-group-page .scores-box { margin-top:14px; padding:14px; background:#e0e7ff; border-radius:10px; text-align:center; }
+    .supervisor-group-page .score-number { font-size:26px; font-weight:900; color:#1a202c; }
+    .supervisor-group-page .member-card { margin:10px 0; padding:12px; background:#f7fafc; border:1px solid #e8eef7; border-radius:10px; }
+    @media (max-width: 900px) { .supervisor-group-page .problem-grid { grid-template-columns:1fr; } }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <section class="about-section supervisor-group-page">
+    <div class="section-header">
+      <p class="section-subtitle">Supervisor Area</p>
+      <h2 class="section-title">Group Activities</h2>
+      <p class="subtle">Challenge: {{ challenge.title }} • Group: {{ group.name }}</p>
+    </div>
+
+    <div class="page-grid">
+      <div class="module-card hero-card">
+        <div class="module-icon">🏆</div>
+        <h3>{{ challenge.title }}</h3>
+        <p class="challenge-meta">{{ challenge.description }}</p>
+      </div>
+    </div>
+
+    <div class="page-grid">
+      {% for activity in activities %}
+        <div class="activity-card">
+          <div class="activity-title">
+            <h5>Activity #{{ activity.id }}</h5>
+            <span class="badge">{{ activity.status|default('submitted') }}</span>
+          </div>
+          <div class="submission-block">
+            <strong>Submission File:</strong>
+            {% if activity.submissionFile %}
+              <p>
+                <button class="signin-btn open-pdf" data-target="pdf-container-{{ activity.id }}" data-src="{{ asset('assets/challenge/pdf/' ~ activity.submissionFile) }}">Open</button>
+              </p>
+              <div id="pdf-container-{{ activity.id }}" class="pdf-inline-container" style="display:none; margin-top:10px;">
+                <div class="pdf-inline-header">
+                  <span>Submission Preview</span>
+                  <button class="signin-btn close-pdf" data-target="pdf-container-{{ activity.id }}">Close</button>
+                </div>
+                <iframe src="" class="pdf-frame" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>
+              </div>
+            {% else %}
+              <span>Not submitted</span>
+            {% endif %}
+          </div>
+
+          {% set ps = problemSolutionsByActivity[activity.id] %}
+          {% if ps is not empty %}
+            <div class="center-wrap">
+              <div class="problems-section">
+                <h6>Problems</h6>
+                {% for problem in ps %}
+                  <div class="problem-item">
+                    <div class="problem-header">
+                      <span class="pill">{{ loop.index }}</span>
+                      <div class="problem-title">Problem</div>
+                    </div>
+                    <div class="problem-desc">{{ problem.problemDescription }}</div>
+                    <div class="problem-grid">
+                      <div class="solution-card">
+                        <div class="label">Group solution</div>
+                        <div class="solution-text">{{ problem.groupSolution ?: '—' }}</div>
+                      </div>
+                      <div class="solution-card">
+                        <div class="label">Supervisor solution</div>
+                        <div class="solution-text">{{ problem.supervisorSolution ?: '—' }}</div>
+                      </div>
+                    </div>
+                    <form action="{{ path('submit_problem_solution', {'problemId': problem.id}) }}" method="POST" style="margin-top:10px; text-align:center;">
+                      <input type="text" name="supervisorSolution" value="{{ problem.supervisorSolution ?: '' }}" style="width:80%;" placeholder="Supervisor solution">
+                      <button type="submit" class="signin-btn">{{ problem.supervisorSolution ? 'Modify' : 'Add' }} Solution</button>
+                    </form>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% set members = memberActivitiesByActivity[activity.id]|default([]) %}
+          {% if members is not empty %}
+            <div class="center-wrap">
+              <div class="problems-section">
+                <h6>Members</h6>
+                {% for item in members %}
+                  <div class="member-card">
+                    <p>{{ item.user.nom }} - Activity: {{ item.member.activityDescription }}</p>
+                    <form action="{{ path('submit_member_score', {'memberActivityId': item.member.id}) }}" method="POST" style="margin-top:6px; text-align:center;">
+                      <input type="number" name="score" value="{{ item.member.indivScore ?: '' }}" min="0" max="20" step="1" style="width:60px;" placeholder="Score">
+                      <button type="submit" class="signin-btn">{{ item.member.indivScore ? 'Modify' : 'Submit' }} Score</button>
+                    </form>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="activity-form">
+            {% if groupFeedback[activity.id] is not defined %}
+              <h6>Submit Group Feedback</h6>
+              <form method="post" action="{{ path('submit_group_feedback', {'activityId': activity.id}) }}" enctype="multipart/form-data">
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label for="groupScore_{{ activity.id }}">Group Score:</label>
+                  <input type="number" name="groupScore" id="groupScore_{{ activity.id }}" min="0" max="20" step="1" required style="width:60px;">
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                  <input type="file" name="feedbackPdf" accept=".pdf">
+                </div>
+                <button type="submit" class="signin-btn">Submit Feedback</button>
+              </form>
+            {% else %}
+              <h6>Modify Group Feedback</h6>
+              <form method="post" action="{{ path('submit_group_feedback', {'activityId': activity.id}) }}" enctype="multipart/form-data">
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label for="groupScore_{{ activity.id }}">Group Score:</label>
+                  <input type="number" value="{{ groupFeedback[activity.id].score }}" name="groupScore" id="groupScore_{{ activity.id }}" min="0" max="20" step="1" style="width:60px;">
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                  <input type="file" name="feedbackPdf" accept=".pdf">
+                </div>
+                <button type="submit" class="signin-btn">Modif Feedback</button>
+              </form>
+
+              <div class="scores-box">
+                <p>Submitted Group Score: <span class="score-number">{{ groupFeedback[activity.id].score }}</span></p>
+                {% if groupFeedback[activity.id].pdfFilename %}
+                  <div class="submission-block" style="margin-top:8px;">
+                    <strong>Feedback PDF:</strong>
+                    <p>
+                      <button class="signin-btn open-pdf" data-target="feedback-container-{{ activity.id }}" data-src="{{ asset('assets/challenge/pdf/' ~ groupFeedback[activity.id].pdfFilename) }}">Open</button>
+                    </p>
+                    <div id="feedback-container-{{ activity.id }}" class="pdf-inline-container" style="display:none; margin-top:10px;">
+                      <div class="pdf-inline-header">
+                        <span>Feedback Preview</span>
+                        <button class="signin-btn close-pdf" data-target="feedback-container-{{ activity.id }}">Close</button>
+                      </div>
+                      <iframe src="" class="pdf-frame" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <p class="subtle">No activities for this group.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.open-pdf').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const src = btn.dataset.src;
+        const container = document.getElementById(targetId);
+        if (!container) return;
+        const frame = container.querySelector('.pdf-frame');
+        if (frame) { frame.src = src; }
+        container.style.display = 'block';
+      });
+    });
+    document.querySelectorAll('.close-pdf').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const container = document.getElementById(targetId);
+        if (!container) return;
+        const frame = container.querySelector('.pdf-frame');
+        if (frame) { frame.src = ''; }
+        container.style.display = 'none';
+      });
+    });
+  });
+  </script>
+{% endblock %}

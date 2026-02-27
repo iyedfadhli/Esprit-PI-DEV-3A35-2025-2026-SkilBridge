@@ -13,9 +13,18 @@ parameters:
     contract_signed_email: '%env(CONTRACT_SIGNED_EMAIL)%'
     mailer_from: '%env(MAILER_FROM)%'
     gemini_api_key: '%env(GEMINI_API_KEY)%'
+    FLOWISE_API_KEY: '%env(FLOWISE_API_KEY)%'
+    FLOWISE_API_HOST: '%env(FLOWISE_API_HOST)%'
+    FLOWISE_GRADE_FLOW_ID: '%env(FLOWISE_GRADE_FLOW_ID)%'
 
 
 services:
+    App\Service\FlowiseGraderService:
+        arguments:
+            $http: '@http_client'
+            $FLOWISE_API_KEY: '%FLOWISE_API_KEY%'
+            $FLOWISE_API_HOST: '%FLOWISE_API_HOST%'
+            $FLOWISE_GRADE_FLOW_ID: '%FLOWISE_GRADE_FLOW_ID%'
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.

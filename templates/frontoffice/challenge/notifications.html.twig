@@ -1,0 +1,65 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .notif-page { max-width: 900px; margin: 24px auto; padding: 0 12px; }
+    .notif-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .notif-list { background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.06); overflow:hidden; }
+    .notif-row { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; border-bottom:1px solid #f2f4f8; }
+    .notif-row:last-child { border-bottom:0; }
+    .dot { width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; }
+    .dot.unread { background:#4a7fd7; }
+    .dot.read { background:#cfd6e4; }
+    .content { flex:1; }
+    .title { margin:0; font-size:14px; font-weight:500; color:#1a202c; }
+    .time { margin:4px 0 0; font-size:12px; color:#9ca3af; }
+    .actions a { color:#4a7fd7; text-decoration:none; font-weight:500; }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <div class="notif-page">
+    <div class="notif-header">
+      <h2>All Notifications</h2>
+    </div>
+
+    <div class="notif-list">
+      {% for n in notifications %}
+        {% set d = n.data %}
+        {% set type = d.extra.type ?? null %}
+        {% set url =
+          type == 'activity_evaluated' ? path('old_activities') :
+          (type == 'activity_submitted' ? path('evaluation') :
+          (roleLabel == 'Supervisor' ? path('evaluation') : path('old_activities'))) %}
+        <div class="notif-row">
+          <div class="dot {{ n.isRead ? 'read' : 'unread' }}"></div>
+          <div class="content">
+            <p class="title">{{ d.message ?? '' }}</p>
+            <p class="time">
+              {{ d.createdAt is defined ? d.createdAt|date('Y-m-d H:i') : '' }}
+            </p>
+          </div>
+          <div class="actions">
+            <a href="{{ path('notifications_open', {id: n.id}) }}">Open</a>
+          </div>
+        </div>
+      {% else %}
+        <div class="notif-row">
+          <div class="content">
+            <p class="title">No notifications</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% if pagesCount > 1 %}
+      <div class="pagination" style="display:flex; gap:8px; justify-content:center; margin-top:16px;">
+        {% set prev = page > 1 ? page - 1 : 1 %}
+        {% set next = page < pagesCount ? page + 1 : pagesCount %}
+        <a class="btn-secondary" href="{{ path('notifications_index', {page: prev, limit: pageSize}) }}">Prev</a>
+        <span>Page {{ page }} / {{ pagesCount }}</span>
+        <a class="btn-secondary" href="{{ path('notifications_index', {page: next, limit: pageSize}) }}">Next</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

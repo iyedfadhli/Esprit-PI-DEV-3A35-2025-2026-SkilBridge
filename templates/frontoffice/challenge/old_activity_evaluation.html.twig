@@ -1,0 +1,308 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/challenge/old_activities.css') }}">
+  <style>
+    .about-section.evaluation-page .module-card,
+    .about-section.evaluation-page .activity-card {
+      background: #ffffff;
+      border: 1px solid #e8eef7;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .about-section.evaluation-page .center-wrap { max-width: 820px; margin: 0 auto; }
+    .about-section.evaluation-page h4 { margin-bottom: 8px; }
+    .about-section.evaluation-page .problems-section { margin-top: 12px; }
+    .about-section.evaluation-page .problem-item { margin: 16px 0; border-top: 3px solid #4a76f0; padding: 16px; }
+    .about-section.evaluation-page .problem-header { justify-content: center; gap: 8px; margin-bottom: 10px; }
+    .about-section.evaluation-page .pill { min-width: 26px; height: 26px; line-height: 26px; }
+    .about-section.evaluation-page .problem-title { font-weight: 800; }
+    .about-section.evaluation-page .problem-desc { text-align: center; margin-bottom: 12px; color: #4a5568; }
+    .about-section.evaluation-page .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .about-section.evaluation-page .solution-card { text-align: center; background: #f7fafc; border: 1px solid #e8eef7; border-radius: 10px; padding: 12px; }
+    .about-section.evaluation-page .label { font-weight: 700; color: #2d3748; margin-bottom: 4px; }
+    .about-section.evaluation-page .solution-text { color: #4a5568; }
+    .about-section.evaluation-page .scores-box { margin-top: 14px; padding: 14px; background: #e0e7ff; border-radius: 10px; text-align: center; }
+    .about-section.evaluation-page .score-number { font-size: 26px; font-weight: 900; color: #1a202c; }
+    .about-section.evaluation-page .metrics-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px; }
+    .about-section.evaluation-page .metric-card { background:#f7fafc; border:1px solid #e8eef7; border-radius:10px; padding:12px; }
+    .about-section.evaluation-page .metric-label { font-size:12px; color:#4a5568; text-transform:uppercase; letter-spacing:.02em; }
+    .about-section.evaluation-page .metric-value { font-size:24px; font-weight:900; color:#1a202c; }
+    .about-section.evaluation-page .final-block { margin-top:12px; }
+    .about-section.evaluation-page .final-value { font-size:32px; font-weight:900; color:#111827; }
+    .about-section.evaluation-page .status-badge { display:inline-block; margin-top:8px; padding:6px 12px; border-radius:999px; font-weight:800; font-size:13px; }
+    .about-section.evaluation-page .status-badge.passed { background:#dcfce7; color:#166534; }
+    .about-section.evaluation-page .status-badge.failed { background:#fee2e2; color:#991b1b; }
+    .about-section.evaluation-page .ranking-section { margin-top:16px; text-align:center; }
+    #ranking-modal { display:none; position:fixed; z-index:5000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); }
+    #ranking-modal .modal-content { background:#fff; margin:50px auto; padding:24px; border-radius:16px; width:92%; max-width:880px; box-shadow:0 10px 30px rgba(0,0,0,0.25); }
+    #ranking-modal .podium { display:flex; align-items:flex-end; justify-content:center; gap:28px; margin:22px 0; }
+    #ranking-modal .place { position:relative; width:200px; border-radius:16px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:16px 12px 20px; background:linear-gradient(180deg,#2b2b2b 0%, #0f0f0f 55%, #1a1a1a 100%); box-shadow:inset 0 -12px 20px rgba(0,0,0,0.4), inset 0 10px 14px rgba(255,255,255,0.06), 0 10px 24px rgba(0,0,0,0.25); }
+    #ranking-modal .place::before { content:''; position:absolute; top:-18px; left:50%; transform:translateX(-50%); width:86%; height:34px; border-radius:50%; box-shadow:0 6px 12px rgba(0,0,0,0.25), inset 0 2px 6px rgba(255,255,255,0.6); }
+    #ranking-modal .place.first { height:240px; }
+    #ranking-modal .place.second { height:200px; }
+    #ranking-modal .place.third { height:170px; }
+    #ranking-modal .place.first::before { background:linear-gradient(180deg,#fde68a,#f59e0b); }
+    #ranking-modal .place.second::before { background:linear-gradient(180deg,#f3f4f6,#9ca3af); }
+    #ranking-modal .place.third::before { background:linear-gradient(180deg,#ffd7a1,#c27b32); }
+    #ranking-modal .place .rank-number { position:absolute; top:45%; left:50%; transform:translate(-50%,-50%); color:#ffffff; font-size:40px; font-weight:900; text-shadow:0 2px 4px rgba(0,0,0,0.5); }
+    #ranking-modal .place .user-name { margin-top:auto; font-weight:800; color:#f1f5f9; text-align:center; }
+    #ranking-modal .place .score { margin-top:4px; font-size:14px; color:#e5e7eb; text-align:center; }
+    #ranking-modal .avatar { width:44px; height:44px; border-radius:50%; object-fit:cover; box-shadow:0 2px 8px rgba(0,0,0,0.15); margin-bottom:6px; border:2px solid rgba(255,255,255,0.6); }
+    #ranking-modal .avatar.placeholder { display:flex; align-items:center; justify-content:center; background:#374151; color:#fff; font-size:20px; }
+    #ranking-modal .rank-center { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:260px; margin:8px 0; }
+    #ranking-modal .rank-text { font-size:14px; color:#6b7280; font-weight:800; letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px; }
+    #ranking-modal .rank-chip { display:inline-flex; align-items:center; justify-content:center; padding:16px 26px; border-radius:999px; background:linear-gradient(180deg,#111827,#1f2937); color:#fff; font-weight:900; font-size:36px; box-shadow:0 8px 24px rgba(0,0,0,0.25), inset 0 2px 8px rgba(255,255,255,0.08); }
+    .about-section.evaluation-page .user-rank { text-align:center; margin-top:14px; font-weight:900; color:#0f172a; }
+    .about-section.evaluation-page .leaderboard { margin-top:18px; }
+    .about-section.evaluation-page .leaderboard-row { display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px; background:#f9fafb; margin-bottom:8px; }
+    .about-section.evaluation-page .leaderboard-row.highlight { background:#e0e7ff; }
+    .about-section.evaluation-page .leaderboard-left { display:flex; align-items:center; gap:10px; }
+    .about-section.evaluation-page .leaderboard-rank { width:34px; height:34px; border-radius:50%; background:#e5e7eb; display:flex; align-items:center; justify-content:center; font-weight:800; color:#111827; }
+    .about-section.evaluation-page .leaderboard-name { font-weight:700; color:#111827; }
+    .about-section.evaluation-page .leaderboard-score { font-weight:900; color:#0f172a; }
+    @media (max-width: 900px) { .about-section.evaluation-page .problem-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .about-section.evaluation-page .metrics-grid { grid-template-columns: 1fr; } }
+    #certificate-modal { display:none; position:fixed; z-index:5000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center; }
+    #certificate-modal .modal-content { background:#fff; padding:24px; border-radius:16px; width:92%; max-width:980px; box-shadow:0 10px 30px rgba(0,0,0,0.25); }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <section class="about-section evaluation-page">
+    <div class="section-header">
+      <p class="section-subtitle">Your Activity</p>
+      <h2 class="section-title">Evaluation</h2>
+    </div>
+
+    <div class="evaluation-grid">
+      <div class="center-wrap">
+        <div class="module-card">
+          <div class="module-icon">🏆</div>
+          <h3>{{ challenge.title }}</h3>
+          <p class="challenge-meta">{{ challenge.description }}</p>
+        </div>
+      </div>
+
+      <div class="center-wrap">
+        <div class="activity-card">
+          <h4>📄 Your Submitted Activity</h4>
+          <div class="challenge-meta" style="margin:8px 0;">
+            Activity ID: {{ activity.id }}
+          </div>
+          {% if activity.submissionFile %}
+            <p>
+              <a class="signin-btn" href="{{ asset('assets/challenge/pdf/' ~ activity.submissionFile) }}" target="_blank">Open Submission</a>
+            </p>
+          {% endif %}
+          <div class="challenge-meta" style="margin-top: 8px;">
+            Submitted on: {{ activity.submissionDate|date('d F Y') }}
+          </div>
+        </div>
+
+        <div class="activity-card">
+          <h4>📝 Evaluation</h4>
+          {% if problems|length > 0 %}
+            <h5>Problems</h5>
+            <div class="problems-section">
+              {% for problem in problems %}
+                <div class="problem-item">
+                  <div class="problem-header">
+                    <span class="pill">{{ loop.index }}</span>
+                    <div class="problem-title">Problem</div>
+                  </div>
+                  <div class="problem-desc">{{ problem.problemDescription }}</div>
+                  <div class="problem-grid">
+                    <div class="solution-card">
+                      <div class="label">Group solution</div>
+                      <div class="solution-text">{{ problem.groupSolution ?: '—' }}</div>
+                    </div>
+                    <div class="solution-card">
+                      <div class="label">Supervisor solution</div>
+                      <div class="solution-text">{{ problem.supervisorSolution ?: '—' }}</div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if feedback %}
+            <div class="scores-box">
+              {% if indivScore is not null %}
+                {% set finalScore = (indivScore * 0.7) + (feedback.score * 0.3) %}
+                {% set passedClass = finalScore > 10 ? 'passed' : 'failed' %}
+              {% endif %}
+              <div class="metrics-grid">
+                <div class="metric-card">
+                  <div class="metric-label">Your Individual Score</div>
+                  <div class="metric-value">{{ indivScore is not null ? indivScore : '—' }}</div>
+                </div>
+                <div class="metric-card">
+                  <div class="metric-label">Submitted Group Score</div>
+                  <div class="metric-value">{{ feedback.score }}</div>
+                </div>
+              </div>
+              {% if indivScore is not null %}
+                <div class="final-block">
+                  <div class="metric-label">Final Score</div>
+                  <div class="final-value">{{ finalScore|round(2, 'common') }}</div>
+                  <span class="status-badge {{ passedClass }}">{{ finalScore > 10 ? 'Passed' : 'Not Passed' }}</span>
+                </div>
+                {% if finalScore > 10 %}
+                  <div style="margin-top:12px; text-align:center;">
+                    <button class="signin-btn open-cert" data-url="{{ path('challenge_certificate_preview', {'challengeId': challenge.id, 'activityId': activity.id, 'userId': viewerUserId}) }}">View Certificate</button>
+                    <a class="signin-btn" href="{{ path('challenge_certificate_pdf', {'challengeId': challenge.id, 'activityId': activity.id, 'userId': viewerUserId}) }}">Download Certificate</a>
+                  </div>
+                {% endif %}
+              {% endif %}
+              {% if feedback.pdfFilename %}
+                <div class="submission-block" style="margin-top:8px;">
+                  <span>Feedback PDF:</span>
+                  <p>
+                    <button class="signin-btn open-pdf" data-target="feedback-container-{{ activity.id }}" data-src="{{ asset('assets/challenge/pdf/' ~ feedback.pdfFilename) }}">Open</button>
+                  </p>
+                  <div id="feedback-container-{{ activity.id }}" class="pdf-inline-container" style="display:none; margin-top:10px;">
+                    <div class="pdf-inline-header">
+                      <span>Feedback Preview</span>
+                      <button class="signin-btn close-pdf" data-target="feedback-container-{{ activity.id }}">Close</button>
+                    </div>
+                    <iframe src="" class="pdf-frame" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>
+                  </div>
+                </div>
+              {% endif %}
+              <div class="ranking-section">
+                <button class="signin-btn" id="open-ranking">View Individual Ranking</button>
+              </div>
+            </div>
+          {% else %}
+            <p class="challenge-meta">Not Evaluated Yet</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.open-pdf').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const src = btn.dataset.src;
+        const container = document.getElementById(targetId);
+        if (!container) return;
+        const frame = container.querySelector('.pdf-frame');
+        if (frame) { frame.src = src; }
+        container.style.display = 'block';
+      });
+    });
+    document.querySelectorAll('.close-pdf').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const container = document.getElementById(targetId);
+        if (!container) return;
+        const frame = container.querySelector('.pdf-frame');
+        if (frame) { frame.src = ''; }
+        container.style.display = 'none';
+      });
+    });
+  });
+  </script>
+  <div id="certificate-modal" class="modal">
+    <div class="modal-content" style="max-width:980px;">
+      <h3 style="text-align:center;">Certificate</h3>
+      <iframe id="certificate-frame" src="" style="width:100%;height:70vh;border:none;border-radius:6px;"></iframe>
+      <div style="text-align:center;margin-top:14px;">
+        <button class="signin-btn" id="close-certificate">Close</button>
+      </div>
+    </div>
+  </div>
+  <div id="ranking-modal" class="modal">
+    <div class="modal-content">
+      <h3 style="text-align:center;">Individual Ranking</h3>
+      {% if totalPassed > 0 %}
+        <div class="podium">
+          <div class="place second">
+            <div class="rank-number">🥈</div>
+            {% if topRankers[1] is defined and topRankers[1].photo %}
+              <img class="avatar" src="{{ asset('assets/images/frontoffice/user_pic/' ~ topRankers[1].photo) }}" alt="">
+            {% else %}
+              <div class="avatar placeholder">👤</div>
+            {% endif %}
+            <div class="user-name">{{ topRankers[1] is defined ? topRankers[1].userName : '—' }}</div>
+            <div class="score">{{ topRankers[1] is defined ? topRankers[1].final : '' }}</div>
+          </div>
+          <div class="place first">
+            <div class="rank-number">🥇</div>
+            {% if topRankers[0] is defined and topRankers[0].photo %}
+              <img class="avatar" src="{{ asset('assets/images/frontoffice/user_pic/' ~ topRankers[0].photo) }}" alt="">
+            {% else %}
+              <div class="avatar placeholder">👤</div>
+            {% endif %}
+            <div class="user-name">{{ topRankers[0] is defined ? topRankers[0].userName : '—' }}</div>
+            <div class="score">{{ topRankers[0] is defined ? topRankers[0].final : '' }}</div>
+          </div>
+          <div class="place third">
+            <div class="rank-number">🥉</div>
+            {% if topRankers[2] is defined and topRankers[2].photo %}
+              <img class="avatar" src="{{ asset('assets/images/frontoffice/user_pic/' ~ topRankers[2].photo) }}" alt="">
+            {% else %}
+              <div class="avatar placeholder">👤</div>
+            {% endif %}
+            <div class="user-name">{{ topRankers[2] is defined ? topRankers[2].userName : '—' }}</div>
+            <div class="score">{{ topRankers[2] is defined ? topRankers[2].final : '' }}</div>
+          </div>
+        </div>
+      {% endif %}
+      <div class="rank-center">
+        {% if totalPassed > 0 and currentRank is not null %}
+          <div class="rank-text">Your Rank</div>
+          <div class="rank-chip">{{ currentRank }} / {{ totalPassed }}</div>
+        {% elseif totalPassed > 0 %}
+          <div class="rank-text">Your Rank</div>
+          <div class="rank-chip">— / {{ totalPassed }}</div>
+        {% else %}
+          <div class="rank-text">No passed participants yet</div>
+        {% endif %}
+      </div>
+      <div style="text-align:center;margin-top:14px;">
+        <button class="signin-btn" id="close-ranking">Close</button>
+      </div>
+    </div>
+  </div>
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const certOpeners = document.querySelectorAll('.open-cert');
+    const certModal = document.getElementById('certificate-modal');
+    const certFrame = document.getElementById('certificate-frame');
+    const certClose = document.getElementById('close-certificate');
+    certOpeners.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const url = btn.dataset.url;
+        if (certFrame) { certFrame.src = url; }
+        if (certModal) { certModal.style.display = 'flex'; }
+      });
+    });
+    if (certClose && certModal) {
+      certClose.addEventListener('click', () => { certModal.style.display = 'none'; certFrame.src = ''; });
+    }
+    certModal?.addEventListener('click', (e) => { if (e.target === certModal) { certModal.style.display = 'none'; certFrame.src=''; } });
+    const openBtn = document.getElementById('open-ranking');
+    const closeBtn = document.getElementById('close-ranking');
+    const modal = document.getElementById('ranking-modal');
+    if (openBtn && modal) {
+      openBtn.addEventListener('click', () => { modal.style.display = 'block'; });
+    }
+    if (closeBtn && modal) {
+      closeBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    }
+    modal?.addEventListener('click', (e) => {
+      if (e.target === modal) { modal.style.display = 'none'; }
+    });
+  });
+  </script>
+{% endblock %}

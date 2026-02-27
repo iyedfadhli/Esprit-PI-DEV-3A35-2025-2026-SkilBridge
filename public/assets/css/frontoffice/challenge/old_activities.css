@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* Old Activity Page Layout */
 
 .challenge-wrapper {
@@ -277,3 +278,416 @@
     font-size: 24px;
     cursor: pointer;
 }
+=======
+/* Old Activity Page Layout */
+
+.challenge-wrapper {
+    max-width: 1000px;
+    margin: 15px auto;
+    padding: 0 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Per-activity row grid */
+.row-grid { display:flex; flex-wrap:wrap; gap:12px; align-items:flex-start; }
+.row-grid > .submitted-section,
+.row-grid > .evaluation-section { flex: 1 1 0; min-width: 0; }
+
+/* Module Cards - Challenge & Activity Sections */
+.module-card {
+    background: white;
+    border-radius: 6px;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e8eef7;
+    transition: all 0.3s ease;
+}
+
+.module-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #d0dce8;
+}
+
+/* Module Icon */
+.module-icon {
+    font-size: 20px;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+/* Heading styles within cards */
+.module-card h3 {
+    margin: 0 0 4px 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1a202c;
+    letter-spacing: -0.5px;
+}
+
+.module-card h5 {
+    margin: 0 0 4px 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* Challenge Meta Information */
+.challenge-meta {
+    font-size: 9px;
+    color: #718096;
+    font-weight: 500;
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+}
+
+/* Challenge Section */
+.challenge-section {
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e8eef7;
+}
+
+.challenge-section h3 {
+    margin: 0 0 4px 0;
+}
+
+/* Paragraph styles */
+.module-card p {
+    margin: 0;
+    font-size: 11px;
+    color: #4a5568;
+    line-height: 1.3;
+}
+
+/* Activity Card */
+.activity-card {
+    background: #f7fafc;
+    border-left: 2px solid #4a76f0;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 6px 0 4px 0;
+}
+
+.activity-card p {
+    margin: 0 0 6px 0;
+    font-size: 10px;
+    color: #4a5568;
+    line-height: 1.3;
+}
+
+.activity-card .signin-btn {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+/* Buttons */
+.signin-btn,
+.evaluation-btn {
+    padding: 6px 14px;
+    border: none;
+    background: linear-gradient(135deg, #4a76f0 0%, #357abd 100%);
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px rgba(74, 118, 240, 0.2);
+}
+
+.signin-btn:hover,
+.evaluation-btn:hover {
+    box-shadow: 0 4px 8px rgba(74, 118, 240, 0.3);
+    transform: translateY(-1px);
+}
+
+.signin-btn:active,
+.evaluation-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(74, 118, 240, 0.2);
+}
+
+.signin-btn:focus,
+.evaluation-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 118, 240, 0.1), 0 4px 8px rgba(74, 118, 240, 0.3);
+}
+
+/* Evaluation Section */
+.evaluation-section {
+    text-align: center;
+    margin-top: 12px;
+    padding: 12px 0;
+}
+
+.evaluation-btn {
+    padding: 8px 20px;
+    font-size: 12px;
+}
+
+/* Disabled evaluation button */
+.disabled-btn {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.disabled-btn:hover {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transform: none;
+    background: #cbd5e0;
+}
+
+.disabled-btn:active {
+    transform: none;
+}
+
+.disabled-btn:focus {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .challenge-wrapper {
+        grid-template-columns: 1fr;
+        margin: 12px auto;
+        padding: 0 10px;
+        gap: 8px;
+    }
+    .row-grid { flex-direction: column; }
+    .row-grid > .submitted-section,
+    .row-grid > .evaluation-section { width: 100%; }
+
+    .module-card {
+        padding: 10px;
+    }
+
+    .module-card h3 {
+        font-size: 12px;
+    }
+
+    .signin-btn,
+    .evaluation-btn {
+        padding: 5px 12px;
+        font-size: 9px;
+    }
+
+    .activity-card {
+        padding: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .module-card {
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    .module-icon {
+        font-size: 18px;
+    }
+
+    .module-card h3 {
+        font-size: 11px;
+    }
+
+    .challenge-meta {
+        font-size: 8px;
+    }
+
+    .challenge-wrapper {
+        gap: 6px;
+        margin: 10px auto;
+    }
+    .row-grid { flex-direction: column; }
+    .row-grid > .submitted-section,
+    .row-grid > .evaluation-section { width: 100%; }
+
+    .evaluation-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .popup-content {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        width: 80%;
+        max-height: 80%;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        cursor: pointer;
+        font-size: 24px;
+    }
+
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modal-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.modal .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Inline PDF container */
+.pdf-inline-container {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.pdf-inline-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #2d3748;
+}
+
+/* Evaluation page */
+.evaluation-page {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+.evaluation-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+.center-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+}
+.evaluation-page .activity-card {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+.problems-section {
+    margin-top: 12px;
+}
+.evaluation-page .problem-item {
+    background: #ffffff;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    margin: 16px 0;
+    border-top: 3px solid #4a76f0;
+}
+.evaluation-page .problem-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+.evaluation-page .pill {
+    display: inline-block;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #1a202c;
+    font-size: 12px;
+    line-height: 26px;
+    text-align: center;
+    border: 1px solid #e5e7eb;
+}
+.evaluation-page .problem-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #1a202c;
+}
+.evaluation-page .problem-desc {
+    font-size: 12px;
+    color: #4a5568;
+    text-align: center;
+    margin-bottom: 12px;
+}
+.evaluation-page .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+.evaluation-page .solution-card {
+    background: #f7fafc;
+    border: 1px solid #e8eef7;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+.evaluation-page .label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 4px;
+}
+.evaluation-page .solution-text {
+    font-size: 12px;
+    color: #4a5568;
+}
+.evaluation-page .scores-box {
+    margin-top: 14px;
+    padding: 14px;
+    background: #e0e7ff;
+    border-radius: 10px;
+    text-align: center;
+}
+.evaluation-page .score-number {
+    font-size: 26px;
+    font-weight: 900;
+    color: #1a202c;
+}
+@media (max-width: 900px) {
+    .evaluation-page .problem-grid {
+        grid-template-columns: 1fr;
+    }
+}
+>>>>>>> gestion_challenge_advanced_features
