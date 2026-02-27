@@ -1,189 +1,211 @@
 <!DOCTYPE html>
 <html lang="en">
 
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<title>
-			{% block title %}Skill Bridge
-			{% endblock %}
-		</title>
+	<title>
+		{% block title %}Skill Bridge{% endblock %}
+	</title>
 
-		{# Favicon #}
-		<link
-		rel="shortcut icon" href="{{ asset('assets/images/frontoffice/logo.png') }}" type="image/x-icon">
+	{# Favicon #}
+	<link rel="shortcut icon" href="{{ asset('assets/images/frontoffice/logo.png') }}" type="image/x-icon">
 
-		{# Font Awesome #}
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	{# Font Awesome #}
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-		<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/home/home_page.css') }}">
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-		<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/home/chat.css') }}"> {% block stylesheets %}{%
+	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/home/home_page.css') }}">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="{{ asset('assets/css/frontoffice/home/chat.css') }}"> {% block stylesheets %}{%
 	endblock %}
-		{% block javascripts %} <script src="{{ asset('assets/js/frontoffice/chat.js') }}" defer></script>
-			 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
-			 <script>
-								const url = new URL('http://localhost:3001/.well-known/mercure');
-								url.searchParams.append('topic', 'https://example.com/chat');
-						
-								const es = new EventSource(url);
-								es.onmessage = e => console.log('Mercure update:', e.data);
-							</script>
-		{% endblock %}
+	{% block javascripts %}
+	<script src="{{ asset('assets/js/frontoffice/chat.js') }}" defer></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+	<script>
+		const url = new URL('http://localhost:3001/.well-known/mercure');
+		url.searchParams.append('topic', 'https://example.com/chat');
 
-	</head>
+		const es = new EventSource(url);
+		es.onmessage = e => console.log('Mercure update:', e.data);
+	</script>
+	{% endblock %}
 
-	<body>
-		<header>
-			<div class="logo">
-				<img src="{{ asset('assets/images/frontoffice/logo.png') }}" alt="Skill Bridge Logo" class="header-logo-img">
+</head>
+
+<body>
+	<header>
+		<div class="logo">
+			<img src="{{ asset('assets/images/frontoffice/logo.png') }}" alt="Skill Bridge Logo"
+				class="header-logo-img">
+		</div>
+
+		<nav>
+            {# Debug: {{ user ? 'UserDetected:' ~ user.id : 'NoUser' }} #}
+			{% if user %}
+
+			{% if user.getMainRoleLabel() == "Admin" %}
+			<a href="{{path('dashboard')}}">Dashboard</a>
+			{% endif %}
+			{% endif %}
+
+
+			<a href="{{ path('home') }}">Home</a>
+			<a href="{{ path('student_dashboard') }}">Courses</a>
+			<a href="{{ path('groups_index') }}">Groups</a>
+			<a href="#">Challenges</a>
+			{% if user %}
+			{% if user.getMainRoleLabel() == "Entreprise" %}
+			<a href="{{ path('entreprise_offer_index') }}">My Offers</a>
+			{% else %}
+			<a href="{{ path('preview_front_offer_index') }}">Jobs & CV</a>
+			<a href="{{ path('preview_front_cv_index') }}">Mes CV</a>
+			{% endif %}
+			{% else %}
+			<a href="{{ path('preview_front_offer_index') }}">Jobs & CV</a>
+			<a href="{{ path('preview_front_cv_index') }}">Mes CV</a>
+			{% endif %}
+			<a href="{{ path('app_front_hackathon_index') }}">Hackathon</a>
+			{% if user %}
+            <div class="dropdown" style="display: inline-block; margin-right: 12px;">
+                <a href="#" class="position-relative" title="Notifications" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-bell" aria-hidden="true" style="font-size:22px; color: #333;"></i>
+                    {% if unread_notifications_count is defined and unread_notifications_count > 0 %}
+                        <span style="position:absolute; top:-8px; right:-10px; background:#dc3545; color:#fff; border-radius:50%; padding:2px 7px; font-size:11px; font-weight: bold; border: 2px solid #fff;">
+                            {{ unread_notifications_count }}
+                        </span>
+                    {% endif %}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="notificationDropdown" style="min-width: 320px; border-radius: 12px; overflow: hidden;">
+                    <li class="dropdown-header bg-light py-3 px-4 border-bottom">
+                        <h6 class="mb-0 text-dark">Notifications</h6>
+                    </li>
+                    <div style="max-height: 350px; overflow-y: auto;">
+                        {% if unread_notifications is defined and unread_notifications is not empty %}
+                            {% for n in unread_notifications %}
+                                <li class="notification-item border-bottom">
+                                    <div class="dropdown-item py-3 px-4" style="white-space: normal; background: transparent;">
+                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                            <span class="badge bg-primary rounded-pill" style="font-size: 8px;">NEW</span>
+                                            <small class="text-muted" style="font-size: 11px;">{{ n.createdAt|date('d/m H:i') }}</small>
+                                        </div>
+                                        <div class="text-dark fw-medium" style="font-size: 13.5px; line-height: 1.4;">{{ n.message }}</div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                            <li class="p-2 border-top bg-light text-center">
+                                <a class="btn btn-link btn-sm text-decoration-none fw-bold" href="{{ path('student_notifications_mark_read') }}" style="font-size: 12px; color: #007bff;">
+                                     Tout marquer comme lu
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="py-5 text-center px-4">
+                                <div class="mb-2 text-muted" style="font-size: 32px;"><i class="fa fa-bell-slash-o"></i></div>
+                                <span class="text-muted small">Aucune nouvelle notification</span>
+                            </li>
+                        {% endif %}
+                    </div>
+                </ul>
+            </div>
+			<div class="header-profile">
+				<a href="{{path('profile')}}">
+					<img src="{{ asset(user.photo ?: 'assets/images/frontoffice/user_pic/profile_pic.png') }}"
+						alt="Profile" class="profile-img"></a>
 			</div>
+			<a href="{{ path('logout') }}" class="logout-btn">Logout</a>
 
-			<nav>
-				{% if user %}
+			{% else %}
+			<a href="{{ path('sign') }}">
+				<button class="signin-btn">Sign in</button>
+			</a>
+			{% endif %}
 
-					{% if user.getMainRoleLabel() == "Admin" %}
-						<a href="{{path('dashboard')}}">Dashboard</a>
-					{% endif %}
-				{% endif %}
+		</nav>
+	</header>
 
+	<main>
+		{% block body %}{% endblock %}
+	</main>
 
-				<a href="{{ path('home') }}">Home</a>
-				<a href="{{ path('student_dashboard') }}">Courses</a>
-				<a href="{{ path('groups_index') }}">Groups</a>
-				{% if not user %}
-					<a href="{{path('activity_check')}}">Challenges</a>
-				{% endif %}
+	<footer class="footer">
+		<div class="footer-top">
+			<div class="footer-row">
 
-				{% if user %}
-
-					{% if user.getMainRoleLabel() == "Supervisor" %}
-						<a href="{{path('supervisor_challenge')}}">Challenges</a>
-						<a href="{{path('evaluation')}}">Evaluation</a>
-					{% elseif user.getMainRoleLabel() == "Student" %}
-						<a href="{{path('old_activities')}}">Old Activities</a>
-						<a href="{{path('activity_check')}}">Challenges</a>
-
-					{% else %}
-						<a href="{{path('activity_check')}}">Challenges</a>
-
-					{% endif %}
-
-
-				{% endif %}
-
-				{% if user %}
-					{% if user.getMainRoleLabel() == "Entreprise" %}
-						<a href="{{ path('entreprise_offer_index') }}">My Offers</a>
-					{% else %}
-						<a href="{{ path('preview_front_offer_index') }}">Jobs & CV</a>
-						<a href="{{ path('preview_front_cv_index') }}">Mes CV</a>
-					{% endif %}
-				{% else %}
-					<a href="{{ path('preview_front_offer_index') }}">Jobs & CV</a>
-					<a href="{{ path('preview_front_cv_index') }}">Mes CV</a>
-				{% endif %}
-				<a href="{{ path('app_front_hackathon_index') }}">Hackathon</a>
-				{% if user %}
-					<div class="header-profile">
-						<a href="{{path('profile')}}">
-							<img src="{{ asset(user.photo ?: 'assets/images/frontoffice/user_pic/profile_pic.png') }}" alt="Profile" class="profile-img"></a>
-					</div>
-					<a href="{{ path('logout') }}" class="logout-btn">Logout</a>
-
-				{% else %}
-					<a href="{{ path('sign') }}">
-						<button class="signin-btn">Sign in</button>
-					</a>
-				{% endif %}
-
-			</nav>
-		</header>
-
-		<main>
-			{% block body %}{% endblock %}
-		</main>
-
-		<footer class="footer">
-			<div class="footer-top">
-				<div class="footer-row">
-
-					<div class="footer-col">
-						<h2>Skill Bridge</h2>
-						<p>
-							Plateforme éducative intelligente pour améliorer les compétences
-																				des étudiants et connecter les talents avec les opportunités.
-						</p>
-					</div>
-
-					<div class="footer-col">
-						<h3>LIENS UTILES</h3>
-						<ul>
-							<li><a href="#">Programme d’affiliation</a></li>
-							<li><a href="#">Devenir partenaire</a></li>
-							<li><a href="#">Aide et FAQ</a></li>
-							<li><a href="#">À propos de Skill Bridge</a></li>
-							<li><a href="#">Nos tarifs</a></li>
-							<li><a href="#">Comment ça marche ?</a></li>
-							<li><a href="#">Nous contacter</a></li>
-						</ul>
-					</div>
-
-					<div class="footer-col">
-						<h3>NOUS CONTACTER</h3>
-						<p>📞 +216 97347595</p>
-						<p>✉️
-							<a href="mailto:contact@skillbridge.tn">contact@skillbridge.tn</a>
-						</p>
-
-						<div class="footer-social">
-							<a href="#">
-								<i class="fa fa-facebook"></i>
-							</a>
-							<a href="#">
-								<i class="fa fa-instagram"></i>
-							</a>
-							<a href="#">
-								<i class="fa fa-linkedin"></i>
-							</a>
-						</div>
-					</div>
-
-				</div>
-			</div>
-
-			<div class="footer-bottom">
-				<p>&copy; 2026 Skill Bridge. Tous droits réservés.</p>
-			</div>
-			<div id="chat-container">
-				<div id="chat-bubble-container">
-					<div id="chat-bubbles">
-						<button class="chat-bubble" data-group="Group 1">
-							<img src="assets/images/frontoffice/images.png" alt="Group 1"/>
-						</button>
-					</div>
-					<input type="text" id="chat-search" placeholder="Search groups..." class="chat-search">
+				<div class="footer-col">
+					<h2>Skill Bridge</h2>
+					<p>
+						Plateforme éducative intelligente pour améliorer les compétences
+						des étudiants et connecter les talents avec les opportunités.
+					</p>
 				</div>
 
-				<div id="chat-windows">
-					<div class="chat-window" data-group="Group 1" style="display:none;">
-						<div class="chat-header">
-							<span>Group 1</span>
-							<button class="close-btn">&times;</button>
-						</div>
-						<div class="chat-messages">
-							<div class="message self">Test</div>
-							<div class="message other">Test</div>
-						</div>
-						<div class="chat-input">
-							<input type="text" placeholder="Type a message...">
-							<button class="send-btn">Send</button>
-						</div>
+				<div class="footer-col">
+					<h3>LIENS UTILES</h3>
+					<ul>
+						<li><a href="#">Programme d’affiliation</a></li>
+						<li><a href="#">Devenir partenaire</a></li>
+						<li><a href="#">Aide et FAQ</a></li>
+						<li><a href="#">À propos de Skill Bridge</a></li>
+						<li><a href="#">Nos tarifs</a></li>
+						<li><a href="#">Comment ça marche ?</a></li>
+						<li><a href="#">Nous contacter</a></li>
+					</ul>
+				</div>
+
+				<div class="footer-col">
+					<h3>NOUS CONTACTER</h3>
+					<p>📞 +216 97347595</p>
+					<p>✉️
+						<a href="mailto:contact@skillbridge.tn">contact@skillbridge.tn</a>
+					</p>
+
+					<div class="footer-social">
+						<a href="#">
+							<i class="fa fa-facebook"></i>
+						</a>
+						<a href="#">
+							<i class="fa fa-instagram"></i>
+						</a>
+						<a href="#">
+							<i class="fa fa-linkedin"></i>
+						</a>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<div class="footer-bottom">
+			<p>&copy; 2026 Skill Bridge. Tous droits réservés.</p>
+		</div>
+		<div id="chat-container">
+			<div id="chat-bubble-container">
+				<div id="chat-bubbles">
+					<button class="chat-bubble" data-group="Group 1">
+						<img src="assets/images/frontoffice/images.png" alt="Group 1" />
+					</button>
+				</div>
+				<input type="text" id="chat-search" placeholder="Search groups..." class="chat-search">
+			</div>
+
+			<div id="chat-windows">
+				<div class="chat-window" data-group="Group 1" style="display:none;">
+					<div class="chat-header">
+						<span>Group 1</span>
+						<button class="close-btn">&times;</button>
+					</div>
+					<div class="chat-messages">
+						<div class="message self">Test</div>
+						<div class="message other">Test</div>
+					</div>
+					<div class="chat-input">
+						<input type="text" placeholder="Type a message...">
+						<button class="send-btn">Send</button>
 					</div>
 				</div>
 			</div>
-		</footer>
-	</body>
+		</div>
+	</footer>
+</body>
 
 </html>

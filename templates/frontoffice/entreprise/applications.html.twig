@@ -1,32 +1,84 @@
 {% extends 'frontoffice/base_front.html.twig' %}
 
-{% block title %}Candidatures - Skill Bridge{% endblock %}
+{% block title %}Candidatures — {{ offer.title }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
     <style>
+        /* ── Layout ── */
         .app-card {
-            background: white;
+            background: #fff;
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 20px 24px;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 16px;
+            border-left: 5px solid #6c63ff;
+            transition: box-shadow .2s;
         }
-        .app-info h3 { margin: 0 0 5px 0; color: #333; }
-        .app-info p { margin: 0; color: #666; font-size: 14px; }
+        .app-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.10); }
+        .app-info h3 { margin: 0 0 4px; color: #222; font-size: 17px; }
+        .app-info p  { margin: 2px 0; color: #666; font-size: 13px; }
+
+        /* ── ATS Score badge ── */
+        .ats-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 80px;
+        }
+        .ats-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .ats-circle.high   { background: linear-gradient(135deg,#4CAF50,#2e7d32); }
+        .ats-circle.medium { background: linear-gradient(135deg,#FFC107,#e65100); }
+        .ats-circle.low    { background: linear-gradient(135deg,#f44336,#b71c1c); }
+        .ats-label { font-size: 11px; color: #888; text-align: center; }
+
+        /* ── Progress bar ── */
+        .ats-bar-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #555; }
+        .ats-bar { flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+        .ats-bar-fill { height: 100%; border-radius: 4px; }
+        .bar-skills     { background: #6c63ff; }
+        .bar-experience { background: #00bcd4; }
+        .bar-education  { background: #ff9800; }
+
+        /* ── Right panel ── */
+        .app-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
         .app-status {
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 12px; font-weight: 600;
         }
-        .status-pending { background: #fff3e0; color: #e65100; }
+        .status-pending  { background: #fff3e0; color: #e65100; }
         .status-accepted { background: #e8f5e9; color: #2e7d32; }
         .status-rejected { background: #ffebee; color: #c62828; }
         .app-actions { display: flex; gap: 10px; }
+
+        /* ── AI badge ── */
+        .ai-badge {
+            display: inline-block;
+            background: linear-gradient(90deg,#6c63ff,#3b82f6);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 20px;
+        }
+
+        /* ── Sort note ── */
+        .sort-note { font-size:12px; color:#888; margin-bottom:12px; }
     </style>
 {% endblock %}
 
@@ -47,21 +99,24 @@
         <div class="applications-list">
             {% for app in applications %}
                 <div class="app-card">
-                    <div class="app-info">
-                        <h3>{{ app.cv.user.nom }} {{ app.cv.user.prenom }}</h3>
+
+                    {# ── Candidate info ── #}
+                    <div class="app-info" style="flex:1; min-width:0;">
+                        <h3>{{ app.cv.user.nom }} {{ app.cv.user.prenom is defined ? app.cv.user.prenom : '' }}</h3>
                         <p><i class="fa fa-file-text"></i> CV : {{ app.cv.nomCv }}</p>
                         <p><i class="fa fa-calendar"></i> Postulé le : {{ app.appliedAt|date('d/m/Y H:i') }}</p>
                     </div>
 
-                    <div class="app-right" style="display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+                    {# ── Right panel ── #}
+                    <div class="app-right">
                         <span class="app-status status-{{ app.status }}">{{ app.status|capitalize }}</span>
-                        
                         <div class="app-actions">
                             <a href="{{ path('entreprise_application_review', {id: app.id}) }}" class="btn-view">
-                                <i class="fa fa-eye"></i> Analyser la candidature
+                                <i class="fa fa-eye"></i> Analyser
                             </a>
                         </div>
                     </div>
+
                 </div>
             {% endfor %}
         </div>

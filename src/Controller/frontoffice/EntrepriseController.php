@@ -13,21 +13,31 @@ use App\Entity\Skill;
 use App\Entity\Certif;
 use App\Entity\Langue;
 use App\Form\OfferType;
+use App\Entity\Notif;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use Psr\Log\LoggerInterface;
 
-#[Route('/entreprise')]
+#[Route('/enterprise')]
 class EntrepriseController extends AbstractController
 {
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     // ===================== MES OFFRES =====================
     #[Route('/offers', name: 'entreprise_offer_index')]
     public function myOffers(Request $request, EntityManagerInterface $em): Response
     {
         $userId = $request->getSession()->get('user_id');
-        if (!$userId) return $this->redirectToRoute('sign');
+        if (!$userId)
+            return $this->redirectToRoute('sign');
 
         $offers = $em->getRepository(Offer::class)->findBy([
             'entreprise' => $userId
@@ -48,9 +58,10 @@ class EntrepriseController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $userId = $request->getSession()->get('user_id');
-            if (!$userId) return $this->redirectToRoute('sign');
+            if (!$userId)
+                return $this->redirectToRoute('sign');
             $entreprise = $em->getRepository(User::class)->find($userId);
-            
+
             $offer->setEntreprise($entreprise);
             $offer->setCreatedAt(new \DateTimeImmutable());
 
@@ -111,7 +122,7 @@ class EntrepriseController extends AbstractController
             foreach ($applications as $application) {
                 $em->remove($application);
             }
-            
+
             $em->remove($offer);
             $em->flush();
             $this->addFlash('success', 'Offer deleted successfully!');
@@ -144,7 +155,7 @@ class EntrepriseController extends AbstractController
     {
         $userId = $request->getSession()->get('user_id');
         $application = $em->getRepository(CvApplication::class)->find($id);
-        
+
         if (!$application || $application->getOffer()->getEntreprise()->getId() !== $userId) {
             throw $this->createNotFoundException("Application not found or access denied");
         }
@@ -165,7 +176,7 @@ class EntrepriseController extends AbstractController
 
     // ===================== UPDATE STATUS =====================
     #[Route('/application/{id}/status', name: 'entreprise_application_update_status', methods: ['POST'])]
-    public function updateStatus(int $id, Request $request, EntityManagerInterface $em): Response
+    public function updateStatus(int $id, Request $request, EntityManagerInterface $em, \Symfony\Component\EventDispatcher\EventDispatcherInterface $eventDispatcher): Response
     {
         $application = $em->getRepository(CvApplication::class)->find($id);
         if (!$application) {
@@ -176,7 +187,13 @@ class EntrepriseController extends AbstractController
         if (in_array($status, ['accepted', 'rejected', 'pending'])) {
             $application->setStatus($status);
             $em->flush();
-            $this->addFlash('success', 'Statut mis � jour avec succ�s !');
+
+            $this->logger->info('Application status updated to ' . $status . ' for application ID ' . $id);
+
+            // Dispatch event to handle notifications, emails, etc.
+            $eventDispatcher->dispatch(new \App\Event\ApplicationStatusChangedEvent($application));
+
+            $this->addFlash('success', 'Statut mis a jour avec succes !');
         }
 
         return $this->redirectToRoute('entreprise_offer_applications', ['id' => $application->getOffer()->getId()]);

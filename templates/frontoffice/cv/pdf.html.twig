@@ -1,46 +1,200 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <title>{{ cv.nomCv }}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        h1 { font-size: 24px; }
-        h2 { font-size: 18px; margin-top: 20px; }
-        p { margin: 5px 0; }
-        .section { margin-top: 15px; }
+        @page { margin: 22mm 18mm; }
+        :root {
+            --accent: #2F5D8A;
+            --text: #222;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --chip-bg: #eef2f7;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            line-height: 1.35;
+            font-size: 12.5px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        }
+        .title {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            margin: 0;
+            color: var(--accent);
+        }
+        .subtitle {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+        .contact {
+            text-align: right;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+        .contact div { margin: 2px 0; }
+
+        .section {
+            margin-top: 14px;
+        }
+        .section-title {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+            padding-left: 8px;
+            margin: 0 0 8px 0;
+        }
+        .summary {
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #374151;
+        }
+
+        /* Experiences */
+        .exp {
+            border-left: 2px solid var(--border);
+            padding-left: 12px;
+            margin-left: 4px;
+        }
+        .exp-item { margin-bottom: 10px; }
+        .exp-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .exp-title {
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+        .exp-meta {
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+        .exp-desc { margin-top: 4px; }
+
+        /* Education */
+        .edu-item {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed var(--border);
+            padding: 6px 0;
+        }
+        .edu-left { font-weight: 600; }
+        .edu-right { color: var(--muted); font-size: 11.5px; }
+
+        /* Skills */
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .chip {
+            background: var(--chip-bg);
+            color: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 11.5px;
+        }
+        .muted { color: var(--muted); }
     </style>
 </head>
 <body>
-    <h1>{{ cv.nomCv }}</h1>
-    <p><strong>Langue:</strong> {{ cv.langue }}</p>
+    <header class="header">
+        <div>
+            <h1 class="title">{{ cv.user ? cv.user.displayName : cv.nomCv }}</h1>
+            <div class="subtitle">{{ cv.nomCv }}</div>
+        </div>
+        <div class="contact">
+            {% if cv.user and cv.user.email %}
+                <div>{{ cv.user.email }}</div>
+            {% endif %}
+            {% if cv.linkedinUrl %}
+                <div>{{ cv.linkedinUrl }}</div>
+            {% endif %}
+            <div>Langue: {{ cv.langue }}</div>
+        </div>
+    </header>
 
-    <div class="section">
-        <h2>Experiences</h2>
-        {% for exp in cv.experiences %}
-            <p><strong>{{ exp.jobTitle }}</strong> at {{ exp.company }} ({{ exp.startDate|date('Y') }} - {{ exp.endDate ? exp.endDate|date('Y') : 'Present' }})</p>
-            <p>{{ exp.description }}</p>
-        {% else %}
-            <p>Aucune experience.</p>
-        {% endfor %}
-    </div>
+    {% if cv.summary %}
+        <section class="section">
+            <h2 class="section-title">Résumé</h2>
+            <div class="summary">{{ cv.summary }}</div>
+        </section>
+    {% endif %}
 
-    <div class="section">
-        <h2>Education</h2>
+    <section class="section">
+        <h2 class="section-title">Expériences</h2>
+        <div class="exp">
+            {% for exp in cv.experiences %}
+                <div class="exp-item">
+                    <div class="exp-head">
+                        <div class="exp-title">{{ exp.jobTitle }}</div>
+                        <div class="exp-meta">
+                            {{ exp.startDate ? exp.startDate|date('M Y') : '' }}
+                            –
+                            {{ exp.endDate ? exp.endDate|date('M Y') : 'Présent' }}
+                        </div>
+                    </div>
+                    <div class="muted">{{ exp.company }}</div>
+                    {% if exp.description %}
+                        <div class="exp-desc">{{ exp.description }}</div>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="muted">Aucune expérience</div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section">
+        <h2 class="section-title">Formation</h2>
         {% for edu in cv.educations %}
-            <p>{{ edu.degree }} in {{ edu.fieldOfStudy }} at {{ edu.school }} ({{ edu.startDate|date('Y') }} - {{ edu.endDate|date('Y') }})</p>
+            <div class="edu-item">
+                <div class="edu-left">
+                    {{ edu.degree }}{% if edu.fieldOfStudy %} – {{ edu.fieldOfStudy }}{% endif %}
+                    <span class="muted"> | {{ edu.school }}</span>
+                </div>
+                <div class="edu-right">
+                    {{ edu.startDate ? edu.startDate|date('Y') : '' }}
+                    –
+                    {{ edu.endDate ? edu.endDate|date('Y') : '' }}
+                </div>
+            </div>
         {% else %}
-            <p>Aucune formation.</p>
+            <div class="muted">Aucune formation</div>
         {% endfor %}
-    </div>
+    </section>
 
-    <div class="section">
-        <h2>Skills</h2>
-        {% for skill in cv.skills %}
-            <p>{{ skill.nom }} ({{ skill.level }})</p>
-        {% else %}
-            <p>Aucune competence.</p>
-        {% endfor %}
-    </div>
+    <section class="section">
+        <h2 class="section-title">Compétences</h2>
+        <div class="chips">
+            {% for skill in cv.skills %}
+                <span class="chip">
+                    {{ skill.nom }}{% if skill.level %} — {{ skill.level }}{% endif %}
+                </span>
+            {% else %}
+                <span class="muted">Aucune compétence</span>
+            {% endfor %}
+        </div>
+    </section>
 </body>
 </html>

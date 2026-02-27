@@ -1,0 +1,261 @@
+{% extends 'frontoffice/base_front.html.twig' %}
+
+{% block title %}Traduction du CV{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .translate-container { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .panel { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 16px; }
+    .panel h3 { margin: 0 0 12px; font-size: 18px; }
+    .kv { margin-bottom: 10px; }
+    .kv label { display: block; font-weight: 600; margin-bottom: 4px; color: #444; }
+    .kv .val { background: #fafafa; border: 1px solid #eee; padding: 10px; border-radius: 6px; min-height: 44px; white-space: pre-wrap; }
+    .lang-chooser { display: flex; gap: 8px; margin-bottom: 16px; }
+    .lang-chooser a { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; text-decoration: none; }
+    .section { margin-top: 16px; }
+</style>
+{% endblock %}
+
+{% block body %}
+<section class="cv-section">
+    <div class="section-header">
+        <a href="{{ path('preview_front_cv_show', {id: cv.id}) }}" class="btn-secondary">
+            ← Retour au CV
+        </a>
+        <div class="lang-chooser">
+            <a href="{{ path('cv_translate', {id: cv.id, lang: 'fr'}) }}" class="{{ lang == 'fr' ? 'btn-primary' : 'btn-secondary' }}">Fr</a>
+            <a href="{{ path('cv_translate', {id: cv.id, lang: 'ang'}) }}" class="{{ lang == 'ang' ? 'btn-primary' : 'btn-secondary' }}">En</a>
+            <a href="{{ path('cv_translate', {id: cv.id, lang: 'de'}) }}" class="{{ lang == 'de' ? 'btn-primary' : 'btn-secondary' }}">De</a>
+        </div>
+    </div>
+
+    <div class="translate-container">
+        <div class="panel">
+            <h3>Original</h3>
+            <div class="kv">
+                <label>Nom du CV</label>
+                <div class="val">{{ cv.nomCv }}</div>
+            </div>
+            {% if cv.summary %}
+            <div class="kv">
+                <label>Résumé</label>
+                <div class="val">{{ cv.summary }}</div>
+            </div>
+            {% endif %}
+
+            {% if experiences is defined and experiences|length > 0 %}
+            <div class="section">
+                <h3>Expériences</h3>
+                {% for exp in experiences %}
+                    <div class="kv">
+                        <label>Poste</label>
+                        <div class="val">{{ exp.jobTitle }}</div>
+                    </div>
+                    <div class="kv">
+                        <label>Entreprise</label>
+                        <div class="val">{{ exp.company }}</div>
+                    </div>
+                    {% if exp.location %}
+                    <div class="kv">
+                        <label>Lieu</label>
+                        <div class="val">{{ exp.location }}</div>
+                    </div>
+                    {% endif %}
+                    {% if exp.description %}
+                    <div class="kv">
+                        <label>Description</label>
+                        <div class="val">{{ exp.description }}</div>
+                    </div>
+                    {% endif %}
+                    <hr>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if educations is defined and educations|length > 0 %}
+            <div class="section">
+                <h3>Formation</h3>
+                {% for edu in educations %}
+                    <div class="kv">
+                        <label>Diplôme</label>
+                        <div class="val">{{ edu.degree }}</div>
+                    </div>
+                    <div class="kv">
+                        <label>Établissement</label>
+                        <div class="val">{{ edu.school }}</div>
+                    </div>
+                    {% if edu.fieldOfStudy %}
+                    <div class="kv">
+                        <label>Domaine</label>
+                        <div class="val">{{ edu.fieldOfStudy }}</div>
+                    </div>
+                    {% endif %}
+                    {% if edu.city %}
+                    <div class="kv">
+                        <label>Ville</label>
+                        <div class="val">{{ edu.city }}</div>
+                    </div>
+                    {% endif %}
+                    {% if edu.description %}
+                    <div class="kv">
+                        <label>Description</label>
+                        <div class="val">{{ edu.description }}</div>
+                    </div>
+                    {% endif %}
+                    <hr>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if skills is defined and skills|length > 0 %}
+            <div class="section">
+                <h3>Compétences</h3>
+                {% for sk in skills %}
+                    <div class="kv">
+                        <label>Nom</label>
+                        <div class="val">{{ sk.nom }}</div>
+                    </div>
+                    <div class="kv">
+                        <label>Type</label>
+                        <div class="val">{{ sk.type }}</div>
+                    </div>
+                    <div class="kv">
+                        <label>Niveau</label>
+                        <div class="val">{{ sk.level }}</div>
+                    </div>
+                    <hr>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="panel">
+            <h3>Traduction{% if lang %} ({{ lang|upper }}){% endif %}</h3>
+            {% if translations %}
+                <form method="post" action="{{ path('cv_translate_save', { id: cv.id, lang: lang ?? 'fr' }) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('translate' ~ cv.id) }}">
+                    <div class="kv">
+                        <label>Nom du CV</label>
+                        <div class="val">{{ translations.cv.nomCv }}</div>
+                        <input type="hidden" name="cv[nomCv]" value="{{ translations.cv.nomCv }}">
+                    </div>
+                    {% if translations.cv.summary is defined %}
+                    <div class="kv">
+                        <label>Résumé</label>
+                        <div class="val">{{ translations.cv.summary }}</div>
+                        <input type="hidden" name="cv[summary]" value="{{ translations.cv.summary }}">
+                    </div>
+                    {% endif %}
+
+                    {% if translations.experiences is defined and translations.experiences|length > 0 %}
+                    <div class="section">
+                        <h3>Expériences</h3>
+                        {% for t in translations.experiences %}
+                            {% set exp = experiences[loop.index0] ?? null %}
+                            <div class="kv">
+                                <label>Poste</label>
+                                <div class="val">{{ t.job_title }}</div>
+                                {% if exp %}<input type="hidden" name="experiences[{{ exp.id }}][jobTitle]" value="{{ t.job_title }}">{% endif %}
+                            </div>
+                            <div class="kv">
+                                <label>Entreprise</label>
+                                <div class="val">{{ t.company }}</div>
+                                {% if exp %}<input type="hidden" name="experiences[{{ exp.id }}][company]" value="{{ t.company }}">{% endif %}
+                            </div>
+                            {% if t.location is not empty %}
+                            <div class="kv">
+                                <label>Lieu</label>
+                                <div class="val">{{ t.location }}</div>
+                                {% if exp %}<input type="hidden" name="experiences[{{ exp.id }}][location]" value="{{ t.location }}">{% endif %}
+                            </div>
+                            {% endif %}
+                            {% if t.description is not empty %}
+                            <div class="kv">
+                                <label>Description</label>
+                                <div class="val">{{ t.description }}</div>
+                                {% if exp %}<input type="hidden" name="experiences[{{ exp.id }}][description]" value="{{ t.description }}">{% endif %}
+                            </div>
+                            {% endif %}
+                            <hr>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if translations.educations is defined and translations.educations|length > 0 %}
+                    <div class="section">
+                        <h3>Formation</h3>
+                        {% for t in translations.educations %}
+                            {% set edu = educations[loop.index0] ?? null %}
+                            <div class="kv">
+                                <label>Diplôme</label>
+                                <div class="val">{{ t.degree }}</div>
+                                {% if edu %}<input type="hidden" name="educations[{{ edu.id }}][degree]" value="{{ t.degree }}">{% endif %}
+                            </div>
+                            <div class="kv">
+                                <label>Établissement</label>
+                                <div class="val">{{ t.school }}</div>
+                                {% if edu %}<input type="hidden" name="educations[{{ edu.id }}][school]" value="{{ t.school }}">{% endif %}
+                            </div>
+                            {% if t.field_of_study is not empty %}
+                            <div class="kv">
+                                <label>Domaine</label>
+                                <div class="val">{{ t.field_of_study }}</div>
+                                {% if edu %}<input type="hidden" name="educations[{{ edu.id }}][fieldOfStudy]" value="{{ t.field_of_study }}">{% endif %}
+                            </div>
+                            {% endif %}
+                            {% if t.city is not empty %}
+                            <div class="kv">
+                                <label>Ville</label>
+                                <div class="val">{{ t.city }}</div>
+                                {% if edu %}<input type="hidden" name="educations[{{ edu.id }}][city]" value="{{ t.city }}">{% endif %}
+                            </div>
+                            {% endif %}
+                            {% if t.description is not empty %}
+                            <div class="kv">
+                                <label>Description</label>
+                                <div class="val">{{ t.description }}</div>
+                                {% if edu %}<input type="hidden" name="educations[{{ edu.id }}][description]" value="{{ t.description }}">{% endif %}
+                            </div>
+                            {% endif %}
+                            <hr>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if translations.skills is defined and translations.skills|length > 0 %}
+                    <div class="section">
+                        <h3>Compétences</h3>
+                        {% for t in translations.skills %}
+                            {% set sk = skills[loop.index0] ?? null %}
+                            <div class="kv">
+                                <label>Nom</label>
+                                <div class="val">{{ t.nom }}</div>
+                                {% if sk %}<input type="hidden" name="skills[{{ sk.id }}][nom]" value="{{ t.nom }}">{% endif %}
+                            </div>
+                            <div class="kv">
+                                <label>Type</label>
+                                <div class="val">{{ t.type }}</div>
+                                {% if sk %}<input type="hidden" name="skills[{{ sk.id }}][type]" value="{{ t.type }}">{% endif %}
+                            </div>
+                            <div class="kv">
+                                <label>Niveau</label>
+                                <div class="val">{{ t.level }}</div>
+                                {% if sk %}<input type="hidden" name="skills[{{ sk.id }}][level]" value="{{ t.level }}">{% endif %}
+                            </div>
+                            <hr>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div style="margin-top: 16px;">
+                        <button type="submit" class="btn-primary">Enregistrer la traduction</button>
+                    </div>
+                </form>
+            {% else %}
+                <p>Choisissez une langue pour générer la traduction.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+

@@ -1,56 +1,107 @@
 {% extends 'frontoffice/base_front.html.twig' %}
 
-{% block title %}Révision Candidature - Skill Bridge{% endblock %}
+{% block title %}Révision Candidature — {{ cv.user.nom }}{% endblock %}
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('assets/css/frontoffice/cv/cv.css') }}">
     <style>
+        /* ── Review panel ── */
         .review-panel {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 5px solid #007bff;
+            background: #fff; border-radius: 12px; padding: 20px 24px;
+            margin-bottom: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 5px solid #6c63ff;
         }
-        .review-actions {
-            display: flex;
-            gap: 15px;
+        .review-actions  { display: flex; gap: 12px; }
+        .btn-accept { background:#28a745; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; }
+        .btn-reject { background:#dc3545; color:#fff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600; }
+        .btn-accept:hover { background:#218838; }
+        .btn-reject:hover { background:#c82333; }
+        .status-badge { padding:7px 14px; border-radius:20px; font-weight:700; text-transform:uppercase; font-size:12px; }
+
+        /* ── ATS Panel ── */
+        .ats-panel {
+            background: linear-gradient(135deg,#f8f9ff,#fff);
+            border: 1px solid #e0e0ff;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 28px;
         }
-        .btn-accept { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .btn-reject { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; }
-        .btn-accept:hover { background: #218838; }
-        .btn-reject:hover { background: #c82333; }
-        .status-badge {
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 12px;
+        .ats-panel-title {
+            font-size: 18px; font-weight: 700; color: #3d3d8f;
+            margin: 0 0 18px; display: flex; align-items: center; gap: 8px;
         }
+        .ats-scores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .score-card {
+            text-align: center; padding: 16px 10px;
+            border-radius: 12px; color: #fff;
+        }
+        .score-card.total   { background: linear-gradient(135deg,#6c63ff,#3b82f6); }
+        .score-card.skills  { background: linear-gradient(135deg,#8e44ad,#6c63ff); }
+        .score-card.exp     { background: linear-gradient(135deg,#00bcd4,#0097a7); }
+        .score-card.edu     { background: linear-gradient(135deg,#ff9800,#e65100); }
+        .score-card.ai      { background: linear-gradient(135deg,#e91e63,#880e4f); }
+        .score-card .sc-val { font-size: 32px; font-weight: 800; }
+        .score-card .sc-lbl { font-size: 11px; opacity: .85; margin-top: 2px; }
+        .score-card .sc-max { font-size: 12px; opacity: .7; }
+
+        /* ── Progress bars ── */
+        .score-bar-wrap { margin-bottom: 10px; }
+        .score-bar-label { display:flex; justify-content:space-between; font-size:13px; margin-bottom:3px; color:#555; }
+        .score-bar { height:10px; background:#eee; border-radius:5px; overflow:hidden; }
+        .score-bar-fill { height:100%; border-radius:5px; }
+        .fill-skills { background: linear-gradient(90deg,#8e44ad,#6c63ff); }
+        .fill-exp    { background: linear-gradient(90deg,#00bcd4,#0097a7); }
+        .fill-edu    { background: linear-gradient(90deg,#ff9800,#e65100); }
+
+        /* ── Skills columns ── */
+        .skills-columns { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px; }
+        .skills-col h4 { font-size:14px; font-weight:700; margin:0 0 10px; }
+        .skill-tag {
+            display:inline-block; padding:4px 10px; border-radius:20px; font-size:13px;
+            margin: 3px 4px 3px 0;
+        }
+        .skill-matched { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+        .skill-missing { background:#ffebee; color:#c62828; border:1px solid #ef9a9a; }
+        .no-skills { color:#999; font-size:13px; font-style:italic; }
+
+        /* ── AI note ── */
+        .ai-note {
+            margin-top: 12px; padding: 10px 14px;
+            background: #f3e5f5; border-radius: 8px; font-size:13px; color:#6a1b9a;
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        /* ── CV display ── */
+        .status-pending  { background:#fff3e0; color:#e65100; }
+        .status-accepted { background:#e8f5e9; color:#2e7d32; }
+        .status-rejected { background:#ffebee; color:#c62828; }
     </style>
 {% endblock %}
 
 {% block body %}
 <section class="cv-section">
 
+    {# ── Header ── #}
     <div class="section-header">
         <div>
             <h1>Révision de la candidature</h1>
-            <p class="section-subtitle">Offre : {{ offer.title }} | Candidat : {{ cv.user.nom }} {{ cv.user.prenom }}</p>
+            <p class="section-subtitle">Offre : <strong>{{ offer.title }}</strong> | Candidat : {{ cv.user.nom }} {{ cv.user.prenom is defined ? cv.user.prenom : '' }}</p>
         </div>
         <a href="{{ path('entreprise_offer_applications', {id: offer.id}) }}" class="btn-secondary">
             <i class="fa fa-arrow-left"></i> Retour aux candidatures
         </a>
     </div>
 
-    <!-- Panel de décision -->
+    {# ── Decision panel ── #}
     <div class="review-panel">
         <div>
-            <span class="status-badge status-{{ application.status }}">Statut actuel : {{ application.status }}</span>
+            <span class="status-badge status-{{ application.status }}">Statut : {{ application.status }}</span>
         </div>
         <div class="review-actions">
             <form action="{{ path('entreprise_application_update_status', {id: application.id}) }}" method="POST" style="display:inline;">
@@ -64,11 +115,13 @@
         </div>
     </div>
 
+    {# (Section ATS supprimée) #}
+
+    {# ── CV full display ── #}
     <div class="cv-display">
-        {# -- Header -- #}
         <div class="cv-display-header">
             <p class="cv-name-label">Profil Candidat</p>
-            <h1>{{ cv.user.prenom }} {{ cv.user.nom }}</h1>
+            <h1>{{ cv.user.prenom is defined ? cv.user.prenom : '' }} {{ cv.user.nom }}</h1>
             <div class="cv-display-meta">
                 <span><i class="fa fa-envelope"></i> {{ cv.user.email }}</span>
                 {% if cv.linkedinUrl %}
@@ -78,7 +131,6 @@
         </div>
 
         <div class="cv-display-body">
-            {# -- Summary -- #}
             {% if cv.summary %}
                 <div class="cv-display-section">
                     <h2><i class="fa fa-user"></i> Résumé professionnel</h2>
@@ -86,7 +138,6 @@
                 </div>
             {% endif %}
 
-            {# -- Experiences -- #}
             {% if experiences|length > 0 %}
                 <div class="cv-display-section">
                     <h2><i class="fa fa-briefcase"></i> Expériences</h2>
@@ -95,7 +146,8 @@
                             <div class="cv-entry-title">{{ exp.jobTitle }}</div>
                             <div class="cv-entry-sub">{{ exp.company }} | {{ exp.location }}</div>
                             <div class="cv-entry-date">
-                                {{ exp.startDate|date('m/Y') }} - {% if exp.currentlyWorking %}Présent{% else %}{{ exp.endDate|date('m/Y') }}{% endif %}
+                                {{ exp.startDate|date('m/Y') }} –
+                                {% if exp.currentlyWorking %}Présent{% else %}{{ exp.endDate ? exp.endDate|date('m/Y') : '?' }}{% endif %}
                             </div>
                             <div class="cv-entry-desc">{{ exp.description|nl2br }}</div>
                         </div>
@@ -103,7 +155,6 @@
                 </div>
             {% endif %}
 
-            {# -- Education -- #}
             {% if educations|length > 0 %}
                 <div class="cv-display-section">
                     <h2><i class="fa fa-graduation-cap"></i> Formation</h2>
@@ -111,19 +162,40 @@
                         <div class="cv-entry">
                             <div class="cv-entry-title">{{ edu.degree }}</div>
                             <div class="cv-entry-sub">{{ edu.school }}</div>
-                            <div class="cv-entry-date">{{ edu.startDate|date('Y') }} - {{ edu.endDate|date('Y') }}</div>
+                            <div class="cv-entry-date">{{ edu.startDate|date('Y') }} – {{ edu.endDate|date('Y') }}</div>
                         </div>
                     {% endfor %}
                 </div>
             {% endif %}
 
-            {# -- Skills -- #}
             {% if skills|length > 0 %}
                 <div class="cv-display-section">
                     <h2><i class="fa fa-cogs"></i> Compétences</h2>
                     <div class="cv-skills-list">
                         {% for skill in skills %}
                             <span class="cv-skill-tag {{ skill.type }}">{{ skill.nom }} ({{ skill.level }})</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if certifs is defined and certifs|length > 0 %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-certificate"></i> Certifications</h2>
+                    {% for cert in certifs %}
+                        <div class="cv-entry">
+                            <div class="cv-entry-title">{{ cert.title is defined ? cert.title : cert.nom }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if languages is defined and languages|length > 0 %}
+                <div class="cv-display-section">
+                    <h2><i class="fa fa-language"></i> Langues</h2>
+                    <div class="cv-skills-list">
+                        {% for lang in languages %}
+                            <span class="cv-skill-tag">{{ lang.nom is defined ? lang.nom : lang.language }}</span>
                         {% endfor %}
                     </div>
                 </div>
