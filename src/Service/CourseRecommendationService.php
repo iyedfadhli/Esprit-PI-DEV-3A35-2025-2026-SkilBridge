@@ -228,20 +228,16 @@ class CourseRecommendationService
         $courseLevel = $course->getDifficultyLevel();
         $nextLevel = $studentCurrentLevel + 1;
 
-        // ── Critère 1 : Difficulté immédiatement supérieure ──
         if ($courseLevel === $nextLevel) {
             $score += 40;
             $reasons[] = 'niveau suivant logique';
         } elseif ($courseLevel === $studentCurrentLevel && $studentCurrentLevel > 0) {
-            // Même niveau → bon pour consolider
             $score += 25;
             $reasons[] = 'consolidation du niveau actuel';
         } elseif ($courseLevel < $studentCurrentLevel) {
-            // Niveau inférieur → moins pertinent
             $score += 10;
             $reasons[] = 'niveau inférieur (révision)';
         } else {
-            // Niveau trop avancé (saut de +2 ou plus)
             $score += 5;
             $reasons[] = 'niveau avancé disponible';
         }
