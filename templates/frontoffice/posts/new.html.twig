@@ -1,6 +1,6 @@
 {% extends 'frontoffice/base_front.html.twig' %}
 
-{% block title %}Create Post - {{ group.name }}{% endblock %}
+{% block title %}Create Post{% if group %} - {{ group.name }}{% endif %}{% endblock %}
 
 {% block stylesheets %}
     <style>
@@ -52,6 +52,42 @@
             box-shadow: 0 0 0 4px rgba(74, 127, 215, 0.1);
             background: #fff;
         }
+
+        /* ── Moderation error banner ── */
+        .moderation-alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background: linear-gradient(135deg, #fff0f0, #ffe4e4);
+            border: 1.5px solid #f5a5a5;
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 28px;
+            animation: shake 0.45s ease;
+        }
+        .moderation-alert-icon {
+            font-size: 26px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .moderation-alert-body strong {
+            display: block;
+            font-size: 15px;
+            font-weight: 700;
+            color: #c0392b;
+            margin-bottom: 4px;
+        }
+        .moderation-alert-body span {
+            font-size: 13.5px;
+            color: #7b2929;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
     </style>
 {% endblock %}
 
@@ -59,7 +95,23 @@
 <div class="form-container">
     <div class="form-card">
         <h2 class="form-title">Create New Post in <span class="text-primary">{{ group.name }}</span></h2>
-        
+
+        {# ── AI Moderation error flash ── #}
+        {% for message in app.flashes('moderation_error') %}
+            <div class="moderation-alert" role="alert">
+                <div class="moderation-alert-icon">🛡️</div>
+                <div class="moderation-alert-body">
+                    <strong>Post Blocked by Content Moderation</strong>
+                    <span>{{ message }} Please review your content and try again.</span>
+                </div>
+            </div>
+        {% endfor %}
+
+        {# ── General error flashes ── #}
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger rounded-3 mb-3" role="alert">{{ message }}</div>
+        {% endfor %}
+
         {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
             <div class="mb-4">
                 {{ form_label(form.titre, 'Post Title', {'label_attr': {'class': 'form-label'}}) }}
@@ -77,6 +129,12 @@
                 {{ form_label(form.visibility, 'Visibility', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(form.visibility, {'attr': {'class': 'form-select'}}) }}
                 <div class="invalid-feedback">{{ form_errors(form.visibility) }}</div>
+            </div>
+
+            <div class="mb-4">
+                {{ form_label(form.attached_file, 'Attach an Image (optional)', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.attached_file, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
+                <div class="invalid-feedback">{{ form_errors(form.attached_file) }}</div>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mt-4">

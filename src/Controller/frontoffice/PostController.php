@@ -2,16 +2,17 @@
 
 namespace App\Controller\frontoffice;
 
-use App\Entity\Group;
-use App\Entity\Reactions;
-use App\Entity\Posts;
 use App\Entity\Commentaires;
+use App\Entity\Group;
+use App\Entity\Posts;
+use App\Entity\Reactions;
 use App\Entity\User;
 use App\Form\PostType;
+use App\Service\ModerationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
@@ -20,16 +21,12 @@ use Twig\Environment;
 
 class PostController extends AbstractController
 {
+    public function __construct(private readonly ModerationService $moderation) {}
+
     #[Route('/groups/{id}/post/new', name: 'group_post_new')]
-    public function new(Request $request, EntityManagerInterface $em, Group $group = null): Response
+    public function new(Request $request, EntityManagerInterface $em, ?Group $group = null): Response
     {
-        $user = $this->getUser(); 
-        if (!$user) {
-            $sessionUserId = $request->getSession()->get('user_id');
-            if ($sessionUserId) {
-                $user = $em->getRepository(User::class)->find($sessionUserId);
-            }
-        }
+        $user = $this->resolveCurrentUser($request, $em);
         if (!$user) {
             $this->addFlash('error', 'You must be logged in to create a post.');
             if ($group) {
@@ -39,7 +36,6 @@ class PostController extends AbstractController
         }
 
         $post = new Posts();
-
         $form = $this->createForm(PostType::class, $post);
         $form->handleRequest($request);
 
@@ -49,39 +45,45 @@ class PostController extends AbstractController
             $post->setLikesCounter(0);
             $post->setStatus('published');
 
-            // Link to group if coming from a group page
             if ($group) {
                 $post->setGroupId($group);
             }
 
-            $uploadedFile = $form->get('attached_file')->getData();
-            if ($uploadedFile) {
-                $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/posts';
-                if (!is_dir($uploadsDir)) {
-                    @mkdir($uploadsDir, 0775, true);
+            [$absoluteFilePath, $relativeFilePath] = $this->uploadAttachedFile($form->get('attached_file')->getData());
+
+            $textToCheck = trim($post->getTitre() . ' ' . $post->getDescription());
+            $moderationResult = $this->moderation->moderatePost($textToCheck, $absoluteFilePath);
+
+            if (!$moderationResult['safe']) {
+                if ($absoluteFilePath && is_file($absoluteFilePath)) {
+                    @unlink($absoluteFilePath);
                 }
-                $safeName = bin2hex(random_bytes(8));
-                $ext = strtolower($uploadedFile->getClientOriginalExtension() ?? '');
-                $allowed = ['jpg','jpeg','png','gif','webp'];
-                if (!in_array($ext, $allowed, true)) {
-                    $ext = 'dat';
-                }
-                $newFilename = $safeName . '.' . $ext;
-                try {
-                    $uploadedFile->move($uploadsDir, $newFilename);
-                    $post->setAttachedFile('uploads/posts/' . $newFilename);
-                } catch (FileException $e) {
-                    // silently ignore upload error for now
-                }
+
+                $this->addFlash('moderation_error', $this->moderationErrorMessage((string) ($moderationResult['reason'] ?? '')));
+
+                return $this->render('frontoffice/posts/new.html.twig', [
+                    'group' => $group,
+                    'form' => $form->createView(),
+                ]);
+            }
+
+            if (!empty($moderationResult['warning'])) {
+                $this->addFlash('warning', (string) $moderationResult['warning']);
+            }
+
+            if ($relativeFilePath !== null) {
+                $post->setAttachedFile($relativeFilePath);
             }
 
             $em->persist($post);
             $em->flush();
 
             $this->addFlash('success', 'Post created successfully!');
-
             if ($group) {
                 return $this->redirectToRoute('group_show', ['id' => $group->getId()]);
+            }
+            if ($post->getGroupId()) {
+                return $this->redirectToRoute('group_show', ['id' => $post->getGroupId()->getId()]);
             }
             return $this->redirectToRoute('groups_index');
         }
@@ -95,13 +97,7 @@ class PostController extends AbstractController
     #[Route('/posts/{id}/like', name: 'post_like')]
     public function like(Request $request, EntityManagerInterface $em, Posts $post): Response
     {
-        $user = $this->getUser();
-        if (!$user) {
-            $sessionUserId = $request->getSession()->get('user_id');
-            if ($sessionUserId) {
-                $user = $em->getRepository(User::class)->find($sessionUserId);
-            }
-        }
+        $user = $this->resolveCurrentUser($request, $em);
         if (!$user) {
             $this->addFlash('error', 'You must be logged in to like a post.');
             return $this->redirectToRoute('groups_index');
@@ -129,27 +125,13 @@ class PostController extends AbstractController
         }
 
         $em->flush();
-
-        $referer = $request->headers->get('referer');
-        if ($referer) {
-            return $this->redirect($referer);
-        }
-        if ($post->getGroupId()) {
-            return $this->redirectToRoute('group_show', ['id' => $post->getGroupId()->getId()]);
-        }
-        return $this->redirectToRoute('groups_index');
+        return $this->redirectAfterPostContext($request, $post);
     }
 
     #[Route('/posts/{id}/comment', name: 'post_comment', methods: ['POST'])]
     public function comment(Request $request, EntityManagerInterface $em, Posts $post): Response
     {
-        $user = $this->getUser();
-        if (!$user) {
-            $sessionUserId = $request->getSession()->get('user_id');
-            if ($sessionUserId) {
-                $user = $em->getRepository(User::class)->find($sessionUserId);
-            }
-        }
+        $user = $this->resolveCurrentUser($request, $em);
         if (!$user) {
             $this->addFlash('error', 'You must be logged in to comment.');
             return $this->redirectToRoute('groups_index');
@@ -167,14 +149,7 @@ class PostController extends AbstractController
             $em->flush();
         }
 
-        $referer = $request->headers->get('referer');
-        if ($referer) {
-            return $this->redirect($referer);
-        }
-        if ($post->getGroupId()) {
-            return $this->redirectToRoute('group_show', ['id' => $post->getGroupId()->getId()]);
-        }
-        return $this->redirectToRoute('groups_index');
+        return $this->redirectAfterPostContext($request, $post);
     }
 
     #[Route('/comment/{id}/report', name: 'comment_report', methods: ['POST'])]
@@ -347,20 +322,105 @@ class PostController extends AbstractController
     public function delete(EntityManagerInterface $em, Posts $post): Response
     {
         $group = $post->getGroupId();
-        // Remove dependent records first to satisfy FK constraints
+
         $reactionRepo = $em->getRepository(Reactions::class);
         $commentRepo = $em->getRepository(Commentaires::class);
-        foreach ($reactionRepo->findBy(['post_id' => $post]) as $r) {
-            $em->remove($r);
+
+        foreach ($reactionRepo->findBy(['post_id' => $post]) as $reaction) {
+            $em->remove($reaction);
         }
-        foreach ($commentRepo->findBy(['post' => $post]) as $c) {
-            $em->remove($c);
+
+        foreach ($commentRepo->findBy(['post' => $post]) as $comment) {
+            $em->remove($comment);
         }
+
         $em->remove($post);
         $em->flush();
+
         if ($group) {
             return $this->redirectToRoute('group_show', ['id' => $group->getId()]);
         }
+
         return $this->redirectToRoute('groups_index');
+    }
+    private function resolveCurrentUser(Request $request, EntityManagerInterface $em): ?User
+    {
+        $authUser = $this->getUser();
+        if ($authUser instanceof User) {
+            return $authUser;
+        }
+
+        $sessionUserId = $request->getSession()->get('user_id');
+        if (!$sessionUserId) {
+            return null;
+        }
+
+        return $em->getRepository(User::class)->find($sessionUserId);
+    }
+
+    /**
+     * @return array{0: string|null, 1: string|null}
+     */
+    private function uploadAttachedFile(mixed $uploadedFile): array
+    {
+        if ($uploadedFile === null) {
+            return [null, null];
+        }
+
+        $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/posts';
+        if (!is_dir($uploadsDir)) {
+            @mkdir($uploadsDir, 0775, true);
+        }
+
+        $safeName = bin2hex(random_bytes(8));
+        $ext = strtolower($uploadedFile->getClientOriginalExtension() ?? '');
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        if (!in_array($ext, $allowed, true)) {
+            $ext = 'dat';
+        }
+
+        $newFilename = $safeName . '.' . $ext;
+
+        try {
+            $uploadedFile->move($uploadsDir, $newFilename);
+            return [
+                $uploadsDir . '/' . $newFilename,
+                'uploads/posts/' . $newFilename,
+            ];
+        } catch (FileException) {
+            return [null, null];
+        }
+    }
+
+    private function redirectAfterPostContext(Request $request, ?Posts $post = null, ?Group $group = null): Response
+    {
+        $referer = $request->headers->get('referer');
+        if ($referer) {
+            return $this->redirect($referer);
+        }
+
+        if ($group) {
+            return $this->redirectToRoute('group_show', ['id' => $group->getId()]);
+        }
+
+        if ($post?->getGroupId()) {
+            return $this->redirectToRoute('group_show', ['id' => $post->getGroupId()->getId()]);
+        }
+
+        return $this->redirectToRoute('groups_index');
+    }
+
+    private function moderationErrorMessage(string $reason): string
+    {
+        return match ($reason) {
+            'profanity' => 'Blocked by Neutrino: profanity or forbidden words detected.',
+            'hate_or_abuse' => 'Blocked by Perspective AI: hate speech, threats, sexual abuse, or severe toxic content detected.',
+            'violence' => 'Blocked by YOLOv8 fight detection: violent/fight content detected.',
+            'fight' => 'Blocked by YOLOv8 fight detection: violent/fight content detected.',
+            'fight_or_violence' => 'Blocked by YOLOv8 fight detection: violent/fight content detected.',
+            'fight_moderation_unavailable' => 'Post blocked: fight moderation service unavailable.',
+            default => 'Post blocked by moderation.',
+        };
     }
 }

@@ -9,6 +9,8 @@ use App\Entity\Reactions;
 use App\Entity\User;
 use App\Form\GroupType;
 use App\Form\PostType;
+use App\Service\ModerationService;
+use App\Service\NewsService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,16 +22,15 @@ use App\Entity\Commentaires;
 
 class GroupController extends AbstractController
 {
+    public function __construct(
+        private readonly ModerationService $moderation,
+        private readonly NewsService $newsService,
+    ) {}
+
 #[Route('/groups', name: 'groups_index')]
 public function index(EntityManagerInterface $em, Request $request): Response
 {
-    $user = $this->getUser();
-    if (!$user) {
-        $sessionUserId = $request->getSession()->get('user_id');
-        if ($sessionUserId) {
-            $user = $em->getRepository(User::class)->find($sessionUserId);
-        }
-    }
+    $user = $this->resolveCurrentUser($request, $em);
 
     // --- SIDEBAR DATA: Groups User is Member of ---
     // Groups created by user
@@ -98,6 +99,7 @@ public function index(EntityManagerInterface $em, Request $request): Response
         $quickPost->setVisibility('public'); // Main feed posts are public by default
         $quickPost->setGroupId(null); // Explicitly no group
         $uploadedFile = $quickPostForm->get('attached_file')->getData();
+        $absoluteFilePath = null;
         if ($uploadedFile) {
             $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/posts';
             if (!is_dir($uploadsDir)) {
@@ -112,10 +114,25 @@ public function index(EntityManagerInterface $em, Request $request): Response
             $newFilename = $safeName . '.' . $ext;
             try {
                 $uploadedFile->move($uploadsDir, $newFilename);
+                $absoluteFilePath = $uploadsDir . '/' . $newFilename;
                 $quickPost->setAttachedFile('uploads/posts/' . $newFilename);
             } catch (FileException $e) {
                 // ignore upload error
             }
+        }
+
+        $textToCheck = trim($quickPost->getTitre() . ' ' . $quickPost->getDescription());
+        $moderationResult = $this->moderation->moderatePost($textToCheck, $absoluteFilePath);
+        if (!$moderationResult['safe']) {
+            if ($absoluteFilePath && is_file($absoluteFilePath)) {
+                @unlink($absoluteFilePath);
+            }
+            $this->addFlash('moderation_error', $this->moderationErrorMessage((string) ($moderationResult['reason'] ?? '')));
+            return $this->redirectToRoute('groups_index');
+        }
+
+        if (!empty($moderationResult['warning'])) {
+            $this->addFlash('warning', (string) $moderationResult['warning']);
         }
 
         $em->persist($quickPost);
@@ -133,19 +150,14 @@ public function index(EntityManagerInterface $em, Request $request): Response
         'quickPostForm' => $quickPostForm->createView(),
         'currentSort' => $sort,
         'commentsByPost' => $publicCommentsByPost,
+        'feedNews' => $this->newsService->fetchTopHeadlines(4),
     ]);
 }
 
     #[Route('/groups/add', name: 'group_add')]
     public function add(Request $request, EntityManagerInterface $em): Response
     {
-        $user = $this->getUser();
-        if (!$user) {
-            $sessionUserId = $request->getSession()->get('user_id');
-            if ($sessionUserId) {
-                $user = $em->getRepository(User::class)->find($sessionUserId);
-            }
-        }
+        $user = $this->resolveCurrentUser($request, $em);
         if (!$user) {
             $this->addFlash('error', 'You must be logged in to create a group.');
             return $this->redirectToRoute('groups_index');
@@ -262,13 +274,7 @@ public function index(EntityManagerInterface $em, Request $request): Response
 #[Route('/groups/{id}', name: 'group_show')]
 public function show(Group $group, Request $request, EntityManagerInterface $em): Response
 {
-    $user = $this->getUser();
-    if (!$user) {
-        $sessionUserId = $request->getSession()->get('user_id');
-        if ($sessionUserId) {
-            $user = $em->getRepository(User::class)->find($sessionUserId);
-        }
-    }
+    $user = $this->resolveCurrentUser($request, $em);
 
     // --- SIDEBAR DATA (Same as index) ---
     $ownedGroups = $em->getRepository(Group::class)->findBy(['leaderId' => $user]);
@@ -392,5 +398,33 @@ public function show(Group $group, Request $request, EntityManagerInterface $em)
         $em->flush();
 
         return $this->redirectToRoute('groups_index');
+    }
+
+    private function resolveCurrentUser(Request $request, EntityManagerInterface $em): ?User
+    {
+        $authUser = $this->getUser();
+        if ($authUser instanceof User) {
+            return $authUser;
+        }
+
+        $sessionUserId = $request->getSession()->get('user_id');
+        if (!$sessionUserId) {
+            return null;
+        }
+
+        return $em->getRepository(User::class)->find($sessionUserId);
+    }
+
+    private function moderationErrorMessage(string $reason): string
+    {
+        return match ($reason) {
+            'profanity' => 'Blocked by Neutrino: profanity or forbidden words detected.',
+            'hate_or_abuse' => 'Blocked by Perspective AI: hate speech, threats, sexual abuse, or severe toxic content detected.',
+            'violence' => 'Blocked by YOLOv8 fight detection: violent/fight content detected.',
+            'fight' => 'Blocked by YOLOv8 fight detection: violent/fight content detected.',
+            'fight_or_violence' => 'Blocked by YOLOv8 fight detection: violent/fight content detected.',
+            'fight_moderation_unavailable' => 'Post blocked: fight moderation service unavailable.',
+            default => 'Post blocked by moderation.',
+        };
     }
 }

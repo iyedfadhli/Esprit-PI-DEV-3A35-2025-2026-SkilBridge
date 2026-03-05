@@ -16,6 +16,13 @@ parameters:
     FLOWISE_API_KEY: '%env(FLOWISE_API_KEY)%'
     FLOWISE_API_HOST: '%env(FLOWISE_API_HOST)%'
     FLOWISE_GRADE_FLOW_ID: '%env(FLOWISE_GRADE_FLOW_ID)%'
+    neutrino_user_id: '%env(NEUTRINO_USER_ID)%'
+    neutrino_api_key: '%env(NEUTRINO_API_KEY)%'
+    perspective_api_key: '%env(PERSPECTIVE_API_KEY)%'
+    news_api_key: '%env(NEWS_API_KEY)%'
+    fight_moderation_url: '%env(APP_FIGHT_MODERATION_URL)%'
+    fight_moderation_timeout: '%env(int:FIGHT_MODERATION_TIMEOUT)%'
+    fight_moderation_fail_open: '%env(bool:FIGHT_MODERATION_FAIL_OPEN)%'
 
 
 services:
@@ -31,6 +38,13 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
             $geminiApiKey: '%gemini_api_key%'
+            $neutrinoUserId: '%neutrino_user_id%'
+            $neutrinoApiKey: '%neutrino_api_key%'
+            $perspectiveApiKey: '%perspective_api_key%'
+            $newsApiKey: '%news_api_key%'
+            $fightModerationUrl: '%fight_moderation_url%'
+            $fightModerationTimeout: '%fight_moderation_timeout%'
+            $fightModerationFailOpen: '%fight_moderation_fail_open%'
             $mailerFrom: '%mailer_from%'
             $contractSignedEmail: '%contract_signed_email%'
     Symfony\Component\Security\Http\Logout\LogoutUrlGenerator:
