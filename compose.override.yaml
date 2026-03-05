@@ -22,3 +22,7 @@ services:
     ports:
       - "80"
 ###< symfony/mercure-bundle ###
+
+  fight_moderation:
+    ports:
+      - "8010:8010"

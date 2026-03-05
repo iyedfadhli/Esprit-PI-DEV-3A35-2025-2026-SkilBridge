@@ -209,6 +209,43 @@
             background: #3a6bb8;
             color: #fff;
         }
+        .news-item {
+            display: block;
+            text-decoration: none;
+            border: 1px solid #eef2f8;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            transition: 0.2s;
+            color: inherit;
+            background: #fff;
+        }
+        .news-item:hover {
+            border-color: #d6e2f7;
+            background: #f8fbff;
+        }
+        .news-item-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #2c3e50;
+            line-height: 1.35;
+            margin-bottom: 4px;
+        }
+        .news-item-meta {
+            font-size: 11px;
+            color: #7c8799;
+        }
+        .news-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            padding: 2px 7px;
+            border-radius: 999px;
+            background: #eef3ff;
+            color: #3f68b4;
+            border: 1px solid #dbe7ff;
+        }
     </style>
 {% endblock %}
 
@@ -407,12 +444,24 @@
         <!-- RIGHT SIDEBAR -->
         <div class="col-md-3">
             <div class="sidebar-card">
-                <div class="sidebar-title">Skill Bridge Community</div>
-                <p class="small text-muted">Join the most active educational community in Tunisia.</p>
-                <hr>
-                <div class="d-grid">
-                    <button class="btn btn-outline-primary btn-sm rounded-pill">View Guidelines</button>
+                <div class="sidebar-title">
+                    <span>Latest News</span>
+                    <span class="news-badge">Business + Tech</span>
                 </div>
+                {% if feedNews is not empty %}
+                    {% for news in feedNews %}
+                        <a href="{{ news.url }}" target="_blank" rel="noopener noreferrer" class="news-item">
+                            <div class="news-item-title">{{ news.title }}</div>
+                            <div class="news-item-meta">
+                                {{ news.source }}{% if news.publishedAt %} • {{ news.publishedAt|date('M d, H:i') }}{% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="small text-muted mb-0">
+                        No news available. Add your `NEWS_API_KEY` in `.env.local` to enable headlines.
+                    </p>
+                {% endif %}
             </div>
         </div>
     </div>

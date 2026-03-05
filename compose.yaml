@@ -38,6 +38,21 @@ services:
       - mercure_config:/config
 ###< symfony/mercure-bundle ###
 
+  fight_moderation:
+    build:
+      context: ./services/fight-moderation
+    restart: unless-stopped
+    environment:
+      FIGHT_WEIGHTS_URL: ${FIGHT_MODERATION_WEIGHTS_URL:-https://raw.githubusercontent.com/Musawer1214/Fight-Violence-detection-yolov8/main/Yolo_nano_weights.pt}
+      FIGHT_CONFIDENCE: ${FIGHT_MODERATION_CONFIDENCE:-0.35}
+      FIGHT_CLASS_ID: 1
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health', timeout=3)"]
+      timeout: 5s
+      retries: 5
+      start_period: 90s
+
+
 volumes:
 ###> doctrine/doctrine-bundle ###
   database_data:
