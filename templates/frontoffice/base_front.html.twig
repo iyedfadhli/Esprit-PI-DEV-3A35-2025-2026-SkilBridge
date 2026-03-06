@@ -31,6 +31,16 @@
 					es.onmessage = e => console.log('Mercure update:', e.data);
 				</script>
 		{% endblock %}
+		{% if app.debug %}
+			<style>
+				#sfwdt, .sf-toolbar {
+					display: block !important;
+					visibility: visible !important;
+					opacity: 1 !important;
+					z-index: 2147483647 !important;
+				}
+			</style>
+		{% endif %}
 
 	</head>
 
@@ -227,6 +237,5 @@
 					</div>
 				</div>
 			</footer>
-		</body>
 	</body>
 </html>

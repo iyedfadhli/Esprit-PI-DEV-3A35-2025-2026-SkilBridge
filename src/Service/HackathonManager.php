@@ -24,7 +24,7 @@ class HackathonManager
             throw new \InvalidArgumentException('Hackathon registration must close before start date.');
         }
 
-        if ($hackathon->getFee() === null || $hackathon->getFee() < 0) {
+        if ($hackathon->getFee() === null || (float) $hackathon->getFee() < 0) {
             throw new \InvalidArgumentException('Hackathon fee cannot be negative.');
         }
 

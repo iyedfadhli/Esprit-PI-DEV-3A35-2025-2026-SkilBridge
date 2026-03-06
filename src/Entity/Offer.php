@@ -45,8 +45,8 @@ class Offer
     #[ORM\Column(nullable: true)]
     private ?int $duration = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?float $salary_range = null;
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, nullable: true)]
+    private ?string $salary_range = null;
 
     #[ORM\Column(length: 30)]
     private ?string $status = null;
@@ -179,14 +179,14 @@ class Offer
         return $this;
     }
 
-    public function getSalaryRange(): ?float
+    public function getSalaryRange(): ?string
     {
         return $this->salary_range;
     }
 
-    public function setSalaryRange(?float $salary_range): static
+    public function setSalaryRange(float|int|string|null $salary_range): static
     {
-        $this->salary_range = $salary_range;
+        $this->salary_range = $salary_range === null ? null : number_format((float) $salary_range, 2, '.', '');
 
         return $this;
     }

@@ -61,10 +61,10 @@ class Hackathon
     #[Assert\LessThan(propertyPath: 'start_at', message: 'Registration must close before the event starts')]
     private ?\DateTimeImmutable $registration_close_at = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'Fee is required')]
     #[Assert\PositiveOrZero(message: 'Fee cannot be negative')]
-    private ?float $fee = null;
+    private ?string $fee = null;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'Max teams is required')]
@@ -212,14 +212,14 @@ class Hackathon
         return $this;
     }
 
-    public function getFee(): ?float
+    public function getFee(): ?string
     {
         return $this->fee;
     }
 
-    public function setFee(float $fee): static
+    public function setFee(float|int|string $fee): static
     {
-        $this->fee = $fee;
+        $this->fee = number_format((float) $fee, 2, '.', '');
 
         return $this;
     }

@@ -1,0 +1,55 @@
+﻿                                                               Ann�e Universitaire : 2025-2026
+                                                           Workshops Framework Symfony6.4
+
+                                                                             UP-Web
+
+                                                        Workshop :
+                            Utilisation de doctor-doctrine dans un projet Symfony
+
+Objectifs
+
+Am�liorer les performances de votre application (int�grit�, s�curit� et configuration)
+
+Travail demand� :
+
+        1- Installer le bundle doctor-doctrine � travers cette commande :
+                      composer require --dev ahmed-bhs/doctrine-doctor
+                      Voir le lien github suivant pour plus de d�tails :
+                          https://github.com/ahmed-bhs/doctrine-doctor
+
+        Au cas o� vous rencontrez l'erreur suivante :
+
+                          Figure 1 : Probl�me d'installation qui peut se produire
+    Taper la commande :
+
+        composer require ahmed-bhs/doctrine-doctor:^1.0 webmozart/assert:^1.11 --
+        with-all-dependencies
+    Ensuite taper la commande
+        composer require --dev ahmed-bhs/doctrine-doctor
+        2- Acc�der � n'importe quelle page dans votre application symfony
+
+            (dev environment)
+        3- Ouvrir Symfony Web Profiler (toolbar en bas)
+        4- Cliquer sur "Doctrine Doctor" panel
+
+                                                                                                                          1
+� Au cas ou vous ne trouvez pas � Doctrine Doctor � dans le profiler, ajouter
+    dans config/bundles.php la ligne suivante :
+    AhmedBhs\DoctrineDoctor\DoctrineDoctorBundle::class => ['dev' =>
+    true],
+
+5- Faites une capture sur les diff�rents probl�mes signal�s (integrity, security,
+    configurations, slowest queries)
+    Un probl�me d'int�grit� ressemble � cette figure : (exemple)
+
+                       Figure 2 : Exemple d'un probl�me d'int�grit�
+6- Commencez � r�soudre chaque probl�me un par un.
+7- Suite � chaque correction, afin de d�terminer si c'est r�solu ou pas, taper :
+� Symfony server:stop
+� Php bin/console cache:clear
+8- Relancer votre serveur et v�rifier dans le profiler que le probl�me est
+
+    r�solu.
+
+                                                                                                                 2
+

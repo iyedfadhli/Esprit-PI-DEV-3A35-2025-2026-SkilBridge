@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -48,6 +49,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $photo = null;
 
     #[ORM\Column(name: "passwd", length: 255)]
+    #[Ignore]
     #[Assert\NotBlank(message: 'Password is required')]
     #[Assert\Length(min: 6, minMessage: 'Password must be at least {{ limit }} characters')]
     private ?string $passwd = null;
@@ -109,8 +111,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhoto(?string $photo): static { $this->photo = $photo; return $this; }
 
     // Symfony security password getter
+    #[Ignore]
     public function getPassword(): string { return (string) $this->passwd; }
-    public function setPassword(string $passwd): static { $this->passwd = $passwd; return $this; }
+    public function setPassword(#[\SensitiveParameter] string $passwd): static { $this->passwd = $passwd; return $this; }
 
     public function getDateInscrit(): \DateTime { return $this->dateInscrit; }
     public function setDateInscrit(\DateTime $dateInscrit): static { $this->dateInscrit = $dateInscrit; return $this; }

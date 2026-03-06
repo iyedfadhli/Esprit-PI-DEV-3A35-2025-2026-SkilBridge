@@ -76,16 +76,16 @@ class Course
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
     private ?Quiz $prerequisite_quiz = null;
 
-    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Quiz::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Quiz::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $quizzes;
 
-    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Chapter::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Chapter::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $chapters;
 
-    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Enrollement::class, cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Enrollement::class, orphanRemoval: true)]
     private Collection $enrollements;
 
-    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Challenge::class, cascade: ['remove'])]
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Challenge::class, orphanRemoval: true)]
     private Collection $challenges;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
