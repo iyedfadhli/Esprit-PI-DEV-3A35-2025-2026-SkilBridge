@@ -1,0 +1,171 @@
+﻿                                                               Ann�e Universitaire : 2025-2026
+                                                           Workshops Framework Symfony6.4
+
+                                                                             UP-Web
+
+                                                        Workshop :
+                                    Les tests unitaires dans un projet Symfony
+
+Introduction
+    Dans le cadre du projet, le travail s'organise en plusieurs phases : conception, d�veloppement
+
+(entit�s, CRUD, services), phase de test, puis livraison finale.
+    La phase de test intervient apr�s la phase de d�veloppement. Elle a pour objectif de valider et de
+
+s�curiser le code r�alis� avant la livraison du projet.
+    Il existe plusieurs types de tests dans un projet logiciel (tests unitaires, tests fonctionnels, tests
+
+d'int�gration). Dans ce workshop, nous nous concentrons sur les tests unitaires, car ils constituent la
+premi�re �tape de la phase de test. Ils permettent de v�rifier, de mani�re simple et isol�e, la logique
+interne du code avant d'aborder des tests plus globaux.
+
+     Les tests unitaires permettent de valider les r�gles m�tier, de s�curiser les �volutions et
+         d'am�liorer la qualit� globale du projet.
+
+Premi�re approche : cr�ation d'un test avec make:test
+
+    1. Symfony fournit un outil permettant de g�n�rer automatiquement la structure d'un test avec la
+         commande : php bin/console make:test . Cette commande propose plusieurs types de tests.
+
+    2. Pour les tests unitaires, il faut choisir : TestCase
+Puis donner un nom � la classe de test, par exemple : AuthorManagerTest .
+
+PARTIE PRATIQUE
+
+   1. R�gles m�tier � valider :
+
+Pour l'entit� Author, on d�finit les r�gles suivantes :
+
+    1. Le nom de l'auteur est obligatoire
+
+    2. L'email doit �tre valide
+
+     Ces r�gles doivent �tre valid�es par des tests unitaires.
+
+   2. Organisation des dossiers
+
+Pour une bonne organisation du projet, on adopte la structure suivante :
+
+                                         src/
+                                          Service/
+                                          AuthorManager.php
+
+                                         tests/
+                                          Service/
+                                          AuthorManagerTest.php
+
+Le fichier g�n�r� par make:test peut �tre d�plac� dans tests/Service/
+
+   3. Cr�ation du service m�tier
+
+               <?php
+               namespace App\Service;
+               use App\Entity\Author;
+
+               class AuthorManager
+               {
+
+                  public function validate(Author $author): bool
+                  {
+
+                     if (empty($author->getName())) {
+                        throw new \InvalidArgumentException('Le nom est obligatoire');
+
+                     }
+
+                     if (!filter_var($author->getEmail(), FILTER_VALIDATE_EMAIL)) {
+                        throw new \InvalidArgumentException('Email invalide');}
+
+               return true;
+                  }
+
+               }
+ La validation de l'entit� Author repose sur l'utilisation de empty() pour v�rifier que le nom n'est
+    pas vide, de FILTER_VALIDATE_EMAIL pour contr�ler le format de l'email, et de
+    InvalidArgumentException pour signaler imm�diatement toute donn�e invalide lors des tests
+    unitaires.
+
+4. Impl�mentation du test unitaire g�n�r� (AuthorManagerTest.php)
+
+               <?php
+
+               namespace App\Tests\Service;
+
+               use App\Entity\Author;
+               use App\Service\AuthorManager;
+               use PHPUnit\Framework\TestCase;
+
+               class AuthorManagerTest extends TestCase
+               {
+
+                  public function testValidAuthor()
+                  {
+
+                     $author = new Author();
+                     $author->setName('Victor Hugo');
+                     $author->setEmail('victor.hugo@gmail.com');
+
+                     $manager = new AuthorManager();
+
+                     $this->assertTrue($manager->validate($author));
+                  }
+
+                  public function testAuthorWithoutName()
+                  {
+
+                     $this->expectException(\InvalidArgumentException::class);
+
+                     $author = new Author();
+                     $author->setEmail('test@gmail.com');
+
+                     $manager = new AuthorManager();
+                     $manager->validate($author);
+                  }
+
+                  public function testAuthorWithInvalidEmail()
+                  {
+
+                     $this->expectException(\InvalidArgumentException::class);
+
+                     $author = new Author();
+                     $author->setName('Author Test');
+                     $author->setEmail('email_invalide');
+
+                     $manager = new AuthorManager();
+                     $manager->validate($author);}}
+     Cette classe de test v�rifie automatiquement que le service AuthorManager valide un auteur
+         correct et rejette les donn�es invalides (nom vide ou email incorrect) conform�ment aux r�gles
+         m�tier d�finies.
+
+   5. Ex�cution des tests :
+                            php bin/phpunit
+
+R�sultat attendu :
+     chaque point correspond � un test
+     OK indique que la logique m�tier est valide
+
+Conclusion
+Les tests unitaires constituent la premi�re �tape de la phase de test.
+Ils permettent de valider la logique m�tier et de s�curiser le projet avant la livraison finale.
+
+Travail demand� aux �tudiants
+
+Chaque �tudiant doit :
+    1. Choisir une entit� de son projet
+    2. Identifier au moins deux r�gles m�tier
+    3. Cr�er un service m�tier correspondant
+    4. G�n�rer un test avec make:test
+    5. Impl�menter les tests unitaires
+    6. V�rifier l'ex�cution des tests
+Voici 10 exemples des r�gles m�tier :
+    1. � La quantit� saisie ne peut pas �tre n�gative. �
+    2. � Le prix d'un article doit toujours �tre sup�rieur � z�ro. �
+    3. � La date de fin d'un �v�nement doit �tre post�rieure � la date de d�but. �
+    4. � Un champ obligatoire doit �tre rempli avant de soumettre le formulaire. �
+    5. � Une remise ne peut �tre appliqu�e que si le montant total d�passe 100. �
+    6. � Le code saisi doit �tre unique dans le syst�me. �
+    7. � Une op�ration ne peut �tre valid�e que si toutes les �tapes pr�c�dentes sont compl�t�es. �
+    8. � La dur�e d'un abonnement ne peut pas �tre inf�rieure � un mois. �
+    9. � Le mot de passe doit contenir au moins 8 caract�res. �
+    10. � Une action critique ne peut �tre effectu�e qu'avec une autorisation pr�alable. �
+
