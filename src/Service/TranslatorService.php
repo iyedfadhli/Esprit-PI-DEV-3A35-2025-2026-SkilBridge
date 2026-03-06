@@ -9,6 +9,7 @@ class TranslatorService
     private HttpClientInterface $httpClient;
     private string $apiUrl;
     private ?string $apiKey;
+    /** @var list<string> */
     private array $fallbackEndpoints = [
         'https://libretranslate.com/translate',
         'https://libretranslate.de/translate',
@@ -24,7 +25,7 @@ class TranslatorService
 
     public function translate(string $text, string $target, string $source): string
     {
-        if ($text === '' || $text === null) {
+        if ($text === '') {
             return $text;
         }
 
@@ -73,6 +74,10 @@ class TranslatorService
         return $text;
     }
 
+    /**
+     * @param array<string, scalar|null> $fields
+     * @return array<string, mixed>
+     */
     public function translateFields(array $fields, string $target, string $source): array
     {
         $flat = [];
@@ -118,7 +123,7 @@ class TranslatorService
                 $data = $response->toArray(false);
 
                 $translated = [];
-                if (isset($data[0]) && is_array($data)) {
+                if (isset($data[0])) {
                     foreach ($data as $idx => $row) {
                         $translated[] = is_array($row) && isset($row['translatedText']) ? (string) $row['translatedText'] : (string) ($flat[$idx] ?? '');
                     }
@@ -141,7 +146,7 @@ class TranslatorService
         $mmResult = [];
         $hasAny = false;
         foreach ($keys as $i => $k) {
-            $translated = $this->translateWithMyMemory($fields[$k] ?? '', $src, $tgt);
+            $translated = $this->translateWithMyMemory((string) ($fields[$k] ?? ''), $src, $tgt);
             if ($translated !== null && $translated !== '') {
                 $mmResult[$k] = $translated;
                 $hasAny = true;
@@ -158,14 +163,14 @@ class TranslatorService
 
         $result = [];
         foreach ($keys as $i => $k) {
-            $result[$k] = $this->translate($fields[$k], $tgt, $src);
+            $result[$k] = $this->translate((string) ($fields[$k] ?? ''), $tgt, $src);
         }
         return $result;
     }
 
     private function translateWithMyMemory(string $text, string $source, string $target): ?string
     {
-        $q = trim($text ?? '');
+        $q = trim($text);
         if ($q === '') {
             return $q;
         }
@@ -205,4 +210,3 @@ class TranslatorService
         };
     }
 }
-

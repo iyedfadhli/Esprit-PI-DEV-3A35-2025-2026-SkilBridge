@@ -143,6 +143,7 @@ class CourseRecommendationService
      * @param array $completedEnrolments Les inscritions complétées
      * @return int Niveau numérique (0 si aucun cours complété)
      */
+    /** @param list<object> $completedEnrolments */
     private function calculateStudentLevel(array $completedEnrolments): int
     {
         $maxLevel = 0;
@@ -162,6 +163,7 @@ class CourseRecommendationService
      * @param array $lastPassedAttempts Les tentatives réussies récentes
      * @return float Score moyen (0.0 si aucune tentative)
      */
+    /** @param list<object> $lastPassedAttempts */
     private function calculateRecentAvgScore(array $lastPassedAttempts): float
     {
         if (empty($lastPassedAttempts)) {
@@ -217,6 +219,7 @@ class CourseRecommendationService
      *
      * @return array{score: int, reason: string}
      */
+    /** @param list<int> $completedCourseIds */
     private function calculatePriorityScore(
         Course $course,
         int $studentCurrentLevel,
@@ -284,6 +287,14 @@ class CourseRecommendationService
      * @param int   $studentLevel Le niveau actuel de l'étudiant
      * @param float $recentAvgScore Le score moyen récent
      * @return array Réponse structurée pour le JSON
+     */
+    /**
+     * @param list<array{
+     *   course: Course,
+     *   priority_score: int,
+     *   reason: string,
+     *   enrolled?: bool
+     * }> $candidates
      */
     private function formatResponse(array $candidates, int $studentLevel, float $recentAvgScore): array
     {

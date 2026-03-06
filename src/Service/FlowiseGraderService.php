@@ -27,8 +27,8 @@ class FlowiseGraderService
      * Grade a submission against a challenge PDF
      * @param string $challengeUrl
      * @param string $submissionUrl
-     * @param array $options Optional keys: 'prompt', 'flowId'
-     * @return array
+     * @param array{prompt?: string, flowId?: string, challengeUrl?: string, submissionUrl?: string} $options Optional keys
+     * @return array<string, mixed>
      */
     public function gradeFromFiles(string $challengePath, string $submissionPath, array $options = []): array
     {

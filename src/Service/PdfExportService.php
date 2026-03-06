@@ -16,6 +16,9 @@ class PdfExportService
         $this->twig = $twig;
     }
 
+    /**
+     * @param list<mixed> $chapters
+     */
     public function generateCoursePdf(Course $course, array $chapters = []): string
     {
         // Configure Dompdf

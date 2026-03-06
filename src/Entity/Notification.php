@@ -15,11 +15,12 @@ class Notification
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?user $owner = null;
+    private ?User $owner = null;
 
     #[ORM\Column]
-    private ?bool $isRead = false;
+    private bool $isRead = false;
 
+    /** @var array<string, mixed> */
     #[ORM\Column]
     private array $data = [];
 
@@ -31,19 +32,19 @@ class Notification
         return $this->id;
     }
 
-    public function getOwner(): ?user
+    public function getOwner(): ?User
     {
         return $this->owner;
     }
 
-    public function setOwner(?user $owner): static
+    public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
 
         return $this;
     }
 
-    public function isRead(): ?bool
+    public function isRead(): bool
     {
         return $this->isRead;
     }
@@ -55,11 +56,17 @@ class Notification
         return $this;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getData(): array
     {
         return $this->data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function setData(array $data): static
     {
         $this->data = $data;

@@ -19,6 +19,9 @@ class NotificationService
         $this->hub = $hub;
     }
 
+    /**
+     * @param array<string, mixed> $extra
+     */
     public function notify(User $user, string $message, array $extra = []): void
     {
         $notification = new Notification();
@@ -41,6 +44,9 @@ class NotificationService
             'createdAt' => $notification->getCreatedAt()?->format(\DateTimeInterface::ATOM),
             'extra' => $extra,
         ], JSON_UNESCAPED_UNICODE);
+        if ($payload === false) {
+            $payload = '{}';
+        }
 
         $update = new Update($topic, $payload);
         $this->hub->publish($update);

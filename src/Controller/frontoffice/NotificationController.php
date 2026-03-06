@@ -7,13 +7,14 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 class NotificationController extends AbstractController
 {
     #[Route('/notifications', name: 'notifications_index', methods: ['GET'])]
-    public function index(Request $request, EntityManagerInterface $em)
+    public function index(Request $request, EntityManagerInterface $em): Response
     {
         $userId = $request->getSession()->get('user_id');
         if (!$userId) {
@@ -53,7 +54,7 @@ class NotificationController extends AbstractController
     }
 
     #[Route('/notifications/{id}/open', name: 'notifications_open', methods: ['GET'])]
-    public function open(int $id, Request $request, EntityManagerInterface $em)
+    public function open(int $id, Request $request, EntityManagerInterface $em): Response
     {
         $userId = $request->getSession()->get('user_id');
         if (!$userId) {

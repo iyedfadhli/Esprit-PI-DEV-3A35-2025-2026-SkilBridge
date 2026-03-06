@@ -110,6 +110,16 @@ class AiFeedbackService
     /**
      * Prépare les données structurées des réponses de l'étudiant.
      */
+    /**
+     * @param list<StudentResponse> $studentResponses
+     * @return array{
+     *   correct: list<array<string, mixed>>,
+     *   wrong: list<array<string, mixed>>,
+     *   correctCount: int,
+     *   wrongCount: int,
+     *   total: int
+     * }
+     */
     private function buildResponseData(array $studentResponses): array
     {
         $correct = [];
@@ -153,6 +163,16 @@ class AiFeedbackService
 
     /**
      * Construit le prompt détaillé pour Gemini 1.5 Flash.
+     */
+    /**
+     * @param array{
+     *   correct: list<array<string, mixed>>,
+     *   wrong: list<array<string, mixed>>,
+     *   correctCount: int,
+     *   wrongCount: int,
+     *   total: int
+     * } $responseData
+     * @param list<string> $sectionsToReview
      */
     private function buildPrompt(
         string $studentName,
@@ -302,6 +322,24 @@ PROMPT;
 
     /**
      * Feedback de secours si l'API Gemini est indisponible.
+     */
+    /**
+     * @param array{
+     *   correct: list<array<string, mixed>>,
+     *   wrong: list<array<string, mixed>>,
+     *   correctCount: int,
+     *   wrongCount: int,
+     *   total: int
+     * } $responseData
+     * @param list<string> $sectionsToReview
+     * @return array{
+     *   feedback: string,
+     *   strengths: list<string>,
+     *   weaknesses: list<string>,
+     *   sectionsToReview: list<string>,
+     *   actionPlan: list<string>,
+     *   encouragement: string
+     * }
      */
     private function buildFallbackFeedback(array $responseData, array $sectionsToReview, float $score): array
     {

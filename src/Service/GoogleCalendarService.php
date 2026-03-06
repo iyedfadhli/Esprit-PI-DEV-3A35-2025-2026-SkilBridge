@@ -9,13 +9,19 @@ class GoogleCalendarService
     public function generateUrl(Hackathon $hackathon): string
     {
         $baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
-        $title = urlencode($hackathon->getTitle());
+        $title = urlencode((string) $hackathon->getTitle());
 
-        $start = $hackathon->getStartAt()->format('Ymd\THis\Z');
-        $end = $hackathon->getEndAt()->format('Ymd\THis\Z');
+        $startAt = $hackathon->getStartAt();
+        $endAt = $hackathon->getEndAt();
+        if ($startAt === null || $endAt === null) {
+            return $baseUrl . '&text=' . $title;
+        }
 
-        $details = urlencode("Theme: " . $hackathon->getTheme() . "\n\n" . $hackathon->getDescription());
-        $location = urlencode($hackathon->getLocation());
+        $start = $startAt->format('Ymd\THis\Z');
+        $end = $endAt->format('Ymd\THis\Z');
+
+        $details = urlencode("Theme: " . (string) $hackathon->getTheme() . "\n\n" . (string) $hackathon->getDescription());
+        $location = urlencode((string) $hackathon->getLocation());
 
         return "{$baseUrl}&text={$title}&dates={$start}/{$end}&details={$details}&location={$location}";
     }

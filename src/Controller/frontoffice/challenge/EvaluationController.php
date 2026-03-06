@@ -103,7 +103,7 @@ final class EvaluationController extends AbstractController
 
 
     #[Route('/submit_problem_solution/{problemId}', name: 'submit_problem_solution', methods: ['POST'])]
-    public function submitProblemSolution(Request $request, EntityManagerInterface $em, int $problemId)
+    public function submitProblemSolution(Request $request, EntityManagerInterface $em, int $problemId): Response
     {
         $problem = $em->getRepository(ProblemSolution::class)->find($problemId);
         if (!$problem) {
@@ -119,7 +119,7 @@ final class EvaluationController extends AbstractController
 
 
     #[Route('/submit_member_score/{memberActivityId}', name: 'submit_member_score', methods: ['POST'])]
-    public function submitMemberScore(Request $request, EntityManagerInterface $em, int $memberActivityId)
+    public function submitMemberScore(Request $request, EntityManagerInterface $em, int $memberActivityId): Response
     {
         $memberActivity = $em->getRepository(MemberActivity::class)->find($memberActivityId);
         if (!$memberActivity) {

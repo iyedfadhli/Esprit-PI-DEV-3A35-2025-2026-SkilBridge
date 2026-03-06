@@ -385,7 +385,7 @@ class QuizTimerController extends AbstractController
      * des réponses fausses (0 points).
      *
      * @param QuizAttempts $attempt     La tentative
-     * @param array        $responses   Map { questionId => answerId }
+     * @param array<int|string, int|string> $responses   Map { questionId => answerId }
      * @return array{ percent: float, correctCount: int, totalQuestions: int, earnedPoints: float, totalPoints: float }
      */
     private function processResponses(QuizAttempts $attempt, array $responses): array

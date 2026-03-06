@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\SponsorHackathon;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\AbstractQuery;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -16,6 +17,9 @@ class SponsorHackathonRepository extends ServiceEntityRepository
         parent::__construct($registry, SponsorHackathon::class);
     }
 
+    /**
+     * @return list<SponsorHackathon>
+     */
     public function searchSponsors(?string $query = null): array
     {
         $qb = $this->createQueryBuilder('s')
@@ -32,7 +36,7 @@ class SponsorHackathonRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function getSearchQuery(?string $query = null)
+    public function getSearchQuery(?string $query = null): AbstractQuery
     {
         $qb = $this->createQueryBuilder('s')
             ->leftJoin('s.sponsor', 'sp')

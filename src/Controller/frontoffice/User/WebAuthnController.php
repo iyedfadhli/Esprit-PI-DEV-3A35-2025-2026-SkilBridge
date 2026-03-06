@@ -12,7 +12,8 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/webauthn')]
 class WebAuthnController extends AbstractController
 {
-    private function base64url_encode($data) {
+    private function base64url_encode(string $data): string
+    {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
 
@@ -75,7 +76,7 @@ class WebAuthnController extends AbstractController
         $user = $em->getRepository(User::class)->find($userId);
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['id']) || !isset($data['rawId']) || !isset($data['response'])) {
+        if (!$user || !isset($data['id']) || !isset($data['rawId']) || !isset($data['response'])) {
             return new JsonResponse(['error' => 'Invalid biometric response'], 400);
         }
 

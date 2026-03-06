@@ -113,6 +113,9 @@ class FaceIdController extends AbstractController
 
     /**
      * Calculate Euclidean distance between two vectors
+     *
+     * @param list<float|int> $a
+     * @param list<float|int> $b
      */
     private function euclideanDistance(array $a, array $b): float
     {
