@@ -9,6 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: OfferRepository::class)]
 class Offer
 {
+    public function __construct()
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -19,28 +24,28 @@ class Offer
     private ?User $entreprise = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $title = null;
+    private string $title = '';
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $offer_type = null;
+    private string $offer_type = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $field = null;
+    private string $field = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $required_level = null;
+    private string $required_level = '';
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $required_skills = null;
+    private string $required_skills = '';
 
     #[ORM\Column(length: 40)]
-    private ?string $location = null;
+    private string $location = '';
 
     #[ORM\Column(length: 40)]
-    private ?string $contract_type = null;
+    private string $contract_type = '';
 
     #[ORM\Column(nullable: true)]
     private ?int $duration = null;
@@ -49,10 +54,10 @@ class Offer
     private ?string $salary_range = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $status = null;
+    private string $status = '';
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private \DateTimeImmutable $created_at;
 
     public function getId(): ?int
     {
@@ -71,7 +76,7 @@ class Offer
         return $this;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -83,7 +88,7 @@ class Offer
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -95,7 +100,7 @@ class Offer
         return $this;
     }
 
-    public function getOfferType(): ?string
+    public function getOfferType(): string
     {
         return $this->offer_type;
     }
@@ -107,7 +112,7 @@ class Offer
         return $this;
     }
 
-    public function getField(): ?string
+    public function getField(): string
     {
         return $this->field;
     }
@@ -119,7 +124,7 @@ class Offer
         return $this;
     }
 
-    public function getRequiredLevel(): ?string
+    public function getRequiredLevel(): string
     {
         return $this->required_level;
     }
@@ -131,7 +136,7 @@ class Offer
         return $this;
     }
 
-    public function getRequiredSkills(): ?string
+    public function getRequiredSkills(): string
     {
         return $this->required_skills;
     }
@@ -143,7 +148,7 @@ class Offer
         return $this;
     }
 
-    public function getLocation(): ?string
+    public function getLocation(): string
     {
         return $this->location;
     }
@@ -155,7 +160,7 @@ class Offer
         return $this;
     }
 
-    public function getContractType(): ?string
+    public function getContractType(): string
     {
         return $this->contract_type;
     }
@@ -191,7 +196,7 @@ class Offer
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -203,7 +208,7 @@ class Offer
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }

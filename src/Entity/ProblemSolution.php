@@ -19,7 +19,7 @@ class ProblemSolution
     private ?Activity $activityId = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $problemDescription = null;
+    private string $problemDescription = '';
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $groupSolution = null;
@@ -44,7 +44,7 @@ class ProblemSolution
         return $this;
     }
 
-    public function getProblemDescription(): ?string
+    public function getProblemDescription(): string
     {
         return $this->problemDescription;
     }

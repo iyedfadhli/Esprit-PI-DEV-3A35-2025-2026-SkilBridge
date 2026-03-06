@@ -38,8 +38,8 @@ class DashboardController extends AbstractController
         $commentRepo = $em->getRepository(Commentaires::class);
         $userRepo = $em->getRepository(User::class);
 
-        $groups = $groupRepo->findAll();
-        $posts = $postRepo->findAll();
+        $groups = $groupRepo->findBy([], [], 99);
+        $posts = $postRepo->findBy([], [], 99);
 
         $stats = [
             'users' => $userRepo->count([]),
@@ -409,7 +409,7 @@ class DashboardController extends AbstractController
             throw $this->createAccessDeniedException('Access denied');
         }
 
-        $users = $em->getRepository(User::class)->findAll();
+        $users = $em->getRepository(User::class)->findBy([], [], 99);
 
         // Create PDF using TCPDF
         $pdf = new \TCPDF('L', 'mm', 'A4', true, 'UTF-8', false);

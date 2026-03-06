@@ -24,8 +24,8 @@ class Activity
     #[ORM\Column(length: 255,nullable: true)]
     private ?string $submission_file = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?\DateTime $submission_date = null;
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $submission_date = null;
 
     #[ORM\Column(type: 'string', length: 30, nullable: true)]
     private ?string $status = null;
@@ -71,14 +71,14 @@ class Activity
         return $this;
     }
 
-    public function getSubmissionDate(): ?\DateTime
+    public function getSubmissionDate(): ?\DateTimeImmutable
     {
         return $this->submission_date;
     }
 
-    public function setSubmissionDate(\DateTime $submission_date): static
+    public function setSubmissionDate(\DateTimeInterface $submission_date): static
     {
-        $this->submission_date = $submission_date;
+        $this->submission_date = $submission_date instanceof \DateTimeImmutable ? $submission_date : \DateTimeImmutable::createFromMutable($submission_date);
 
         return $this;
     }

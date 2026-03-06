@@ -28,13 +28,13 @@ class Quiz
     private ?Chapter $chapter = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $title = null;
+    private string $title = '';
 
     #[ORM\Column]
-    private ?float $passing_score = null;
+    private float $passing_score = 0.0;
 
     #[ORM\Column]
-    private ?int $max_attempts = null;
+    private int $max_attempts = 0;
 
     #[ORM\Column(nullable: true)]
     private ?int $questions_per_attempt = null;
@@ -50,10 +50,10 @@ class Quiz
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $supervisor = null;
 
-    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $questions;
 
-    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: QuizAttempts::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: QuizAttempts::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $quizAttempts;
 
     public function __construct()
@@ -91,7 +91,7 @@ class Quiz
         return $this;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -103,7 +103,7 @@ class Quiz
         return $this;
     }
 
-    public function getPassingScore(): ?float
+    public function getPassingScore(): float
     {
         return $this->passing_score;
     }
@@ -115,7 +115,7 @@ class Quiz
         return $this;
     }
 
-    public function getMaxAttempts(): ?int
+    public function getMaxAttempts(): int
     {
         return $this->max_attempts;
     }

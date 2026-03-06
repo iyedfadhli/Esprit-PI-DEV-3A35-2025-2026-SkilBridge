@@ -9,13 +9,18 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: MessageRepository::class)]
 class Message
 {
+    public function __construct()
+    {
+        $this->createdAT = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $content = null;
+    private string $content = '';
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -25,15 +30,15 @@ class Message
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Group $group_id = null;
 
-    #[ORM\Column]
-    private ?\DateTime $createdAT = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $createdAT;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getContent(): ?string
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -69,14 +74,14 @@ class Message
         return $this;
     }
 
-    public function getCreatedAT(): ?\DateTime
+    public function getCreatedAT(): \DateTimeImmutable
     {
         return $this->createdAT;
     }
 
-    public function setCreatedAT(\DateTime $createdAT): static
+    public function setCreatedAT(\DateTimeInterface $createdAT): static
     {
-        $this->createdAT = $createdAT;
+        $this->createdAT = $createdAT instanceof \DateTimeImmutable ? $createdAT : \DateTimeImmutable::createFromMutable($createdAT);
 
         return $this;
     }

@@ -13,11 +13,11 @@ class StudentResponse
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'studentResponses')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?QuizAttempts $attempt = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'studentResponses')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Question $question = null;
 
@@ -26,10 +26,10 @@ class StudentResponse
     private ?Answer $selected_answer = null;
 
     #[ORM\Column]
-    private ?bool $is_correct = null;
+    private bool $is_correct = false;
 
     #[ORM\Column]
-    private ?float $points_earned = null;
+    private float $points_earned = 0.0;
 
     public function getId(): ?int
     {
@@ -69,7 +69,7 @@ class StudentResponse
         return $this;
     }
 
-    public function isCorrect(): ?bool
+    public function isCorrect(): bool
     {
         return $this->is_correct;
     }
@@ -80,7 +80,7 @@ class StudentResponse
         return $this;
     }
 
-    public function getPointsEarned(): ?float
+    public function getPointsEarned(): float
     {
         return $this->points_earned;
     }

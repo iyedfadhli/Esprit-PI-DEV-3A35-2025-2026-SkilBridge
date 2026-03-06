@@ -14,15 +14,15 @@ class Experience
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'experiences')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Cv $cv = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $job_title = null;
+    private string $job_title = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $company = null;
+    private string $company = '';
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $location = null;
@@ -34,10 +34,10 @@ class Experience
     private ?\DateTime $end_date = null;
 
     #[ORM\Column]
-    private ?bool $currently_working = null;
+    private bool $currently_working = false;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
+    private string $description = '';
 
     public function getId(): ?int
     {
@@ -56,24 +56,24 @@ class Experience
         return $this;
     }
 
-    public function getJobTitle(): ?string
+    public function getJobTitle(): string
     {
         return $this->job_title;
     }
 
-    public function setJobTitle(?string $job_title): static
+    public function setJobTitle(string $job_title): static
     {
         $this->job_title = $job_title;
 
         return $this;
     }
 
-    public function getCompany(): ?string
+    public function getCompany(): string
     {
         return $this->company;
     }
 
-    public function setCompany(?string $company): static
+    public function setCompany(string $company): static
     {
         $this->company = $company;
 
@@ -116,7 +116,7 @@ class Experience
         return $this;
     }
 
-    public function isCurrentlyWorking(): ?bool
+    public function isCurrentlyWorking(): bool
     {
         return $this->currently_working;
     }
@@ -128,12 +128,12 @@ class Experience
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
 
-    public function setDescription(?string $description): static
+    public function setDescription(string $description): static
     {
         $this->description = $description;
 

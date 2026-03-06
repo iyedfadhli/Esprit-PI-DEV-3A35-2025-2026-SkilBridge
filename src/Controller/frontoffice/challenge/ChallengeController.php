@@ -37,7 +37,9 @@ final class ChallengeController extends AbstractController
                 $this->addFlash('error', 'No course available.');
                 return $this->redirectToRoute('supervisor_challenge');
             }
-            $challenge->setCreator($creator);
+            if ($creator !== null) {
+                $challenge->assignCreator($creator);
+            }
             $challenge->setCourse($course);
             $challenge->setCreatedAt(new \DateTime());
             $descriptionText = $formA->get('descriptionText')->getData();

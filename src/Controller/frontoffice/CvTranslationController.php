@@ -75,19 +75,19 @@ class CvTranslationController extends AbstractController
 
         foreach ($experiences as $idx => $exp) {
             $t = $this->translator->translateFields([
-                'job_title' => (string) ($exp->getJobTitle() ?? ''),
-                'company' => (string) ($exp->getCompany() ?? ''),
+                'job_title' => (string) $exp->getJobTitle(),
+                'company' => (string) $exp->getCompany(),
                 'location' => (string) ($exp->getLocation() ?? ''),
-                'description' => (string) ($exp->getDescription() ?? ''),
+                'description' => (string) $exp->getDescription(),
             ], $target, $source);
             $translations['experiences'][$idx] = $t;
         }
 
         foreach ($educations as $idx => $edu) {
             $t = $this->translator->translateFields([
-                'degree' => (string) ($edu->getDegree() ?? ''),
+                'degree' => (string) $edu->getDegree(),
                 'field_of_study' => (string) ($edu->getFieldOfStudy() ?? ''),
-                'school' => (string) ($edu->getSchool() ?? ''),
+                'school' => (string) $edu->getSchool(),
                 'city' => (string) ($edu->getCity() ?? ''),
                 'description' => (string) ($edu->getDescription() ?? ''),
             ], $target, $source);
@@ -96,9 +96,9 @@ class CvTranslationController extends AbstractController
 
         foreach ($skills as $idx => $sk) {
             $t = $this->translator->translateFields([
-                'nom' => (string) ($sk->getNom() ?? ''),
-                'type' => (string) ($sk->getType() ?? ''),
-                'level' => (string) ($sk->getLevel() ?? ''),
+                'nom' => (string) $sk->getNom(),
+                'type' => (string) $sk->getType(),
+                'level' => (string) $sk->getLevel(),
             ], $target, $source);
             $translations['skills'][$idx] = $t;
         }
@@ -121,12 +121,12 @@ class CvTranslationController extends AbstractController
             throw $this->createNotFoundException('CV introuvable');
         }
         $token = $request->request->get('_token');
-        if (!$this->isCsrfTokenValid('translate'.$cv->getId(), $token)) {
+        if (!$this->isCsrfTokenValid('translate'.$cv->getId(), is_string($token) ? $token : null)) {
             $this->addFlash('error', 'Jeton CSRF invalide.');
             return $this->redirectToRoute('cv_translate', ['id' => $id, 'lang' => $lang]);
         }
 
-        $cvData = $request->request->all('cv') ?? [];
+        $cvData = $request->request->all('cv');
         if (isset($cvData['nomCv'])) {
             $cv->setNomCv($cvData['nomCv'] ?: $cv->getNomCv());
         }
@@ -140,7 +140,7 @@ class CvTranslationController extends AbstractController
             $cv->setLangue('Anglais');
         }
 
-        $exps = $request->request->all('experiences') ?? [];
+        $exps = $request->request->all('experiences');
         foreach ($exps as $expId => $data) {
             $exp = $this->em->getRepository(Experience::class)->find($expId);
             if ($exp && $exp->getCv() && $exp->getCv()->getId() === $cv->getId()) {
@@ -151,7 +151,7 @@ class CvTranslationController extends AbstractController
             }
         }
 
-        $edus = $request->request->all('educations') ?? [];
+        $edus = $request->request->all('educations');
         foreach ($edus as $eduId => $data) {
             $edu = $this->em->getRepository(Education::class)->find($eduId);
             if ($edu && $edu->getCv() && $edu->getCv()->getId() === $cv->getId()) {
@@ -163,7 +163,7 @@ class CvTranslationController extends AbstractController
             }
         }
 
-        $skills = $request->request->all('skills') ?? [];
+        $skills = $request->request->all('skills');
         foreach ($skills as $skillId => $data) {
             $sk = $this->em->getRepository(Skill::class)->find($skillId);
             if ($sk && $sk->getCv() && $sk->getCv()->getId() === $cv->getId()) {
@@ -201,4 +201,3 @@ class CvTranslationController extends AbstractController
         };
     }
 }
-

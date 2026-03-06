@@ -23,8 +23,10 @@ class HackathonController extends AbstractController
     #[Route('/', name: 'app_back_hackathon_index', methods: ['GET'])]
     public function index(Request $request, HackathonRepository $hackathonRepository): Response
     {
-        $query = $request->query->get('q');
-        $status = $request->query->get('status');
+        $queryValue = $request->query->get('q');
+        $statusValue = $request->query->get('status');
+        $query = is_string($queryValue) ? $queryValue : null;
+        $status = is_string($statusValue) ? $statusValue : null;
         
         $hackathons = $hackathonRepository->searchHackathons($query, $status);
 
@@ -50,7 +52,7 @@ class HackathonController extends AbstractController
             $coverFile = $form->get('cover_url')->getData();
 
             if ($coverFile instanceof UploadedFile) {
-                $ext = strtolower($coverFile->getClientOriginalExtension() ?? '');
+                $ext = strtolower($coverFile->getClientOriginalExtension());
                 $allowed = ['jpg','jpeg','png','gif','webp'];
                 if (!in_array($ext, $allowed, true)) {
                     $ext = 'dat';
@@ -58,8 +60,12 @@ class HackathonController extends AbstractController
                 $newFilename = uniqid().'.'.$ext;
 
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    if (!is_string($projectDir)) {
+                        throw new \RuntimeException('Invalid project dir parameter');
+                    }
                     $coverFile->move(
-                        $this->getParameter('kernel.project_dir') . '/public/uploads/hackathons',
+                        $projectDir . '/public/uploads/hackathons',
                         $newFilename
                     );
                     $hackathon->setCoverUrl('/uploads/hackathons/' . $newFilename);
@@ -68,7 +74,7 @@ class HackathonController extends AbstractController
                 }
             }
 
-            $users = $userRepository->findAll();
+            $users = $userRepository->findBy([], [], 99);
             if (!empty($users)) {
                 $hackathon->setCreatorId($users[0]);
             }
@@ -117,7 +123,7 @@ class HackathonController extends AbstractController
             $coverFile = $form->get('cover_url')->getData();
 
             if ($coverFile instanceof UploadedFile) {
-                $ext = strtolower($coverFile->getClientOriginalExtension() ?? '');
+                $ext = strtolower($coverFile->getClientOriginalExtension());
                 $allowed = ['jpg','jpeg','png','gif','webp'];
                 if (!in_array($ext, $allowed, true)) {
                     $ext = 'dat';
@@ -125,8 +131,12 @@ class HackathonController extends AbstractController
                 $newFilename = uniqid().'.'.$ext;
 
                 try {
+                    $projectDir = $this->getParameter('kernel.project_dir');
+                    if (!is_string($projectDir)) {
+                        throw new \RuntimeException('Invalid project dir parameter');
+                    }
                     $coverFile->move(
-                        $this->getParameter('kernel.project_dir') . '/public/uploads/hackathons',
+                        $projectDir . '/public/uploads/hackathons',
                         $newFilename
                     );
                     $hackathon->setCoverUrl('/uploads/hackathons/' . $newFilename);
@@ -150,7 +160,8 @@ class HackathonController extends AbstractController
     #[Route('/{id}', name: 'app_back_hackathon_delete', methods: ['POST'])]
     public function delete(Request $request, Hackathon $hackathon, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$hackathon->getId(), $request->request->get('_token'))) {
+        $token = $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete'.$hackathon->getId(), is_string($token) ? $token : null)) {
             $entityManager->remove($hackathon);
             $entityManager->flush();
             $this->addFlash('success', 'Hackathon deleted successfully!');

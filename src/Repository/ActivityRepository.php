@@ -74,10 +74,20 @@ class ActivityRepository extends ServiceEntityRepository
 
     public function hasAnyMemberInProgressConflict(\App\Entity\Group $candidateGroup): bool
     {
+        $candidateMembersDql = $this->getEntityManager()
+            ->createQueryBuilder()
+            ->select('IDENTITY(mg.user_id)')
+            ->from('App\Entity\Membership', 'mg')
+            ->where('mg.group_id = :candidate')
+            ->getDQL();
+
         $count = (int) $this->createQueryBuilder('a')
             ->select('COUNT(a.id)')
-            ->join('App\Entity\Membership', 'm', 'WITH', 'm.group_id = a.group_id')
-            ->join('App\Entity\Membership', 'mg', 'WITH', 'IDENTITY(mg.user_id) = IDENTITY(m.user_id) AND mg.group_id = :candidate')
+            ->andWhere('EXISTS (
+                SELECT 1 FROM App\Entity\Membership m
+                WHERE m.group_id = a.group_id
+                AND IDENTITY(m.user_id) IN (' . $candidateMembersDql . ')
+            )')
             ->andWhere('a.status = :status')
             ->setParameter('candidate', $candidateGroup)
             ->setParameter('status', 'in_progress')

@@ -19,23 +19,23 @@ class Question
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'questions')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Quiz $quiz = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $content = null;
+    private string $content = '';
 
     #[ORM\Column(length: 20)]
-    private ?string $type = null;
+    private string $type = '';
 
     #[ORM\Column]
-    private ?float $point = null;
+    private float $point = 0.0;
 
-    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Answer::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Answer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $answers;
 
-    #[ORM\OneToMany(mappedBy: 'question', targetEntity: StudentResponse::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: StudentResponse::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $studentResponses;
 
     public function __construct()
@@ -61,7 +61,7 @@ class Question
         return $this;
     }
 
-    public function getContent(): ?string
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -73,7 +73,7 @@ class Question
         return $this;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -85,7 +85,7 @@ class Question
         return $this;
     }
 
-    public function getPoint(): ?float
+    public function getPoint(): float
     {
         return $this->point;
     }
@@ -128,7 +128,7 @@ class Question
 
     public function __toString(): string
     {
-        $content = $this->content ?? '';
+        $content = $this->content;
         if (strlen($content) > 40) {
             return substr($content, 0, 37).'...';
         }

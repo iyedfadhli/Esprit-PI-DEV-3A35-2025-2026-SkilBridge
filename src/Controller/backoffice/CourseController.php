@@ -3,6 +3,7 @@
 namespace App\Controller\backoffice;
 
 use App\Entity\Course;
+use App\Entity\User;
 use App\Form\CourseType;
 use App\Repository\CourseRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,14 +18,17 @@ class CourseController extends AbstractController
     #[Route('', name: 'admin_course_index', methods: ['GET'])]
     public function index(CourseRepository $courseRepository, Request $request): Response
     {
-        $search = $request->query->get('search', '');
+        $searchValue = $request->query->get('search', '');
+        $search = is_string($searchValue) ? $searchValue : '';
         $page = max(1, $request->query->getInt('page', 1));
         $limit = 10;
 
         // Sorting
         $allowedSortFields = ['id', 'title', 'duration', 'validationScore'];
-        $sort = $request->query->get('sort', 'id');
-        $direction = strtoupper($request->query->get('direction', 'DESC'));
+        $sortValue = $request->query->get('sort', 'id');
+        $sort = is_string($sortValue) ? $sortValue : 'id';
+        $directionValue = $request->query->get('direction', 'DESC');
+        $direction = strtoupper(is_string($directionValue) ? $directionValue : 'DESC');
         if (!in_array($sort, $allowedSortFields)) {
             $sort = 'id';
         }
@@ -78,6 +82,10 @@ class CourseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $creator = $form->get('creator')->getData();
+            if ($creator instanceof User) {
+                $course->assignCreator($creator);
+            }
             $entityManager->persist($course);
             $entityManager->flush();
 
@@ -106,6 +114,10 @@ class CourseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $creator = $form->get('creator')->getData();
+            if ($creator instanceof User) {
+                $course->assignCreator($creator);
+            }
             $entityManager->flush();
 
             $this->addFlash('success', 'Course updated successfully!');
@@ -121,7 +133,8 @@ class CourseController extends AbstractController
     #[Route('/{id}/delete', name: 'admin_course_delete', methods: ['POST'])]
     public function delete(Request $request, Course $course, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $course->getId(), $request->request->get('_token'))) {
+        $token = $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete' . $course->getId(), is_string($token) ? $token : null)) {
             $entityManager->remove($course);
             $entityManager->flush();
             $this->addFlash('success', 'Course deleted successfully!');

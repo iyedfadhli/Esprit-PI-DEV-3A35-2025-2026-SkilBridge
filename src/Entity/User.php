@@ -29,7 +29,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank(message: 'Nom is required')]
     #[Assert\Length(min: 2, minMessage: 'Nom must be at least {{ limit }} characters')]
-    private ?string $nom = null;
+    private string $nom = '';
 
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $prenom = null;
@@ -40,7 +40,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: "string", length: 180, unique: true)]
     #[Assert\NotBlank(message: 'Email is required')]
     #[Assert\Email(message: 'Please enter a valid email address')]
-    private ?string $email = null;
+    private string $email = '';
 
     #[ORM\Column(options: ['default' => false])]
     private bool $ban = false;
@@ -52,10 +52,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Ignore]
     #[Assert\NotBlank(message: 'Password is required')]
     #[Assert\Length(min: 6, minMessage: 'Password must be at least {{ limit }} characters')]
-    private ?string $passwd = null;
+    private string $passwd = '';
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTime $dateInscrit;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $dateInscrit;
 
     #[ORM\Column(options: ['default' => true])]
     private bool $is_active = true;
@@ -66,8 +66,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 30, nullable: true)]
     private ?string $previous_role = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTime $bannedUntil = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $bannedUntil = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $archived = false;
@@ -87,7 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->report_nbr = 0;
         $this->is_active = true;
         $this->archived = false;
-        $this->dateInscrit = new \DateTime();
+        $this->dateInscrit = new \DateTimeImmutable();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -115,8 +115,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPassword(): string { return (string) $this->passwd; }
     public function setPassword(#[\SensitiveParameter] string $passwd): static { $this->passwd = $passwd; return $this; }
 
-    public function getDateInscrit(): \DateTime { return $this->dateInscrit; }
-    public function setDateInscrit(\DateTime $dateInscrit): static { $this->dateInscrit = $dateInscrit; return $this; }
+    public function getDateInscrit(): \DateTimeImmutable { return $this->dateInscrit; }
+    public function setDateInscrit(\DateTimeInterface $dateInscrit): static
+    {
+        $this->dateInscrit = $dateInscrit instanceof \DateTimeImmutable ? $dateInscrit : \DateTimeImmutable::createFromMutable($dateInscrit);
+        return $this;
+    }
 
     public function isActive(): bool { return $this->is_active; }
     public function setIsActive(bool $is_active): static { $this->is_active = $is_active; return $this; }
@@ -172,12 +176,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getPreviousRole(): ?string { return $this->previous_role; }
     public function setPreviousRole(?string $previous_role): static { $this->previous_role = $previous_role; return $this; }
 
-    public function getBannedUntil(): ?\DateTime { return $this->bannedUntil; }
-    public function setBannedUntil(?\DateTime $bannedUntil): static { $this->bannedUntil = $bannedUntil; return $this; }
+    public function getBannedUntil(): ?\DateTimeImmutable { return $this->bannedUntil; }
+    public function setBannedUntil(?\DateTimeInterface $bannedUntil): static
+    {
+        if ($bannedUntil === null) {
+            $this->bannedUntil = null;
+            return $this;
+        }
+        $this->bannedUntil = $bannedUntil instanceof \DateTimeImmutable ? $bannedUntil : \DateTimeImmutable::createFromMutable($bannedUntil);
+        return $this;
+    }
 
     public function isBannedNow(): bool
     {
-        return $this->bannedUntil !== null && $this->bannedUntil > new \DateTime();
+        return $this->bannedUntil !== null && $this->bannedUntil > new \DateTimeImmutable();
     }
 
     public function isArchived(): bool { return $this->archived; }

@@ -9,6 +9,12 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: CvApplicationRepository::class)]
 class CvApplication
 {
+    public function __construct()
+    {
+        $this->applied_at = new \DateTimeImmutable();
+        $this->status = '';
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -23,10 +29,10 @@ class CvApplication
     private ?Offer $offer = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $status = null;
+    private string $status = '';
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $applied_at = null;
+    private \DateTimeImmutable $applied_at;
 
     // --- ATS Scoring ---------------------------------------------------------
 
@@ -61,10 +67,10 @@ class CvApplication
     public function getOffer(): ?Offer { return $this->offer; }
     public function setOffer(?Offer $offer): static { $this->offer = $offer; return $this; }
 
-    public function getStatus(): ?string { return $this->status; }
+    public function getStatus(): string { return $this->status; }
     public function setStatus(string $status): static { $this->status = $status; return $this; }
 
-    public function getAppliedAt(): ?\DateTimeImmutable { return $this->applied_at; }
+    public function getAppliedAt(): \DateTimeImmutable { return $this->applied_at; }
     public function setAppliedAt(\DateTimeImmutable $applied_at): static { $this->applied_at = $applied_at; return $this; }
 
     public function getAtsScore(): ?int { return $this->atsScore; }

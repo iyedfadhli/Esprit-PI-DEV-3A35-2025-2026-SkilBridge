@@ -59,7 +59,7 @@ class PostController extends AbstractController
                     @unlink($absoluteFilePath);
                 }
 
-                $this->addFlash('moderation_error', $this->moderationErrorMessage((string) ($moderationResult['reason'] ?? '')));
+                $this->addFlash('moderation_error', $this->moderationErrorMessage($moderationResult['reason']));
 
                 return $this->render('frontoffice/posts/new.html.twig', [
                     'group' => $group,
@@ -112,7 +112,7 @@ class PostController extends AbstractController
 
         if ($existing) {
             $em->remove($existing);
-            $post->setLikesCounter(max(0, ($post->getLikesCounter() ?? 0) - 1));
+            $post->setLikesCounter(max(0, $post->getLikesCounter() - 1));
         } else {
             $reaction = new Reactions();
             $reaction->setUserId($user);
@@ -121,7 +121,7 @@ class PostController extends AbstractController
             $reaction->setPostedAt(new \DateTimeImmutable());
             $reaction->setUrl($request->headers->get('referer') ?? '');
             $em->persist($reaction);
-            $post->setLikesCounter(($post->getLikesCounter() ?? 0) + 1);
+            $post->setLikesCounter($post->getLikesCounter() + 1);
         }
 
         $em->flush();
@@ -204,7 +204,7 @@ class PostController extends AbstractController
 
                 $email = (new Email())
                     ->from('tas.sam.se@gmail.com')
-                    ->to($commentAuthor->getEmail())
+                    ->to((string) $commentAuthor->getEmail())
                     ->subject('⚠️ Warning: Your account has been reported multiple times')
                     ->html($htmlContent);
 
@@ -287,7 +287,7 @@ class PostController extends AbstractController
 
                 $email = (new Email())
                     ->from('tas.sam.se@gmail.com')
-                    ->to($postAuthor->getEmail())
+                    ->to((string) $postAuthor->getEmail())
                     ->subject('⚠️ Warning: Your account has been reported multiple times')
                     ->html($htmlContent);
 
@@ -367,7 +367,11 @@ class PostController extends AbstractController
             return [null, null];
         }
 
-        $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/uploads/posts';
+        $projectDir = $this->getParameter('kernel.project_dir');
+        if (!is_string($projectDir)) {
+            return [null, null];
+        }
+        $uploadsDir = $projectDir . '/public/uploads/posts';
         if (!is_dir($uploadsDir)) {
             @mkdir($uploadsDir, 0775, true);
         }

@@ -10,6 +10,11 @@ use App\Entity\Course;
 #[ORM\Entity(repositoryClass: EnrollementRepository::class)]
 class Enrollement
 {
+    public function __construct()
+    {
+        $this->completed_at = new \DateTime();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -20,18 +25,18 @@ class Enrollement
     private ?User $student = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $status = null;
+    private string $status = '';
 
     #[ORM\Column]
-    private ?int $progress = null;
+    private int $progress = 0;
 
     #[ORM\Column(nullable: true)]
     private ?float $score = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $completed_at = null;
+    private \DateTime $completed_at;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'enrollements')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Course $course = null;
 
@@ -52,7 +57,7 @@ class Enrollement
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -64,7 +69,7 @@ class Enrollement
         return $this;
     }
 
-    public function getProgress(): ?int
+    public function getProgress(): int
     {
         return $this->progress;
     }
@@ -88,7 +93,7 @@ class Enrollement
         return $this;
     }
 
-    public function getCompletedAt(): ?\DateTime
+    public function getCompletedAt(): \DateTime
     {
         return $this->completed_at;
     }

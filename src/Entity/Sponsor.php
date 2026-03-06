@@ -26,16 +26,16 @@ class Sponsor
         max: 30,
         maxMessage: 'Name cannot exceed 30 characters'
     )]
-    private ?string $name = null;
+    private string $name = '';
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Description is required')]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Logo URL is required')]
     #[Assert\Url(message: 'Please enter a valid URL')]
-    private ?string $logo_url = null;
+    private string $logo_url = '';
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Url(
@@ -44,14 +44,14 @@ class Sponsor
     )]
     private ?string $website_url = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Assert\NotNull(message: 'Created at is required')]
-    private ?\DateTime $created_at = null;
+    private \DateTimeImmutable $created_at;
 
     public function __construct()
     {
         // Set creation date by default so validation passes and DB constraint is satisfied
-        $this->created_at = new \DateTime();
+        $this->created_at = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -71,7 +71,7 @@ class Sponsor
         return $this;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -83,7 +83,7 @@ class Sponsor
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -95,7 +95,7 @@ class Sponsor
         return $this;
     }
 
-    public function getLogoUrl(): ?string
+    public function getLogoUrl(): string
     {
         return $this->logo_url;
     }
@@ -119,14 +119,14 @@ class Sponsor
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTime $created_at): static
+    public function setCreatedAt(\DateTimeInterface $created_at): static
     {
-        $this->created_at = $created_at;
+        $this->created_at = $created_at instanceof \DateTimeImmutable ? $created_at : \DateTimeImmutable::createFromMutable($created_at);
 
         return $this;
     }

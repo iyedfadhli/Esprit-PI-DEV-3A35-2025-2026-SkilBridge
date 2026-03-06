@@ -9,40 +9,47 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ChallengeRepository::class)]
 class Challenge
 {
+    public function __construct()
+    {
+        $now = new \DateTimeImmutable();
+        $this->createdAt = $now;
+        $this->deadLine = $now;
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $title = null;
+    private string $title = '';
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $targetSkill = null;
+    private string $targetSkill = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $difficulty = null;
+    private string $difficulty = '';
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $creator = null;
 
     #[ORM\Column]
-    private ?int $minGroupNbr = null;
+    private int $minGroupNbr = 0;
 
     #[ORM\Column]
-    private ?int $maxGroupNbr = null;
+    private int $maxGroupNbr = 0;
 
-    #[ORM\Column]
-    private ?\DateTime $deadLine = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $deadLine;
 
-    #[ORM\Column]
-    private ?\DateTime $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $createdAt;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'challenges')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Course $course = null;
 
@@ -55,7 +62,7 @@ class Challenge
     }
     
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -67,7 +74,7 @@ class Challenge
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -79,7 +86,7 @@ class Challenge
         return $this;
     }
 
-    public function getTargetSkill(): ?string
+    public function getTargetSkill(): string
     {
         return $this->targetSkill;
     }
@@ -91,7 +98,7 @@ class Challenge
         return $this;
     }
 
-    public function getDifficulty(): ?string
+    public function getDifficulty(): string
     {
         return $this->difficulty;
     }
@@ -108,14 +115,19 @@ class Challenge
         return $this->creator;
     }
 
-    public function setCreator(?User $creator): static
+    protected function setCreator(?User $creator): static
     {
         $this->creator = $creator;
 
         return $this;
     }
 
-    public function getMinGroupNbr(): ?int
+    public function assignCreator(User $creator): static
+    {
+        return $this->setCreator($creator);
+    }
+
+    public function getMinGroupNbr(): int
     {
         return $this->minGroupNbr;
     }
@@ -127,7 +139,7 @@ class Challenge
         return $this;
     }
 
-    public function getMaxGroupNbr(): ?int
+    public function getMaxGroupNbr(): int
     {
         return $this->maxGroupNbr;
     }
@@ -139,26 +151,26 @@ class Challenge
         return $this;
     }
 
-    public function getDeadLine(): ?\DateTime
+    public function getDeadLine(): \DateTimeImmutable
     {
         return $this->deadLine;
     }
 
-    public function setDeadLine(\DateTime $deadLine): static
+    public function setDeadLine(\DateTimeInterface $deadLine): static
     {
-        $this->deadLine = $deadLine;
+        $this->deadLine = $deadLine instanceof \DateTimeImmutable ? $deadLine : \DateTimeImmutable::createFromMutable($deadLine);
 
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTime
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTime $createdAt): static
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
-        $this->createdAt = $createdAt;
+        $this->createdAt = $createdAt instanceof \DateTimeImmutable ? $createdAt : \DateTimeImmutable::createFromMutable($createdAt);
 
         return $this;
     }

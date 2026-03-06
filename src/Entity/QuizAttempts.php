@@ -21,13 +21,13 @@ class QuizAttempts
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $attempt_nbr = null;
+    private int $attempt_nbr = 0;
 
     #[ORM\Column]
-    private ?float $score = null;
+    private float $score = 0.0;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $submitted_at = null;
+    private \DateTimeImmutable $submitted_at;
 
     /**
      * Heure de début de la tentative — enregistrée UNIQUEMENT par le serveur.
@@ -55,15 +55,16 @@ class QuizAttempts
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $student = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'quizAttempts')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Quiz $quiz = null;
 
-    #[ORM\OneToMany(mappedBy: 'attempt', targetEntity: StudentResponse::class, cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'attempt', targetEntity: StudentResponse::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $studentResponses;
 
     public function __construct()
     {
+        $this->submitted_at = new \DateTimeImmutable();
         $this->studentResponses = new ArrayCollection();
     }
 
@@ -72,7 +73,7 @@ class QuizAttempts
         return $this->id;
     }
 
-    public function getAttemptNbr(): ?int
+    public function getAttemptNbr(): int
     {
         return $this->attempt_nbr;
     }
@@ -84,7 +85,7 @@ class QuizAttempts
         return $this;
     }
 
-    public function getScore(): ?float
+    public function getScore(): float
     {
         return $this->score;
     }
@@ -96,7 +97,7 @@ class QuizAttempts
         return $this;
     }
 
-    public function getSubmittedAt(): ?\DateTimeImmutable
+    public function getSubmittedAt(): \DateTimeImmutable
     {
         return $this->submitted_at;
     }

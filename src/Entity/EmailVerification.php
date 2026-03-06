@@ -19,15 +19,15 @@ class EmailVerification
     #[ORM\Column(length: 6)]
     private string $code;
 
-    #[ORM\Column(type: 'datetime')]
-    private \DateTime $expiresAt;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $expiresAt;
 
-    #[ORM\Column(type: 'datetime')]
-    private \DateTime $createdAt;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -38,13 +38,17 @@ class EmailVerification
     public function getCode(): string { return $this->code; }
     public function setCode(string $code): static { $this->code = $code; return $this; }
 
-    public function getExpiresAt(): \DateTime { return $this->expiresAt; }
-    public function setExpiresAt(\DateTime $expiresAt): static { $this->expiresAt = $expiresAt; return $this; }
+    public function getExpiresAt(): \DateTimeImmutable { return $this->expiresAt; }
+    public function setExpiresAt(\DateTimeInterface $expiresAt): static
+    {
+        $this->expiresAt = $expiresAt instanceof \DateTimeImmutable ? $expiresAt : \DateTimeImmutable::createFromMutable($expiresAt);
+        return $this;
+    }
 
-    public function getCreatedAt(): \DateTime { return $this->createdAt; }
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
 
     public function isExpired(): bool
     {
-        return new \DateTime() > $this->expiresAt;
+        return new \DateTimeImmutable() > $this->expiresAt;
     }
 }

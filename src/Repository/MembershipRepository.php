@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Group;
 use App\Entity\Membership;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -35,5 +37,28 @@ class MembershipRepository extends ServiceEntityRepository
             ->setParameter('group', $group)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function existsByUserAndGroup(User $user, Group $group): bool
+    {
+        $count = (int) $this->createQueryBuilder('m')
+            ->select('COUNT(m.id)')
+            ->andWhere('m.user_id = :user')
+            ->andWhere('m.group_id = :group')
+            ->setParameter('user', $user)
+            ->setParameter('group', $group)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
+    }
+
+    public function deleteByUserAndGroup(User $user, Group $group): int
+    {
+        return $this->getEntityManager()
+            ->createQuery('DELETE FROM App\Entity\Membership m WHERE m.user_id = :user AND m.group_id = :group')
+            ->setParameter('user', $user)
+            ->setParameter('group', $group)
+            ->execute();
     }
 }

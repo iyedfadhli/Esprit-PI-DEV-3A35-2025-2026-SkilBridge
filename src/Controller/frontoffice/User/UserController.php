@@ -36,8 +36,10 @@ final class UserController extends AbstractController
             $nom   = trim((string) $request->request->get('nom'));
             $prenom = trim((string) $request->request->get('prenom'));
             $email = strtolower(trim((string) $request->request->get('email')));
-            $dateNaissance = $request->request->get('date_naissance');
-            $domaine = $request->request->get('domaine');
+            $dateNaissanceRaw = $request->request->get('date_naissance');
+            $dateNaissance = is_string($dateNaissanceRaw) ? $dateNaissanceRaw : null;
+            $domaineRaw = $request->request->get('domaine');
+            $domaine = is_string($domaineRaw) ? $domaineRaw : '';
             $passwd = (string) $request->request->get('passwd');
 
             // ✅ PHP VALIDATION (mapped to fields)
@@ -460,11 +462,12 @@ final class UserController extends AbstractController
             return $this->redirectToRoute('profile');
         }
 
-        $user->setNom($request->request->get('nom'));
-        $user->setEmail($request->request->get('email'));
+        $user->setNom(trim((string) $request->request->get('nom')));
+        $user->setEmail(trim((string) $request->request->get('email')));
 
-        if ($request->request->get('prenom')) {
-            $user->setPrenom($request->request->get('prenom'));
+        $prenomValue = $request->request->get('prenom');
+        if (is_string($prenomValue) && $prenomValue !== '') {
+            $user->setPrenom($prenomValue);
         }
 
         if ($request->request->get('education')) {
@@ -502,8 +505,12 @@ final class UserController extends AbstractController
         $file = $request->files->get('profile');
 
         if ($file) {
-            $uploadsDir = $this->getParameter('kernel.project_dir') . '/public/assets/images/frontoffice/user_pic';
-            $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '', strtolower($user->getNom()));
+            $projectDir = $this->getParameter('kernel.project_dir');
+            if (!is_string($projectDir)) {
+                return $this->redirectToRoute('profile');
+            }
+            $uploadsDir = $projectDir . '/public/assets/images/frontoffice/user_pic';
+            $safeName = preg_replace('/[^a-zA-Z0-9_-]/', '', strtolower((string) $user->getNom()));
             $ext = strtolower($file->getClientOriginalExtension() ?? '');
             $allowed = ['jpg','jpeg','png','gif','webp'];
             if (!in_array($ext, $allowed, true)) {
@@ -540,9 +547,9 @@ final class UserController extends AbstractController
             return $this->redirectToRoute('profile');
         }
 
-        $currentPassword = $request->request->get('current_password');
-        $newPassword = $request->request->get('new_password');
-        $confirmPassword = $request->request->get('confirm_password');
+        $currentPassword = (string) $request->request->get('current_password');
+        $newPassword = (string) $request->request->get('new_password');
+        $confirmPassword = (string) $request->request->get('confirm_password');
 
         // ✅ PHP VALIDATION (replaces HTML5 validation)
         $errors = [];

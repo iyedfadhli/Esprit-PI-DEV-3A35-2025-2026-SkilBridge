@@ -10,6 +10,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: PostsRepository::class)]
 class Posts
 {
+    public function __construct()
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -18,30 +23,30 @@ class Posts
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: "Post content cannot be empty")]
     #[Assert\Length(min: 5, minMessage: "Content must be at least 5 characters")]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank(message: "Title is required")]
     #[Assert\Length(max: 30, maxMessage: "Title cannot exceed 30 characters")]
-    private ?string $titre = null;
+    private string $titre = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $status = null;
+    private string $status = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $visibility = null;
+    private string $visibility = '';
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $attached_file = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private \DateTimeImmutable $created_at;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column]
-    private ?int $likes_counter = null;
+    private int $likes_counter = 0;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
@@ -56,7 +61,7 @@ class Posts
         return $this->id;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -68,7 +73,7 @@ class Posts
         return $this;
     }
 
-    public function getTitre(): ?string
+    public function getTitre(): string
     {
         return $this->titre;
     }
@@ -80,7 +85,7 @@ class Posts
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -92,7 +97,7 @@ class Posts
         return $this;
     }
 
-    public function getVisibility(): ?string
+    public function getVisibility(): string
     {
         return $this->visibility;
     }
@@ -116,7 +121,7 @@ class Posts
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }
@@ -140,7 +145,7 @@ class Posts
         return $this;
     }
 
-    public function getLikesCounter(): ?int
+    public function getLikesCounter(): int
     {
         return $this->likes_counter;
     }

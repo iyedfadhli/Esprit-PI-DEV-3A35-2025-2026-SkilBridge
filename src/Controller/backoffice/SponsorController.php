@@ -106,7 +106,7 @@ class SponsorController extends AbstractController
     public function exportCsv(SponsorRepository $sponsorRepository): Response
     {
         // Get all sponsors
-        $sponsors = $sponsorRepository->findAll();
+        $sponsors = $sponsorRepository->findBy([], [], 99);
 
         // Create CSV content
         $csvData = [];

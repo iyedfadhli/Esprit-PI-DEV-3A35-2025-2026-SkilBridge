@@ -16,6 +16,18 @@ class HackathonRepository extends ServiceEntityRepository
         parent::__construct($registry, Hackathon::class);
     }
 
+    /**
+     * @return list<Hackathon>
+     */
+    public function findLatest(int $limit = 50): array
+    {
+        return $this->createQueryBuilder('h')
+            ->orderBy('h.created_at', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function searchHackathons(?string $query = null, ?string $status = null): array
     {
         $qb = $this->createQueryBuilder('h');
@@ -31,6 +43,7 @@ class HackathonRepository extends ServiceEntityRepository
         }
 
         return $qb->orderBy('h.created_at', 'DESC')
+            ->setMaxResults(200)
             ->getQuery()
             ->getResult();
     }

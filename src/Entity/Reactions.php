@@ -10,34 +10,39 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\UniqueConstraint(name: 'uniq_user_post_type', columns: ['user_id_id', 'post_id_id', 'type'])]
 class Reactions
 {
+    public function __construct()
+    {
+        $this->posted_at = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     #[ORM\Column(length: 25)]
-    private ?string $type = null;
+    private string $type = '';
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user_id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $url = null;
+    private string $url = '';
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Posts $post_id = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $posted_at = null;
+    private \DateTimeImmutable $posted_at;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -61,7 +66,7 @@ class Reactions
         return $this;
     }
 
-    public function getUrl(): ?string
+    public function getUrl(): string
     {
         return $this->url;
     }
@@ -85,7 +90,7 @@ class Reactions
         return $this;
     }
 
-    public function getPostedAt(): ?\DateTimeImmutable
+    public function getPostedAt(): \DateTimeImmutable
     {
         return $this->posted_at;
     }

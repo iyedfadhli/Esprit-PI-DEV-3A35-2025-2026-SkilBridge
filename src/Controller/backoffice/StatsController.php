@@ -15,7 +15,7 @@ class StatsController extends AbstractController
     public function index(HackathonRepository $hackathonRepository, SponsorHackathonRepository $sponsorHackathonRepository): Response
     {
         // 1. Hackathon Status Distribution (Pie Chart)
-        $hackathons = $hackathonRepository->findAll();
+        $hackathons = $hackathonRepository->findBy([], [], 99);
         $statusCounts = [];
         foreach ($hackathons as $hackathon) {
             $status = $hackathon->getStatus() ?: 'Unknown';
@@ -26,7 +26,7 @@ class StatsController extends AbstractController
         }
 
         // 2. Sponsor Contribution Types (Doughnut Chart)
-        $sponsorHackathons = $sponsorHackathonRepository->findAll();
+        $sponsorHackathons = $sponsorHackathonRepository->findBy([], [], 99);
         $typeCounts = [];
         $totalValue = 0;
         foreach ($sponsorHackathons as $sh) {

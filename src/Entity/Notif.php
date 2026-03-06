@@ -10,6 +10,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'notif')]
 class Notif
 {
+    public function __construct()
+    {
+        $this->created_at = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -20,13 +25,13 @@ class Notif
     private ?User $user = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $message = null;
+    private string $message = '';
 
     #[ORM\Column(name: 'is_read')]
     private bool $isRead = false;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private \DateTimeImmutable $created_at;
 
     public function getId(): ?int
     {
@@ -44,7 +49,7 @@ class Notif
         return $this;
     }
 
-    public function getMessage(): ?string
+    public function getMessage(): string
     {
         return $this->message;
     }
@@ -66,7 +71,7 @@ class Notif
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }
@@ -77,4 +82,3 @@ class Notif
         return $this;
     }
 }
-

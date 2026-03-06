@@ -13,18 +13,18 @@ class Skill
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'skills')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Cv $cv = null;
 
     #[ORM\Column(length: 35)]
-    private ?string $nom = null;
+    private string $nom = '';
 
     #[ORM\Column(length: 20)]
-    private ?string $type = null;
+    private string $type = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $level = null;
+    private string $level = '';
 
     public function getId(): ?int
     {
@@ -43,36 +43,36 @@ class Skill
         return $this;
     }
 
-    public function getNom(): ?string
+    public function getNom(): string
     {
         return $this->nom;
     }
 
-    public function setNom(?string $nom): static
+    public function setNom(string $nom): static
     {
         $this->nom = $nom;
 
         return $this;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
 
-    public function setType(?string $type): static
+    public function setType(string $type): static
     {
         $this->type = $type;
 
         return $this;
     }
 
-    public function getLevel(): ?string
+    public function getLevel(): string
     {
         return $this->level;
     }
 
-    public function setLevel(?string $level): static
+    public function setLevel(string $level): static
     {
         $this->level = $level;
 

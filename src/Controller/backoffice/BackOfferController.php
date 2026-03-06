@@ -18,7 +18,7 @@ class BackOfferController extends AbstractController
     #[Route('/offers', name: 'preview_back_offer_index')]
     public function index(EntityManagerInterface $em): Response
     {
-        $offers = $em->getRepository(Offer::class)->findAll();
+        $offers = $em->getRepository(Offer::class)->findBy([], [], 99);
 
         return $this->render('backoffice/offer/index.html.twig', [
             'offers' => $offers,
@@ -85,7 +85,7 @@ class BackOfferController extends AbstractController
             return $this->redirectToRoute('preview_back_offer_index');
         }
 
-        $enterprises = $em->getRepository(Entreprise::class)->findAll();
+        $enterprises = $em->getRepository(Entreprise::class)->findBy([], [], 99);
 
         return $this->render('backoffice/offer/new.html.twig', [
             'enterprises' => $enterprises,
@@ -154,7 +154,7 @@ class BackOfferController extends AbstractController
             return $this->redirectToRoute('preview_back_offer_show', ['id' => $id]);
         }
 
-        $enterprises = $em->getRepository(Entreprise::class)->findAll();
+        $enterprises = $em->getRepository(Entreprise::class)->findBy([], [], 99);
 
         return $this->render('backoffice/offer/edit.html.twig', [
             'offer' => $offer,
@@ -193,7 +193,7 @@ public function delete(int $id, Request $request, EntityManagerInterface $em): R
     #[Route('/applications', name: 'preview_back_application_index')]
     public function applicationIndex(EntityManagerInterface $em): Response
     {
-        $applications = $em->getRepository(CvApplication::class)->findAll();
+        $applications = $em->getRepository(CvApplication::class)->findBy([], [], 99);
 
         return $this->render('backoffice/application/index.html.twig', [
             'applications' => $applications,

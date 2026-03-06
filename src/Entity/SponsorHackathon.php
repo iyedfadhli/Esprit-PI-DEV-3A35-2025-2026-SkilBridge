@@ -19,7 +19,7 @@ class SponsorHackathon
     #[Assert\NotNull(message: 'Sponsor is required')]
     private ?Sponsor $sponsor = null;
 
-    #[ORM\ManyToOne(targetEntity: Hackathon::class)]
+    #[ORM\ManyToOne(targetEntity: Hackathon::class, inversedBy: 'sponsorHackathons')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'Hackathon is required')]
     private ?Hackathon $hackathon = null;
@@ -30,7 +30,7 @@ class SponsorHackathon
         max: 30,
         maxMessage: 'Contribution type cannot exceed 30 characters'
     )]
-    private ?string $contribution_type = null;
+    private string $contribution_type = '';
 
     #[ORM\Column(nullable: true)]
     #[Assert\NotNull(message: 'Please enter the contribution value')]
@@ -66,7 +66,7 @@ class SponsorHackathon
         return $this;
     }
 
-    public function getContributionType(): ?string
+    public function getContributionType(): string
     {
         return $this->contribution_type;
     }

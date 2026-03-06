@@ -80,7 +80,7 @@ public function index(EntityManagerInterface $em, Request $request): Response
     }
 
     // Also fetch all groups for the "Discover Groups" or "All Groups" section if needed
-    $allGroups = $em->getRepository(Group::class)->findAll();
+    $allGroups = $em->getRepository(Group::class)->findBy([], [], 99);
 
     // --- QUICK POST FORM (Public / No Group) ---
     $quickPost = new Posts();

@@ -15,15 +15,15 @@ class Answer
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'answers')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Question $question = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $content = null;
+    private string $content = '';
 
     #[ORM\Column]
-    private ?bool $is_correct = null;
+    private bool $is_correct = false;
 
     public function getId(): ?int
     {
@@ -54,7 +54,7 @@ class Answer
         return $this;
     }
 
-    public function isCorrect(): ?bool
+    public function isCorrect(): bool
     {
         return $this->is_correct;
     }

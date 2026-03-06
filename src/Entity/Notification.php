@@ -8,6 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: NotificationRepository::class)]
 class Notification
 {
+    public function __construct()
+    {
+        $this->CreatedAt = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -25,7 +30,7 @@ class Notification
     private array $data = [];
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $CreatedAt = null;
+    private \DateTimeImmutable $CreatedAt;
 
     public function getId(): ?int
     {
@@ -74,7 +79,7 @@ class Notification
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->CreatedAt;
     }

@@ -16,9 +16,9 @@ class ChallengeBackController extends AbstractController
     public function index(Request $request, EntityManagerInterface $em): Response
     {
         // ALWAYS defined first
-        $challenges = $em->getRepository(Challenge::class)->findAll();
-        $activities = $em->getRepository(Activity::class)->findAll();
-        $evaluations = $em->getRepository(Evaluation::class)->findAll();
+        $challenges = $em->getRepository(Challenge::class)->findBy([], [], 99);
+        $activities = $em->getRepository(Activity::class)->findBy([], [], 99);
+        $evaluations = $em->getRepository(Evaluation::class)->findBy([], [], 99);
         $activeTab = $request->query->get('tab', 'challenge-wrapper');
 
 

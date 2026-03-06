@@ -14,21 +14,28 @@ class Certif
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'certifs')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Cv $cv = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $name = null;
+    private string $name = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $issued_by = null;
+    private string $issued_by = '';
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $issue_date = null;
+    private \DateTime $issue_date;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $exp_date = null;
+    private \DateTime $exp_date;
+
+    public function __construct()
+    {
+        $now = new \DateTime();
+        $this->issue_date = $now;
+        $this->exp_date = $now;
+    }
 
     public function getId(): ?int
     {
@@ -47,31 +54,31 @@ class Certif
         return $this;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
 
-    public function setName(?string $name): static
+    public function setName(string $name): static
     {
         $this->name = $name;
 
         return $this;
     }
 
-    public function getIssuedBy(): ?string
+    public function getIssuedBy(): string
     {
         return $this->issued_by;
     }
 
-    public function setIssuedBy(?string $issued_by): static
+    public function setIssuedBy(string $issued_by): static
     {
         $this->issued_by = $issued_by;
 
         return $this;
     }
 
-    public function getIssueDate(): ?\DateTime
+    public function getIssueDate(): \DateTime
     {
         return $this->issue_date;
     }
@@ -83,7 +90,7 @@ class Certif
         return $this;
     }
 
-    public function getExpDate(): ?\DateTime
+    public function getExpDate(): \DateTime
     {
         return $this->exp_date;
     }

@@ -8,6 +8,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ParticipationRepository::class)]
 class Participation
 {
+    public function __construct()
+    {
+        $this->registred_at = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -22,16 +27,16 @@ class Participation
     private ?Group $group_id = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $status = null;
+    private string $status = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $payment_status = null;
+    private string $payment_status = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $payment_ref = null;
+    private string $payment_ref = '';
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $registred_at = null;
+    private \DateTimeImmutable $registred_at;
 
     public function getId(): ?int
     {
@@ -62,7 +67,7 @@ class Participation
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -74,7 +79,7 @@ class Participation
         return $this;
     }
 
-    public function getPaymentStatus(): ?string
+    public function getPaymentStatus(): string
     {
         return $this->payment_status;
     }
@@ -86,7 +91,7 @@ class Participation
         return $this;
     }
 
-    public function getPaymentRef(): ?string
+    public function getPaymentRef(): string
     {
         return $this->payment_ref;
     }
@@ -98,7 +103,7 @@ class Participation
         return $this;
     }
 
-    public function getRegistredAt(): ?\DateTimeImmutable
+    public function getRegistredAt(): \DateTimeImmutable
     {
         return $this->registred_at;
     }

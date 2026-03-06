@@ -25,76 +25,81 @@ class Hackathon
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank(message: 'Title is required')]
     #[Assert\Length(max: 30, maxMessage: 'Title cannot exceed 30 characters')]
-    private ?string $title = null;
+    private string $title = '';
 
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank(message: 'Theme is required')]
     #[Assert\Length(max: 30, maxMessage: 'Theme cannot exceed 30 characters')]
-    private ?string $theme = null;
+    private string $theme = '';
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Description is required')]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: 'Rules are required')]
-    private ?string $rules = null;
+    private string $rules = '';
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'Start date is required')]
     #[Assert\Type('\DateTimeImmutable')]
-    private ?\DateTimeImmutable $start_at = null;
+    private \DateTimeImmutable $start_at;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'End date is required')]
     #[Assert\Type('\DateTimeImmutable')]
     #[Assert\GreaterThan(propertyPath: 'start_at', message: 'End date must be after start date')]
-    private ?\DateTimeImmutable $end_at = null;
+    private \DateTimeImmutable $end_at;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Assert\NotBlank(message: 'Registration open date is required')]
-    private ?\DateTime $registration_open_at = null;
+    private \DateTimeImmutable $registration_open_at;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'Registration close date is required')]
     #[Assert\Type('\DateTimeImmutable')]
     #[Assert\LessThan(propertyPath: 'start_at', message: 'Registration must close before the event starts')]
-    private ?\DateTimeImmutable $registration_close_at = null;
+    private \DateTimeImmutable $registration_close_at;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     #[Assert\NotBlank(message: 'Fee is required')]
     #[Assert\PositiveOrZero(message: 'Fee cannot be negative')]
-    private ?string $fee = null;
+    private string $fee = '0.00';
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'Max teams is required')]
     #[Assert\Positive(message: 'Max teams must be at least 1')]
-    private ?int $max_teams = null;
+    private int $max_teams = 0;
 
     #[ORM\Column]
     #[Assert\NotBlank(message: 'Max team size is required')]
     #[Assert\Positive(message: 'Max team size must be at least 1')]
-    private ?int $team_size_max = null;
+    private int $team_size_max = 0;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Location is required')]
-    private ?string $location = null;
+    private string $location = '';
 
     #[ORM\Column(length: 255)]
-    private ?string $cover_url = null;
+    private string $cover_url = '';
 
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank(message: 'Status is required')]
-    private ?string $status = null;
+    private string $status = '';
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private \DateTimeImmutable $created_at;
 
-    #[ORM\OneToMany(mappedBy: 'hackathon', targetEntity: SponsorHackathon::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'hackathon', targetEntity: SponsorHackathon::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $sponsorHackathons;
 
     public function __construct()
     {
+        $now = new \DateTimeImmutable();
+        $this->start_at = $now;
+        $this->end_at = $now->modify('+1 day');
+        $this->registration_open_at = $now;
+        $this->registration_close_at = $now;
         $this->created_at = new \DateTimeImmutable();
         $this->sponsorHackathons = new ArrayCollection();
     }
@@ -116,7 +121,7 @@ class Hackathon
         return $this;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -128,7 +133,7 @@ class Hackathon
         return $this;
     }
 
-    public function getTheme(): ?string
+    public function getTheme(): string
     {
         return $this->theme;
     }
@@ -140,7 +145,7 @@ class Hackathon
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -152,7 +157,7 @@ class Hackathon
         return $this;
     }
 
-    public function getRules(): ?string
+    public function getRules(): string
     {
         return $this->rules;
     }
@@ -164,7 +169,7 @@ class Hackathon
         return $this;
     }
 
-    public function getStartAt(): ?\DateTimeImmutable
+    public function getStartAt(): \DateTimeImmutable
     {
         return $this->start_at;
     }
@@ -176,7 +181,7 @@ class Hackathon
         return $this;
     }
 
-    public function getEndAt(): ?\DateTimeImmutable
+    public function getEndAt(): \DateTimeImmutable
     {
         return $this->end_at;
     }
@@ -188,19 +193,19 @@ class Hackathon
         return $this;
     }
 
-    public function getRegistrationOpenAt(): ?\DateTime
+    public function getRegistrationOpenAt(): \DateTimeImmutable
     {
         return $this->registration_open_at;
     }
 
-    public function setRegistrationOpenAt(\DateTime $registration_open_at): static
+    public function setRegistrationOpenAt(\DateTimeInterface $registration_open_at): static
     {
-        $this->registration_open_at = $registration_open_at;
+        $this->registration_open_at = $registration_open_at instanceof \DateTimeImmutable ? $registration_open_at : \DateTimeImmutable::createFromMutable($registration_open_at);
 
         return $this;
     }
 
-    public function getRegistrationCloseAt(): ?\DateTimeImmutable
+    public function getRegistrationCloseAt(): \DateTimeImmutable
     {
         return $this->registration_close_at;
     }
@@ -212,7 +217,7 @@ class Hackathon
         return $this;
     }
 
-    public function getFee(): ?string
+    public function getFee(): string
     {
         return $this->fee;
     }
@@ -224,7 +229,7 @@ class Hackathon
         return $this;
     }
 
-    public function getMaxTeams(): ?int
+    public function getMaxTeams(): int
     {
         return $this->max_teams;
     }
@@ -236,7 +241,7 @@ class Hackathon
         return $this;
     }
 
-    public function getTeamSizeMax(): ?int
+    public function getTeamSizeMax(): int
     {
         return $this->team_size_max;
     }
@@ -248,7 +253,7 @@ class Hackathon
         return $this;
     }
 
-    public function getLocation(): ?string
+    public function getLocation(): string
     {
         return $this->location;
     }
@@ -260,7 +265,7 @@ class Hackathon
         return $this;
     }
 
-    public function getCoverUrl(): ?string
+    public function getCoverUrl(): string
     {
         return $this->cover_url;
     }
@@ -272,7 +277,7 @@ class Hackathon
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -284,7 +289,7 @@ class Hackathon
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }

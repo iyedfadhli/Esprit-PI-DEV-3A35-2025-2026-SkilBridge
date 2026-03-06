@@ -15,26 +15,26 @@ class Chapter
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'chapters')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Course $course = null;
 
     #[ORM\Column]
-    private ?int $chapter_order = null;
+    private int $chapter_order = 0;
 
     #[ORM\Column(length: 30)]
-    private ?string $status = null;
+    private string $status = '';
 
     #[ORM\Column]
-    private ?float $min_score = null;
+    private float $min_score = 0.0;
 
     #[ORM\Column(length: 255)]
-    private ?string $content = null;
+    private string $content = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $title = null;
+    private string $title = '';
 
-    #[ORM\OneToOne(mappedBy: 'chapter', targetEntity: Quiz::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'chapter', targetEntity: Quiz::class, cascade: ['persist'])]
     private ?Quiz $quiz = null;
 
     public function getId(): ?int
@@ -54,7 +54,7 @@ class Chapter
         return $this;
     }
 
-    public function getChapterOrder(): ?int
+    public function getChapterOrder(): int
     {
         return $this->chapter_order;
     }
@@ -66,7 +66,7 @@ class Chapter
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -78,7 +78,7 @@ class Chapter
         return $this;
     }
 
-    public function getMinScore(): ?float
+    public function getMinScore(): float
     {
         return $this->min_score;
     }
@@ -90,7 +90,7 @@ class Chapter
         return $this;
     }
 
-    public function getContent(): ?string
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -102,7 +102,7 @@ class Chapter
         return $this;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }

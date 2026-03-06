@@ -14,7 +14,7 @@ class HackathonController extends AbstractController
     public function index(HackathonRepository $hackathonRepository): Response
     {
         return $this->render('frontoffice/hackathon/index.html.twig', [
-            'hackathons' => $hackathonRepository->findAll(),
+            'hackathons' => $hackathonRepository->findLatest(50),
         ]);
     }
 }

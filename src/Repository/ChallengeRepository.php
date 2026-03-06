@@ -16,12 +16,13 @@ class ChallengeRepository extends ServiceEntityRepository
         parent::__construct($registry, Challenge::class);
     }
 
-    public function findAllOrderedByCreatedAtDesc(): array
+    public function findAllOrderedByCreatedAtDesc(int $limit = 99): array
     {
-        return $this->createQueryBuilder('c')
+        $qb = $this->createQueryBuilder('c')
             ->orderBy('c.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
     }
 
     public function findByCreatorIdOrderedDesc(int $creatorId): array

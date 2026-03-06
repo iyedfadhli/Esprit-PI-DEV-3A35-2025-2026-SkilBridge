@@ -13,15 +13,15 @@ class Langue
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'languages')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Cv $cv = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $nom = null;
+    private string $nom = '';
 
     #[ORM\Column(length: 30)]
-    private ?string $niveau = null;
+    private string $niveau = '';
 
     public function getId(): ?int
     {
@@ -40,24 +40,24 @@ class Langue
         return $this;
     }
 
-    public function getNom(): ?string
+    public function getNom(): string
     {
         return $this->nom;
     }
 
-    public function setNom(?string $nom): static
+    public function setNom(string $nom): static
     {
         $this->nom = $nom;
 
         return $this;
     }
 
-    public function getNiveau(): ?string
+    public function getNiveau(): string
     {
         return $this->niveau;
     }
 
-    public function setNiveau(?string $niveau): static
+    public function setNiveau(string $niveau): static
     {
         $this->niveau = $niveau;
 

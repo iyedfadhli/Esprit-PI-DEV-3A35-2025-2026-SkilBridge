@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\DTO\QuizQuestionStatsDTO;
 use App\Entity\StudentResponse;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -35,12 +36,18 @@ class StudentResponseRepository extends ServiceEntityRepository
     /**
      * Get statistics for a quiz
      */
+    /**
+     * @return list<QuizQuestionStatsDTO>
+     */
     public function getQuizStatistics(int $quizId): array
     {
         return $this->createQueryBuilder('sr')
-            ->select('q.id as question_id, q.content as question_content')
-            ->addSelect('COUNT(sr.id) as total_responses')
-            ->addSelect('SUM(CASE WHEN sr.is_correct = true THEN 1 ELSE 0 END) as correct_count')
+            ->select(
+                sprintf(
+                    'NEW %s(q.id, q.content, COUNT(sr.id), SUM(CASE WHEN sr.is_correct = true THEN 1 ELSE 0 END))',
+                    QuizQuestionStatsDTO::class
+                )
+            )
             ->leftJoin('sr.question', 'q')
             ->leftJoin('sr.attempt', 'a')
             ->andWhere('a.quiz = :quizId')

@@ -19,6 +19,9 @@ class CourseType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        /** @var Course|null $course */
+        $course = $builder->getData();
+
         $builder
             ->add('title', TextType::class, [
                 'label' => 'Course Title',
@@ -97,6 +100,8 @@ class CourseType extends AbstractType
                 'class' => User::class,
                 'choice_label' => 'email',
                 'label' => 'Course Creator',
+                'mapped' => false,
+                'data' => $course?->getCreator(),
                 'attr' => [
                     'class' => 'form-control form-select',
                 ],

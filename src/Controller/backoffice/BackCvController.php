@@ -21,7 +21,7 @@ class BackCvController extends AbstractController
     #[Route('/cv', name: 'preview_back_cv_index')]
     public function cvIndex(EntityManagerInterface $em): Response
     {
-        $cvs = $em->getRepository(Cv::class)->findAll();
+        $cvs = $em->getRepository(Cv::class)->findBy([], [], 99);
 
         return $this->render('backoffice/cv/index.html.twig', [
             'cvs' => $cvs,

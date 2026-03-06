@@ -19,7 +19,7 @@ class LessonsLearned
     private ?Activity $id_activity = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $lessonDescription = null;
+    private string $lessonDescription = '';
 
     public function getId(): ?int
     {
@@ -38,7 +38,7 @@ class LessonsLearned
         return $this;
     }
 
-    public function getLessonDescription(): ?string
+    public function getLessonDescription(): string
     {
         return $this->lessonDescription;
     }

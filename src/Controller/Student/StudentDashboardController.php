@@ -27,7 +27,7 @@ class StudentDashboardController extends AbstractController
         $courseRepo = $em->getRepository(Course::class);
         $quizRepo = $em->getRepository(Quiz::class);
 
-        $courses = $courseRepo->findAll();
+        $courses = $courseRepo->findBy([], [], 99);
 
         $items = [];
         $attemptRepo = $em->getRepository(\App\Entity\QuizAttempts::class);
@@ -49,13 +49,16 @@ class StudentDashboardController extends AbstractController
                     $allPassed = false;
                     continue;
                 }
-                $qb = $attemptRepo->createQueryBuilder('a')
-                    ->select('MAX(a.score)')
+                $bestAttempt = $attemptRepo->createQueryBuilder('a')
                     ->where('a.quiz = :q')
                     ->andWhere('a.student = :s')
                     ->setParameter('q', $quiz)
-                    ->setParameter('s', $student);
-                $bestScore = $qb->getQuery()->getSingleScalarResult();
+                    ->setParameter('s', $student)
+                    ->orderBy('a.score', 'DESC')
+                    ->setMaxResults(1)
+                    ->getQuery()
+                    ->getOneOrNullResult();
+                $bestScore = $bestAttempt?->getScore();
 
                 if ($bestScore !== null) {
                     $scoreSum += (float) $bestScore;

@@ -34,7 +34,7 @@ final class ActivityController extends AbstractController
         }
         $user = $em->getRepository(User::class)->find($userId);
 
-        $challenges = $em->getRepository(Challenge::class)->findAllOrderedByCreatedAtDesc();
+        $challenges = $em->getRepository(Challenge::class)->findAllOrderedByCreatedAtDesc(99);
 
         $memberships = $em->getRepository(Membership::class)->findAdminMembershipsByUser($userId);
 
@@ -125,9 +125,9 @@ final class ActivityController extends AbstractController
         $pdfPublicPath = $challenge->getContent();
         if ($pdfPublicPath) {
             $filenameBase = basename($pdfPublicPath);
-            $uploadDir = rtrim((string) $this->getParameter('CHALLENGES_UPLOAD_DIR'), "/\\");
+            $uploadDir = rtrim($this->getStringParameter('CHALLENGES_UPLOAD_DIR'), "/\\");
             $uploadAbs = $uploadDir . DIRECTORY_SEPARATOR . $filenameBase;
-            $publicAbs = $this->getParameter('kernel.project_dir') . '/public/' . ltrim($pdfPublicPath, '/');
+            $publicAbs = $this->getStringParameter('kernel.project_dir') . '/public/' . ltrim($pdfPublicPath, '/');
             $existingAbs = null;
             if (file_exists($uploadAbs)) {
                 $existingAbs = $uploadAbs;
@@ -135,10 +135,12 @@ final class ActivityController extends AbstractController
                 $existingAbs = $publicAbs;
             }
             if ($existingAbs && is_readable($existingAbs)) {
+                $metadata = json_encode(['challenge_id' => (string) $challenge->getId()]);
+                $additionalMetadata = json_encode(['challenge_id' => (string) $challenge->getId()]);
                 $formData = new FormDataPart([
                     'files' => DataPart::fromPath($existingAbs, $filenameBase, 'application/pdf'),
-                    'metadata' => json_encode(['challenge_id' => (string) $challenge->getId()]),
-                    'additionalMetadata' => json_encode(['challenge_id' => (string) $challenge->getId()]),
+                    'metadata' => $metadata === false ? '{}' : $metadata,
+                    'additionalMetadata' => $additionalMetadata === false ? '{}' : $additionalMetadata,
                     'returnList' => 'true',
                 ]);
                 $headers = $formData->getPreparedHeaders()->toArray();
@@ -177,8 +179,7 @@ final class ActivityController extends AbstractController
         $result = $em->createQueryBuilder()
             ->select('a', 'm.role AS memberRole')
             ->from(Activity::class, 'a')
-            ->innerJoin(Group::class, 'g', 'WITH', 'a.group_id = g.id')
-            ->innerJoin(Membership::class, 'm', 'WITH', 'm.group_id = g.id')
+            ->innerJoin(Membership::class, 'm', 'WITH', 'm.group_id = a.group_id')
             ->where('IDENTITY(m.user_id) = :user')
             ->andWhere('a.status = :status')
             ->setParameter('user', $userId)
@@ -267,8 +268,9 @@ final class ActivityController extends AbstractController
 
         try {
             $headers = [];
-            $apiKey = $this->getParameter('FLOWISE_API_KEY') ?? null;
-            if ($apiKey) {
+            $apiKeyParam = $this->getParameter('FLOWISE_API_KEY');
+            $apiKey = is_string($apiKeyParam) ? $apiKeyParam : '';
+            if ($apiKey !== '') {
                 $headers['Authorization'] = 'Bearer ' . $apiKey; // REQUIRED
                 $headers['X-API-Key'] = $apiKey; // Optional, some versions of Flowise need this
             } else {
@@ -326,20 +328,10 @@ final class ActivityController extends AbstractController
                         $text = $item['text'] ?? $item['answer'] ?? $text;
                     }
                 }
-            } elseif (is_array($data) || is_object($data)) {
-                if (is_array($data)) {
-                    $text = $data['text'] ?? $data['answer'] ?? $text;
-                }
             }
-            $stack = [];
-            if (is_array($data)) {
-                $stack[] = $data;
-            }
+            $stack = is_array($data) ? [$data] : [];
             while (!empty($stack)) {
                 $current = array_pop($stack);
-                if (!is_array($current)) {
-                    continue;
-                }
                 if (isset($current['sourceDocuments']) && is_array($current['sourceDocuments'])) {
                     $sources = $current['sourceDocuments'];
                     break;
@@ -356,15 +348,13 @@ final class ActivityController extends AbstractController
             }
 
             $validSources = [];
-            if (is_array($sources)) {
-                foreach ($sources as $s) {
-                    if (is_array($s)) {
-                        $m = $s['metadata'] ?? $s['meta'] ?? null;
-                        if (is_array($m)) {
-                            $cid = $m['challenge_id'] ?? ($m['challengeId'] ?? null);
-                            if ($cid !== null && (string) $cid === (string) $challengeId) {
-                                $validSources[] = $s;
-                            }
+            foreach ($sources as $s) {
+                if (is_array($s)) {
+                    $m = $s['metadata'] ?? $s['meta'] ?? null;
+                    if (is_array($m)) {
+                        $cid = $m['challenge_id'] ?? ($m['challengeId'] ?? null);
+                        if ($cid !== null && (string) $cid === (string) $challengeId) {
+                            $validSources[] = $s;
                         }
                     }
                 }
@@ -399,7 +389,10 @@ final class ActivityController extends AbstractController
             return $this->redirectToRoute('sign');
         $user = $em->getRepository(User::class)->find($userId);
 
-        $activityDescription = $request->request->get('activity_description');
+        $activityDescription = $this->getStringInput($request, 'activity_description');
+        $problemDescription = $this->getStringInput($request, 'problem_description');
+        $solutionDescription = $this->getStringInput($request, 'solution_description');
+        $problemId = $request->request->get('problem_id');
         if ($activityDescription !== null) {
             $memberActivity = $em->getRepository(MemberActivity::class)->findOneByActivityAndUser($activity, $user) ?? new MemberActivity();
             $memberActivity->setIdActivity($activity);
@@ -411,13 +404,34 @@ final class ActivityController extends AbstractController
             return $this->redirectToRoute('activity_resume', ['activity_id' => $activity->getId(), 'role' => 'admin']);
         }
 
+        if ($problemDescription) {
+            $problem = new ProblemSolution();
+            $problem->setActivityId($activity);
+            $problem->setProblemDescription($problemDescription);
+            $em->persist($problem);
+            $em->flush();
+            $this->addFlash('success', 'ProblÃ¨me ajoutÃ©.');
+            return $this->redirectToRoute('activity_resume', ['activity_id' => $activity->getId(), 'role' => 'admin']);
+        }
+
+        if ($problemId && $solutionDescription !== null && trim($solutionDescription) !== '') {
+            $problem = $em->getRepository(ProblemSolution::class)->find($problemId);
+            if ($problem && !$problem->getGroupSolution()) {
+                $problem->setGroupSolution($solutionDescription);
+                $em->persist($problem);
+                $em->flush();
+                $this->addFlash('success', 'Solution ajoutÃ©e.');
+            }
+            return $this->redirectToRoute('activity_resume', ['activity_id' => $activity->getId(), 'role' => 'admin']);
+        }
+
         $file = $request->files->get('submission_file');
         if ($file) {
             $challenge = $activity->getIdChallenge();
             $group = $activity->getGroupId();
 
             $filename = md5(uniqid()) . '.' . $file->guessExtension();
-            $uploadDirAbs = rtrim($this->getParameter('CHALLENGES_UPLOAD_DIR'), DIRECTORY_SEPARATOR);
+            $uploadDirAbs = rtrim($this->getStringParameter('CHALLENGES_UPLOAD_DIR'), DIRECTORY_SEPARATOR);
             $file->move($uploadDirAbs, $filename);
 
             $activity->setSubmissionFile($filename);
@@ -426,18 +440,21 @@ final class ActivityController extends AbstractController
             $em->flush();
 
             try {
-                $projectDir = $this->getParameter('kernel.project_dir');
-                $challengePath = $projectDir . '/public/' . ltrim($challenge->getContent(), '/');
+                $projectDir = $this->getStringParameter('kernel.project_dir');
+                $challengeContent = $challenge->getContent();
+                $challengePath = $projectDir . '/public/' . ltrim($challengeContent ?? '', '/');
                 $submissionPath = $uploadDirAbs . DIRECTORY_SEPARATOR . $filename;
                 $appUrl = (string) $request->getSchemeAndHttpHost();
-                $apiKey = (string) ($this->getParameter('FLOWISE_API_KEY') ?? '');
+                $apiKeyParam = $this->getParameter('FLOWISE_API_KEY');
+                $apiKey = is_string($apiKeyParam) ? $apiKeyParam : '';
 
                 $grade = $graderService->gradeByTextExtraction($challengePath, $submissionPath, $appUrl, $apiKey);
 
                 $evaluation = $em->getRepository(Evaluation::class)->findOneBy(['activity_id' => $activity]) ?? new \App\Entity\Evaluation();
                 $evaluation->setActivityId($activity);
                 $evaluation->setGroupScore(min(20, max(0, (float) ($grade['overall_score'] ?? 0))));
-                $evaluation->setPreFeedback(json_encode($grade, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+                $preFeedback = json_encode($grade, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                $evaluation->setPreFeedback($preFeedback === false ? null : $preFeedback);
 
                 $em->persist($evaluation);
                 $em->flush();
@@ -471,9 +488,9 @@ final class ActivityController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
-        $activityDescription = $request->request->get('activity_description');
-        $problemDescription = $request->request->get('problem_description');
-        $solutionDescription = $request->request->get('solution_description');
+        $activityDescription = $this->getStringInput($request, 'activity_description');
+        $problemDescription = $this->getStringInput($request, 'problem_description');
+        $solutionDescription = $this->getStringInput($request, 'solution_description');
         $problemId = $request->request->get('problem_id');
 
         // Save member activity
@@ -531,8 +548,8 @@ final class ActivityController extends AbstractController
         }
 
         if ($request->isMethod('POST')) {
-            $problemDescription = $request->request->get('problem_description');
-            $solutionDescription = $request->request->get('solution_description');
+            $problemDescription = $this->getStringInput($request, 'problem_description');
+            $solutionDescription = $this->getStringInput($request, 'solution_description');
 
             if ($problemDescription !== null) {
                 $problem->setProblemDescription($problemDescription);
@@ -567,7 +584,8 @@ final class ActivityController extends AbstractController
             throw $this->createNotFoundException('Problem not found');
         }
 
-        if (!$this->isCsrfTokenValid('delete' . $problem->getId(), $request->request->get('_token'))) {
+        $csrfToken = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('delete' . $problem->getId(), is_string($csrfToken) ? $csrfToken : null)) {
             throw $this->createAccessDeniedException('Invalid CSRF token');
         }
 
@@ -591,7 +609,8 @@ final class ActivityController extends AbstractController
         }
 
         // CSRF token validation
-        if ($this->isCsrfTokenValid('delete' . $memberActivity->getId(), $request->request->get('_token'))) {
+        $csrfToken = $request->request->get('_token');
+        if ($this->isCsrfTokenValid('delete' . $memberActivity->getId(), is_string($csrfToken) ? $csrfToken : null)) {
             $em->remove($memberActivity);
             $em->flush();
             $this->addFlash('success', 'Contribution supprimée.');
@@ -613,7 +632,7 @@ final class ActivityController extends AbstractController
         }
 
         // Get updated values
-        $description = $request->request->get('activity_description');
+        $description = $this->getStringInput($request, 'activity_description');
 
         if ($description) {
             $memberActivity->setActivityDescription($description);
@@ -634,6 +653,18 @@ final class ActivityController extends AbstractController
     {
         return $this->render('frontoffice/challenge/evaluation.html.twig');
 
+    }
+
+    private function getStringInput(Request $request, string $key): ?string
+    {
+        $value = $request->request->get($key);
+        return is_string($value) ? $value : null;
+    }
+
+    private function getStringParameter(string $key): string
+    {
+        $value = $this->getParameter($key);
+        return is_string($value) ? $value : '';
     }
 
 

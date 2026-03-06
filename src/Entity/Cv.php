@@ -25,7 +25,7 @@ class Cv
         minMessage: 'Le nom du CV doit contenir au moins 2 caractères',
         maxMessage: 'Le nom du CV ne peut pas dépasser 30 caractères'
     )]
-    private ?string $nomCv = null;
+    private string $nomCv = '';
 
     #[ORM\Column(length: 30)]
     #[Assert\NotBlank(message: 'La langue est obligatoire')]
@@ -33,7 +33,7 @@ class Cv
         choices: ['Francais', 'Anglais', 'Arabe'],
         message: 'La langue sélectionnée est invalide'
     )]
-    private ?string $langue = null;
+    private string $langue = '';
 
     #[ORM\Column(nullable: true)]
     #[Assert\Positive(message: 'L\'ID template doit être un nombre positif')]
@@ -47,9 +47,9 @@ class Cv
     )]
     private ?int $progression = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     #[Assert\NotNull(message: 'La date de création est obligatoire')]
-    private ?\DateTime $creationDate = null;
+    private \DateTimeImmutable $creationDate;
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
@@ -87,6 +87,7 @@ class Cv
 
     public function __construct()
     {
+        $this->creationDate = new \DateTimeImmutable();
         $this->experiences = new ArrayCollection();
         $this->educations = new ArrayCollection();
         $this->skills = new ArrayCollection();
@@ -99,23 +100,23 @@ class Cv
         return $this->id;
     }
 
-    public function getNomCv(): ?string
+    public function getNomCv(): string
     {
         return $this->nomCv;
     }
 
-    public function setNomCv(?string $nomCv): static
+    public function setNomCv(string $nomCv): static
     {
         $this->nomCv = $nomCv;
         return $this;
     }
 
-    public function getLangue(): ?string
+    public function getLangue(): string
     {
         return $this->langue;
     }
 
-    public function setLangue(?string $langue): static
+    public function setLangue(string $langue): static
     {
         $this->langue = $langue;
         return $this;
@@ -143,14 +144,14 @@ class Cv
         return $this;
     }
 
-    public function getCreationDate(): ?\DateTime
+    public function getCreationDate(): \DateTimeImmutable
     {
         return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTime $creationDate): static
+    public function setCreationDate(\DateTimeInterface $creationDate): static
     {
-        $this->creationDate = $creationDate;
+        $this->creationDate = $creationDate instanceof \DateTimeImmutable ? $creationDate : \DateTimeImmutable::createFromMutable($creationDate);
         return $this;
     }
 

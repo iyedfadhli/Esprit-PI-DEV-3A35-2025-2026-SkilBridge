@@ -22,16 +22,16 @@ class Membership
     private ?Group $group_id = null;
 
     #[ORM\Column(length: 20)]
-    private ?string $role = null;
+    private string $role = '';
 
     #[ORM\Column]
-    private ?float $contributionScore = null;
+    private float $contributionScore = 0.0;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $achievement_unlocked = null;
 
     #[ORM\Column]
-    private ?bool $is_active = null;
+    private bool $is_active = false;
 
     public function getId(): ?int
     {
@@ -62,7 +62,7 @@ class Membership
         return $this;
     }
 
-    public function getRole(): ?string
+    public function getRole(): string
     {
         return $this->role;
     }
@@ -74,7 +74,7 @@ class Membership
         return $this;
     }
 
-    public function getContributionScore(): ?float
+    public function getContributionScore(): float
     {
         return $this->contributionScore;
     }
@@ -98,7 +98,7 @@ class Membership
         return $this;
     }
 
-    public function isActive(): ?bool
+    public function isActive(): bool
     {
         return $this->is_active;
     }

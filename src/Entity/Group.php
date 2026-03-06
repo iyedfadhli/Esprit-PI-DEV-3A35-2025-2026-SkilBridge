@@ -11,6 +11,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: '`group`')]
 class Group
 {
+    public function __construct()
+    {
+        $this->creationDate = new \DateTimeImmutable();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -19,21 +24,21 @@ class Group
     #[ORM\Column(length: 40)]
     #[Assert\NotBlank(message: "The group name cannot be empty")]
     #[Assert\Length(min: 3, max: 40, minMessage: "Name must be at least 3 characters")]
-    private ?string $name = null;
+    private string $name = '';
 
     #[ORM\Column(type: Types::TEXT)]
     #[Assert\NotBlank(message: "Please provide a description")]
     #[Assert\Length(min: 10, minMessage: "Description must be at least 10 characters")]
-    private ?string $description = null;
+    private string $description = '';
 
-    #[ORM\Column]
-    private ?\DateTime $creationDate = null;
-
-    #[ORM\Column(length: 20)]
-    private ?string $type = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $creationDate;
 
     #[ORM\Column(length: 20)]
-    private ?string $level = null;
+    private string $type = '';
+
+    #[ORM\Column(length: 20)]
+    private string $level = '';
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -43,20 +48,20 @@ class Group
     #[Assert\NotBlank(message: "Max members is required")]
     #[Assert\Positive(message: "Must be a positive number")]
     #[Assert\LessThan(101, message: "Maximum 100 members allowed")]
-    private ?int $max_members = null;
+    private int $max_members = 0;
 
     #[ORM\Column]
-    private ?float $ratingScore = null;
+    private float $ratingScore = 0.0;
 
     #[ORM\Column(length: 255)]
-    private ?string $icon = null;
+    private string $icon = '';
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -68,7 +73,7 @@ class Group
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -80,19 +85,19 @@ class Group
         return $this;
     }
 
-    public function getCreationDate(): ?\DateTime
+    public function getCreationDate(): \DateTimeImmutable
     {
         return $this->creationDate;
     }
 
-    public function setCreationDate(\DateTime $creationDate): static
+    public function setCreationDate(\DateTimeInterface $creationDate): static
     {
-        $this->creationDate = $creationDate;
+        $this->creationDate = $creationDate instanceof \DateTimeImmutable ? $creationDate : \DateTimeImmutable::createFromMutable($creationDate);
 
         return $this;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -104,7 +109,7 @@ class Group
         return $this;
     }
 
-    public function getLevel(): ?string
+    public function getLevel(): string
     {
         return $this->level;
     }
@@ -128,7 +133,7 @@ class Group
         return $this;
     }
 
-    public function getMaxMembers(): ?int
+    public function getMaxMembers(): int
     {
         return $this->max_members;
     }
@@ -140,7 +145,7 @@ class Group
         return $this;
     }
 
-    public function getRatingScore(): ?float
+    public function getRatingScore(): float
     {
         return $this->ratingScore;
     }
@@ -152,7 +157,7 @@ class Group
         return $this;
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return $this->icon;
     }

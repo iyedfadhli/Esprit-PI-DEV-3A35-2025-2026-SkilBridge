@@ -5,8 +5,10 @@ namespace App\Controller\frontoffice;
 use App\Entity\Group;
 use App\Entity\Membership;
 use App\Entity\User;
+use App\Repository\MembershipRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -16,14 +18,10 @@ class MembershipController extends AbstractController
     public function join(Group $group, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
+        /** @var MembershipRepository $membershipRepo */
+        $membershipRepo = $em->getRepository(Membership::class);
 
-        // Check if already a member
-        $existing = $em->getRepository(Membership::class)->findOneBy([
-            'user_id' => $user,
-            'group_id' => $group,
-        ]);
-
-        if (!$existing) {
+        if ($user instanceof User && !$membershipRepo->existsByUserAndGroup($user, $group)) {
             $membership = new Membership();
             $membership->setUserId($user);
             $membership->setGroupId($group);
@@ -42,14 +40,9 @@ class MembershipController extends AbstractController
     public function leave(Group $group, EntityManagerInterface $em): Response
     {
         $user = $this->getUser();
-
-        $membership = $em->getRepository(Membership::class)->findOneBy([
-            'user_id' => $user,
-            'group_id' => $group,
-        ]);
-
-        if ($membership) {
-            $em->remove($membership);
+        /** @var MembershipRepository $membershipRepo */
+        $membershipRepo = $em->getRepository(Membership::class);
+        if ($user instanceof User && $membershipRepo->deleteByUserAndGroup($user, $group) > 0) {
             $em->flush();
         }
 
@@ -80,16 +73,14 @@ public function addMember(Request $request, Group $group, EntityManagerInterface
 #[Route('/groups/{groupId}/add-member/{userId}', name: 'group_add_member_confirm')]
     public function addMemberConfirm(int $groupId, int $userId, EntityManagerInterface $em): Response
     {
-        $group = $em->getRepository(Group::class)->find($groupId);
-        $user = $em->getRepository(User::class)->find($userId);
+        /** @var MembershipRepository $membershipRepo */
+        $membershipRepo = $em->getRepository(Membership::class);
+        /** @var Group $group */
+        $group = $em->getReference(Group::class, $groupId);
+        /** @var User $user */
+        $user = $em->getReference(User::class, $userId);
 
-        // Check for duplicates
-        $existing = $em->getRepository(Membership::class)->findOneBy([
-            'user_id' => $user,
-            'group_id' => $group,
-        ]);
-
-        if ($existing) {
+        if ($membershipRepo->existsByUserAndGroup($user, $group)) {
              // Maybe add a flash message here
              return $this->redirectToRoute('group_show', ['id' => $groupId]);
         }
@@ -110,12 +101,10 @@ public function addMember(Request $request, Group $group, EntityManagerInterface
     #[Route('/groups/{groupId}/kick/{membershipId}', name: 'group_kick_member')]
     public function kick(int $groupId, int $membershipId, EntityManagerInterface $em): Response
     {
-        $membership = $em->getRepository(Membership::class)->find($membershipId);
-        
-        if ($membership) {
-            $em->remove($membership);
-            $em->flush();
-        }
+        $em->createQuery('DELETE FROM App\Entity\Membership m WHERE m.id = :id')
+            ->setParameter('id', $membershipId)
+            ->execute();
+        $em->flush();
 
         return $this->redirectToRoute('group_show', ['id' => $groupId]);
     }
@@ -123,9 +112,10 @@ public function addMember(Request $request, Group $group, EntityManagerInterface
 #[Route('/groups/{groupId}/set-role/{membershipId}/{role}', name: 'group_set_role')]
 public function setRole(int $groupId, int $membershipId, string $role, EntityManagerInterface $em): Response
 {
-    $membership = $em->getRepository(Membership::class)->find($membershipId);
-    $membership->setRole($role);
-
+    $em->createQuery('UPDATE App\Entity\Membership m SET m.role = :role WHERE m.id = :id')
+        ->setParameter('role', $role)
+        ->setParameter('id', $membershipId)
+        ->execute();
     $em->flush();
 
     return $this->redirectToRoute('group_show', ['id' => $groupId]);

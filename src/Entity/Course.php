@@ -39,20 +39,20 @@ class Course
 
     #[ORM\Column(length: 30)]
     #[Groups(['course:recommendation'])]
-    private ?string $title = null;
+    private string $title = '';
 
     #[ORM\Column(type: Types::TEXT)]
     #[Groups(['course:recommendation'])]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column]
     #[Groups(['course:recommendation'])]
-    private ?int $duration = null;
+    private int $duration = 0;
 
     /** Niveau de difficulté du cours : BEGINNER, INTERMEDIATE, ADVANCED */
     #[ORM\Column(length: 20, options: ['default' => 'BEGINNER'])]
     #[Groups(['course:recommendation'])]
-    private ?string $difficulty = self::DIFFICULTY_BEGINNER;
+    private string $difficulty = self::DIFFICULTY_BEGINNER;
 
     /** Indique si le cours est actif et visible pour les étudiants */
     #[ORM\Column(type: 'boolean', options: ['default' => true])]
@@ -60,7 +60,7 @@ class Course
     private bool $isActive = true;
 
     #[ORM\Column]
-    private ?float $validation_score = null;
+    private float $validation_score = 0.0;
 
 
     #[ORM\ManyToOne]
@@ -68,7 +68,7 @@ class Course
     private ?User $creator = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $content = null;
+    private string $content = '';
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $material = null;
 
@@ -82,10 +82,10 @@ class Course
     #[ORM\OneToMany(mappedBy: 'course', targetEntity: Chapter::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $chapters;
 
-    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Enrollement::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Enrollement::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $enrollements;
 
-    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Challenge::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'course', targetEntity: Challenge::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $challenges;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
@@ -96,7 +96,7 @@ class Course
         return $this->id;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -108,7 +108,7 @@ class Course
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -120,7 +120,7 @@ class Course
         return $this;
     }
 
-    public function getDuration(): ?int
+    public function getDuration(): int
     {
         return $this->duration;
     }
@@ -132,7 +132,7 @@ class Course
         return $this;
     }
 
-    public function getValidationScore(): ?float
+    public function getValidationScore(): float
     {
         return $this->validation_score;
     }
@@ -149,14 +149,19 @@ class Course
         return $this->creator;
     }
 
-    public function setCreator(?User $creator): static
+    protected function setCreator(?User $creator): static
     {
         $this->creator = $creator;
 
         return $this;
     }
 
-    public function getContent(): ?string
+    public function assignCreator(User $creator): static
+    {
+        return $this->setCreator($creator);
+    }
+
+    public function getContent(): string
     {
         return $this->content;
     }
@@ -204,7 +209,7 @@ class Course
         return $this;
     }
 
-    public function getDifficulty(): ?string
+    public function getDifficulty(): string
     {
         return $this->difficulty;
     }
@@ -304,6 +309,6 @@ class Course
 
     public function __toString(): string
     {
-        return $this->title ?? 'Course #'.$this->id;
+        return $this->title ?: 'Course #'.$this->id;
     }
 }

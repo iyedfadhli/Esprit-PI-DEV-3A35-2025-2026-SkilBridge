@@ -23,7 +23,7 @@ class MemberActivity
     private ?User $user_id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    private ?string $activityDescription = null;
+    private string $activityDescription = '';
 
     #[ORM\Column(nullable: true)]
     private ?float $indivScore = null;
@@ -57,7 +57,7 @@ class MemberActivity
         return $this;
     }
 
-    public function getActivityDescription(): ?string
+    public function getActivityDescription(): string
     {
         return $this->activityDescription;
     }

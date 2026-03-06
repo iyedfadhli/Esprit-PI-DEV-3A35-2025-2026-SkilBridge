@@ -21,7 +21,7 @@ class QuizResultController extends AbstractController
         $attemptRepo = $em->getRepository(QuizAttempts::class);
         
         // Get all quizzes with attempt counts
-        $quizzes = $quizRepo->findAll();
+        $quizzes = $quizRepo->findBy([], [], 99);
         
         $quizStats = [];
         foreach ($quizzes as $quiz) {

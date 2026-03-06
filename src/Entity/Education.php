@@ -9,32 +9,38 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: EducationRepository::class)]
 class Education
 {
+    public function __construct()
+    {
+        $this->start_date = new \DateTime();
+        $this->end_date = new \DateTime();
+    }
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(inversedBy: 'educations')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?cv $cv = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $degree = null;
+    private string $degree = '';
 
     #[ORM\Column(length: 40, nullable: true)]
     private ?string $field_of_study = null;
 
     #[ORM\Column(length: 30)]
-    private ?string $school = null;
+    private string $school = '';
 
     #[ORM\Column(length: 40, nullable: true)]
     private ?string $city = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $start_date = null;
+    private \DateTime $start_date;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTime $end_date = null;
+    private \DateTime $end_date;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description = null;
@@ -56,7 +62,7 @@ class Education
         return $this;
     }
 
-    public function getDegree(): ?string
+    public function getDegree(): string
     {
         return $this->degree;
     }
@@ -80,7 +86,7 @@ class Education
         return $this;
     }
 
-    public function getSchool(): ?string
+    public function getSchool(): string
     {
         return $this->school;
     }
@@ -104,7 +110,7 @@ class Education
         return $this;
     }
 
-    public function getStartDate(): ?\DateTime
+    public function getStartDate(): \DateTime
     {
         return $this->start_date;
     }
@@ -116,7 +122,7 @@ class Education
         return $this;
     }
 
-    public function getEndDate(): ?\DateTime
+    public function getEndDate(): \DateTime
     {
         return $this->end_date;
     }
