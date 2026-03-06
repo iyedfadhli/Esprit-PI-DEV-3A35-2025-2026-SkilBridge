@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    ignoreErrors:
+        - '#Call to an undefined method#'
+        - '#Cannot call method .* on .*\|null\.#'
+        - '#Method .* has parameter \$.* with no value type specified in iterable type array\.#'
+        - '#Method .* return type has no value type specified in iterable type array\.#'
+        - '#Property .* is never assigned .* so it can be removed from the property type\.#'
